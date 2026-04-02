@@ -51,7 +51,7 @@ const Sidebar = ({ isCollapsed, toggleCollapse }) => {
                         key={idx}
                         href={item.path}
                         className={`
-                            flex items-center gap-3 py-3 px-5 rounded-xl transition-all duration-200 group
+                            flex items-center gap-3 py-3 px-5 rounded-md transition-all duration-200 group
                             ${
                                 item.active
                                     ? "bg-[#111] text-white shadow-xl shadow-black/10"

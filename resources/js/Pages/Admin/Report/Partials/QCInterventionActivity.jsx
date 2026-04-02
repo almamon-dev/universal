@@ -1,61 +1,62 @@
 import React from "react";
 import { Zap, ShieldAlert } from "lucide-react";
+import { Activity, Users } from "lucide-react";
 
 export default function QCInterventionActivity({ stats }) {
     const qcStats = stats?.qc_intervention_stats || [];
 
     return (
-        <div className="space-y-6">
-            {/* Total Header */}
-            <div className="flex items-center justify-between bg-rose-50/30 p-5 rounded-2xl border border-rose-100/50">
-                <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-rose-100 flex items-center justify-center text-rose-600 shadow-sm transition-transform hover:scale-105">
-                        <Zap size={24} fill="currentColor" />
-                    </div>
-                    <div>
-                        <div className="flex items-center gap-2 text-rose-600 mb-0.5">
-                            <ShieldAlert size={12} />
-                            <span className="text-[10px] font-black uppercase tracking-[0.2em] leading-none">
-                                Critical Enforcement
-                            </span>
+        <div className="space-y-8">
+            <div className="space-y-6">
+                <div className="flex items-center justify-between bg-zinc-50/50 p-6 rounded-xl border border-zinc-100">
+                    <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-lg bg-zinc-900 flex items-center justify-center text-white">
+                            <Activity size={20} />
                         </div>
-                        <h4 className="text-base font-bold text-slate-800">
-                            Intervention Activity Dashboard
-                        </h4>
+                        <div>
+                            <p className="text-[10px] font-bold text-zinc-400 mb-1">
+                                System control
+                            </p>
+                            <h4 className="text-lg font-bold text-zinc-900 tracking-tight">
+                                Management interventions
+                            </h4>
+                        </div>
+                    </div>
+                    <div className="text-right">
+                        <p className="text-3xl font-bold text-zinc-900 tracking-tighter leading-none">
+                            {stats?.interventions || 0}
+                        </p>
+                        <p className="text-[10px] font-bold text-zinc-400 mt-1">
+                            Active actions
+                        </p>
                     </div>
                 </div>
-                <div className="text-right">
-                    <p className="text-4xl font-black text-rose-600 tracking-tighter leading-none">
-                        {stats?.interventions || 0}
-                    </p>
-                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">
-                        Total Interventions
-                    </p>
-                </div>
-            </div>
 
-            {/* Grid Breakdown */}
-            <div className="space-y-4">
-                <div className="flex items-center gap-2">
-                    <div className="w-1 h-3 bg-slate-300 rounded-full" />
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                        Auditor Level Breakdown
-                    </span>
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {qcStats.map((qc, idx) => (
-                        <div
-                            key={idx}
-                            className="bg-white border border-slate-200 rounded-xl p-5 hover:border-rose-200 transition-all group"
-                        >
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 group-hover:text-rose-600 transition-colors">
-                                {qc.name}
-                            </p>
-                            <p className="text-3xl font-black text-slate-900 tracking-tight">
-                                {qc.count}
-                            </p>
-                        </div>
-                    ))}
+                <div className="space-y-4">
+                    <div className="flex items-center gap-2">
+                        <Users size={14} className="text-zinc-400" />
+                        <span className="text-[11px] font-bold text-zinc-400">
+                            Auditor overview
+                        </span>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {qcStats.map((qc, idx) => (
+                            <div
+                                key={idx}
+                                className="bg-white border border-zinc-200 rounded-xl p-5 hover:border-zinc-900 transition-all"
+                            >
+                                <div className="flex items-center justify-between mb-3">
+                                    <p className="text-[10px] font-bold text-zinc-400 truncate">
+                                        {qc.name}
+                                    </p>
+                                    <div className="w-1.5 h-1.5 rounded-full bg-zinc-900" />
+                                </div>
+                                <p className="text-2xl font-bold text-zinc-900 tracking-tighter">
+                                    {qc.count}
+                                </p>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </div>
         </div>

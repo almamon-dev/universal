@@ -34,7 +34,7 @@ export default function AdminLayout({ children }) {
 
             {/* Sidebar Container */}
             <aside
-                className={`fixed inset-y-0 left-0 z-[160] bg-white transition-all duration-300 ease-in-out border-r border-gray-100 w-[260px]
+                className={`fixed inset-y-0 left-0 z-[160] bg-[#09090b] transition-all duration-300 ease-in-out border-r border-[#18181b] w-[260px]
                     ${isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}
             >
                 <Sidebar

@@ -26,15 +26,15 @@ export default function UserSidebar({ isSidebarOpen, setIsSidebarOpen }) {
     if (user?.agency_id && user?.role !== "admin") {
         navigation.push({
             name: "Audit Forms",
-            href: route("admin.agencies.audits.create", user.agency_id),
+            href: route("qc.agencies.audits.create", user.agency_id),
             icon: Inbox,
-            active: route().current("admin.agencies.audits.create"),
+            active: route().current("qc.agencies.audits.create"),
         });
         navigation.push({
             name: "Agency Protocols",
-            href: route("admin.agencies.protocols", user.agency_id),
+            href: route("qc.agencies.protocols", user.agency_id),
             icon: FileText,
-            active: route().current("admin.agencies.protocols"),
+            active: route().current("qc.agencies.protocols"),
         });
     }
 
@@ -50,15 +50,15 @@ export default function UserSidebar({ isSidebarOpen, setIsSidebarOpen }) {
                 {/* Logo Section */}
                 <div className="h-16 flex items-center px-8 border-b border-gray-50 mb-6">
                     <Link href="/" className="flex items-center gap-3 group">
-                        <div className="w-9 h-9 bg-black rounded-xl flex items-center justify-center text-white shadow-xl shadow-black/10 transition-all group-hover:scale-105 active:scale-95">
+                        <div className="w-9 h-9 bg-[#18181b] rounded-md flex items-center justify-center text-white shadow-lg shadow-black/5 transition-all group-hover:scale-105 active:scale-95">
                             <LayoutDashboard size={22} strokeWidth={2.5} />
                         </div>
                         <div className="flex flex-col">
                             <span className="font-black text-black text-[13px] leading-tight tracking-[0.15em] uppercase">
-                                PPHJob
+                                   QC 
                             </span>
                             <span className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em]">
-                                Done
+                                Dashboard
                             </span>
                         </div>
                     </Link>
@@ -71,10 +71,10 @@ export default function UserSidebar({ isSidebarOpen, setIsSidebarOpen }) {
                             key={item.name}
                             href={item.href}
                             onClick={() => setIsSidebarOpen(false)}
-                            className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-[14px] font-bold transition-all duration-200 group relative
+                            className={`flex items-center gap-3 px-4 py-3 rounded-md text-[14px] font-bold transition-all duration-200 group relative
                                 ${
                                     item.active
-                                        ? "bg-black text-white shadow-lg shadow-black/10"
+                                        ? "bg-[#18181b] text-white shadow-lg shadow-black/5"
                                         : "text-gray-500 hover:text-black hover:bg-gray-50"
                                 }
                             `}

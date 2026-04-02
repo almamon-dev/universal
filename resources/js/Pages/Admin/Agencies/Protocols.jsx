@@ -35,13 +35,13 @@ export default function Protocols({ agency }) {
 
             <div className="max-w-7xl mx-auto px-4 py-6">
                 {/* Header Side */}
-                <div className="mb-8 flex justify-between items-center">
+                <div className="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
                     <div className="flex flex-col gap-4">
                         <Link
                             href={route("admin.agencies.edit", agency.id)}
-                            className="inline-flex items-center gap-2 text-sm transition-colors px-4 py-2 rounded-xl border w-fit font-medium text-gray-500 hover:text-gray-900 border-gray-200 bg-white"
+                            className="inline-flex items-center gap-2 text-xs transition-colors px-4 py-2 rounded-md border w-fit font-bold text-gray-500 hover:text-gray-900 border-gray-200 bg-white shadow-sm"
                         >
-                            <ArrowLeft size={16} />
+                            <ArrowLeft size={14} />
                             Back to Agency
                         </Link>
                         <div className="flex items-center gap-3">
@@ -62,7 +62,7 @@ export default function Protocols({ agency }) {
                         href="https://quillbot.com"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white text-sm font-bold rounded-xl hover:from-emerald-600 hover:to-emerald-700 shadow-xl shadow-emerald-900/10 transition-all active:scale-95"
+                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white text-sm font-bold rounded-md hover:from-emerald-600 hover:to-emerald-700 shadow-xl shadow-emerald-900/10 transition-all active:scale-95"
                     >
                         <CheckCircle2 size={16} />
                         Refine Protocols
@@ -70,8 +70,8 @@ export default function Protocols({ agency }) {
                 </div>
 
                 {/* Main Editor Card */}
-                <div className="overflow-hidden bg-white border border-gray-200 rounded-xl shadow-sm transition-all duration-300">
-                    <div className="p-8 space-y-8">
+                <div className="overflow-hidden bg-white border border-gray-200 rounded-md shadow-sm transition-all duration-300">
+                    <div className="p-6 md:p-10 space-y-8">
                         <div className="flex items-start justify-between">
                             <div className="space-y-1">
                                 <h2 className="text-lg font-bold text-gray-900">
@@ -84,7 +84,7 @@ export default function Protocols({ agency }) {
                             </div>
                         </div>
 
-                        <div className="quill-premium-container">
+                        <div className="quill-premium-container overflow-hidden">
                             <form onSubmit={handleSubmit} className="space-y-8">
                                 <ReactQuill
                                     theme="snow"
@@ -111,7 +111,7 @@ export default function Protocols({ agency }) {
                                     <button
                                         type="submit"
                                         disabled={processing}
-                                        className="inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-sm font-bold rounded-xl hover:from-indigo-700 hover:to-purple-700 shadow-xl shadow-indigo-900/10 disabled:opacity-50 transition-all active:scale-95"
+                                        className="inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-sm font-bold rounded-md hover:from-indigo-700 hover:to-purple-700 shadow-xl shadow-indigo-900/10 disabled:opacity-50 transition-all active:scale-95"
                                     >
                                         <Save size={18} />
                                         {processing
@@ -125,7 +125,7 @@ export default function Protocols({ agency }) {
                 </div>
 
                 {/* Reference Tips */}
-                <div className="mt-8 p-8 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl border border-indigo-100 transition-all duration-300">
+                <div className="mt-8 p-8 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-md border border-indigo-100 transition-all duration-300">
                     <div className="flex gap-6 items-center">
                         <div className="w-12 h-12 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-2xl flex items-center justify-center text-white shadow-2xl shadow-indigo-900/20 shrink-0">
                             <Info size={24} />

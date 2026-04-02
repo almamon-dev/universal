@@ -200,16 +200,18 @@ class AgencyController extends Controller
     public function updateAuditFields(Request $request, Agency $agency)
     {
         $validated = $request->validate([
-            'fields' => 'required|array',
-            'fields.*.id' => 'nullable|string|max:255',
+            'fields' => 'present|array',
+            'fields.*.id' => 'nullable|string|max:100',
             'fields.*.name' => 'required|string|max:255',
             'fields.*.field_label' => 'nullable|string|max:255',
-            'fields.*.type' => 'required|string|in:text,textarea,number,select,checkbox',
+            'fields.*.type' => 'required|string',
             'fields.*.options' => 'nullable|string',
             'fields.*.required' => 'nullable|boolean',
             'fields.*.help_text' => 'nullable|string',
             'fields.*.is_locked' => 'nullable|boolean',
             'fields.*.is_conditional' => 'nullable|boolean',
+            'fields.*.required_if' => 'nullable|string',
+            'fields.*.special_banner' => 'nullable|string',
         ]);
 
         $agency->update([

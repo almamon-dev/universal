@@ -1,5 +1,5 @@
 import AdminLayout from "@/Layouts/AdminLayout";
-import { Head, Link } from "@inertiajs/react";
+import { Head, Link, usePage } from "@inertiajs/react";
 import {
     Plus,
     Search,
@@ -23,7 +23,6 @@ export default function Dashboard({ auth, stats, agencies }) {
         (agency?.name || "").toLowerCase().includes(searchTerm.toLowerCase()),
     );
 
-    // Minimal stat cards with subtle colors
     const statCards = [
         {
             label: "Total Agencies",
@@ -52,259 +51,190 @@ export default function Dashboard({ auth, stats, agencies }) {
         <AdminLayout>
             <Head title="Admin Dashboard" />
 
-            <div className="min-h-screen bg-gray-50 py-8 px-4">
+            <div className="min-h-screen bg-[#fafafa] py-8 px-6">
                 <div className="max-w-7xl mx-auto">
-                    {/* Simple Header */}
-                    <div className="mb-8">
-                        <h1 className="text-2xl font-medium text-gray-900">
-                            Welcome back, {user.name}
-                        </h1>
-                        <p className="text-sm text-gray-500 mt-1">
-                            {new Date().toLocaleDateString("en-US", {
-                                weekday: "long",
-                                year: "numeric",
-                                month: "long",
-                                day: "numeric",
-                            })}
-                        </p>
+                    {/* Header */}
+                    <div className="flex items-center justify-between mb-8">
+                        <div>
+                            <h1 className="text-2xl font-bold text-gray-900 leading-tight tracking-tight">
+                                Welcome back, {user.name}
+                            </h1>
+                            <p className="text-gray-400 text-sm font-medium">
+                                Agency Management Overview
+                            </p>
+                        </div>
+                        <Link
+                            href={route("admin.agencies.create")}
+                            className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-lg shadow-indigo-100 transition-all active:scale-95"
+                        >
+                            <Plus size={18} />
+                            Create Agency
+                        </Link>
                     </div>
 
-                    {/* Minimal Stats Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                    {/* Stats Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                         {statCards.map((stat, index) => (
                             <div
                                 key={index}
-                                className="bg-white p-5 rounded-lg border border-gray-200 hover:border-gray-300 transition-all"
+                                className="bg-white p-6 rounded-xl border border-gray-200 shadow-[0_1px_2px_0_rgba(0,0,0,0.05)] flex flex-col gap-1"
                             >
-                                <div className="flex items-center gap-3 mb-3">
-                                    <div
-                                        className={`w-8 h-8 ${stat.bgColor} rounded-lg flex items-center justify-center ${stat.color}`}
-                                    >
-                                        <stat.icon size={16} />
-                                    </div>
-                                    <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-sm font-medium text-zinc-500">
                                         {stat.label}
                                     </span>
+                                    <div className={stat.color}>
+                                        <stat.icon size={16} />
+                                    </div>
                                 </div>
-                                <p className="text-2xl font-semibold text-gray-900">
-                                    {stat.value}
-                                </p>
+                                <div className="mt-1">
+                                    <p className="text-3xl font-bold text-gray-900 tracking-tight">
+                                        {stat.value}
+                                    </p>
+                                    <div className="flex items-center gap-2 mt-2">
+                                        <div className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${stat.bgColor} ${stat.color}`}>
+                                            SYSTEM DATA
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         ))}
                     </div>
 
                     {/* Agency Table */}
-                    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                    <div className="bg-white rounded-xl border border-gray-200 shadow-[0_1px_3px_0_rgba(0,0,0,0.02)] overflow-hidden">
                         {/* Table Header */}
-                        <div className="px-5 py-4 border-b border-gray-200 flex items-center justify-between">
+                        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-white">
                             <div className="flex items-center gap-3">
-                                <Users size={18} className="text-gray-400" />
-                                <h2 className="text-sm font-medium text-gray-700">
-                                    Agencies
-                                </h2>
-                                <span className="text-xs text-gray-400">
-                                    {filteredAgencies.length} total
+                                <h3 className="text-base font-semibold text-gray-900">
+                                    Agency Registry
+                                </h3>
+                                <span className="px-2.5 py-0.5 bg-gray-100 text-gray-600 text-[10px] font-bold rounded-full">
+                                    {filteredAgencies.length} record(s)
                                 </span>
                             </div>
 
-                            <div className="flex items-center gap-3">
-                                {/* Search */}
-                                <div className="relative">
-                                    <Search
-                                        className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                                        size={16}
-                                    />
-                                    <input
-                                        type="text"
-                                        placeholder="Search..."
-                                        value={searchTerm}
-                                        onChange={(e) =>
-                                            setSearchTerm(e.target.value)
-                                        }
-                                        className="pl-9 pr-4 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-gray-400 transition-colors w-48"
-                                    />
-                                </div>
-
-                                {/* Create Button */}
-                                <Link
-                                    href={route("admin.agencies.create")}
-                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-900 text-white text-xs font-medium rounded-lg hover:bg-gray-800 transition-colors"
-                                >
-                                    <Plus size={14} />
-                                    New Agency
-                                </Link>
+                            <div className="relative">
+                                <Search
+                                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                                    size={16}
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="Search agencies..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="pl-10 pr-4 py-2 bg-gray-50 border-transparent rounded-lg text-sm focus:bg-white focus:ring-2 focus:ring-indigo-100 focus:border-indigo-200 transition-all w-64"
+                                />
                             </div>
                         </div>
 
-                        {/* Table */}
                         <div className="overflow-x-auto">
-                            <table className="w-full">
+                            <table className="w-full text-left">
                                 <thead>
-                                    <tr className="bg-gray-50">
-                                        <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Agency Name
+                                    <tr className="bg-gray-50/50">
+                                        <th className="px-6 py-3 text-xs font-bold text-gray-400 uppercase tracking-wider">
+                                            Agency Info
                                         </th>
-                                        <th className="px-5 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Audits
-                                        </th>
-                                        <th className="px-5 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <th className="px-6 py-3 text-xs font-bold text-gray-400 uppercase tracking-wider">
                                             Status
                                         </th>
-                                        <th className="px-5 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Toggle
+                                        <th className="px-6 py-3 text-xs font-bold text-gray-400 uppercase tracking-wider">
+                                            Statistics
                                         </th>
-                                        <th className="px-5 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Actions
+                                        <th className="px-6 py-3 text-xs font-bold text-gray-400 uppercase tracking-wider text-right">
+                                            Quick Actions
                                         </th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-100">
-                                    {filteredAgencies.length > 0 ? (
-                                        filteredAgencies.map((agency, idx) => (
-                                            <tr
-                                                key={idx}
-                                                className="hover:bg-gray-50/50 transition-colors"
-                                            >
-                                                <td className="px-5 py-3">
-                                                    <div className="flex items-center gap-3">
-                                                        <div
-                                                            className={`w-7 h-7 rounded ${agency.status === "active" ? "bg-emerald-100" : "bg-gray-100"} flex items-center justify-center`}
+                                    {filteredAgencies.map((agency) => (
+                                        <tr
+                                            key={agency.id}
+                                            className="group hover:bg-gray-50/50 transition-colors"
+                                        >
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-lg flex items-center justify-center text-white shadow-lg shadow-indigo-100">
+                                                        <Briefcase size={18} />
+                                                    </div>
+                                                    <div>
+                                                        <Link
+                                                            href={route(
+                                                                "admin.agencies.edit",
+                                                                agency.id,
+                                                            )}
+                                                            className="text-sm font-semibold text-gray-900 hover:text-indigo-600 transition-colors"
                                                         >
-                                                            <Briefcase
-                                                                size={14}
-                                                                className={
-                                                                    agency.status ===
-                                                                    "active"
-                                                                        ? "text-emerald-600"
-                                                                        : "text-gray-400"
-                                                                }
-                                                            />
-                                                        </div>
-                                                        <span className="text-sm text-gray-900">
                                                             {agency.name}
+                                                        </Link>
+                                                        <p className="text-xs text-gray-400">
+                                                            ID: {agency.id.toString().padStart(4, "0")}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-3">
+                                                    <Switch
+                                                        checked={agency.status === "active"}
+                                                        onCheckedChange={(checked) => {
+                                                            router.patch(
+                                                                route(
+                                                                    "admin.agencies.status",
+                                                                    agency.id,
+                                                                ),
+                                                                { status: checked ? "active" : "inactive" },
+                                                                { preserveScroll: true }
+                                                            );
+                                                        }}
+                                                        className="data-[state=checked]:bg-indigo-600"
+                                                    />
+                                                    <span
+                                                        className={`text-xs font-bold uppercase tracking-wider ${agency.status === "active" ? "text-indigo-600" : "text-gray-400"}`}
+                                                    >
+                                                        {agency.status}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="flex items-center gap-1 text-gray-500">
+                                                        <Users size={14} />
+                                                        <span className="text-sm font-semibold text-gray-700">
+                                                            {agency.chatters_count || 0}
                                                         </span>
                                                     </div>
-                                                </td>
-                                                <td className="px-5 py-3 text-center">
-                                                    <span className="text-sm text-gray-600">
-                                                        {agency.total_audits ||
-                                                            0}
-                                                    </span>
-                                                </td>
-                                                <td className="px-5 py-3 text-center">
-                                                    <span
-                                                        className={`inline-flex px-2 py-1 text-xs rounded-full ${
-                                                            agency.status ===
-                                                            "active"
-                                                                ? "bg-emerald-100 text-emerald-700"
-                                                                : "bg-gray-100 text-gray-600"
-                                                        }`}
+                                                    <div className="flex items-center gap-1 text-gray-500">
+                                                        <Activity size={14} />
+                                                        <span className="text-sm font-semibold text-gray-700">
+                                                            {agency.audits_count || 0}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 text-right">
+                                                <div className="flex items-center justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <Link
+                                                        href={route("admin.report.index", agency.id)}
+                                                        className="bg-zinc-900 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-zinc-800 transition-all flex items-center gap-1.5"
                                                     >
-                                                        {agency.status ===
-                                                        "active"
-                                                            ? "Active"
-                                                            : "Inactive"}
-                                                    </span>
-                                                </td>
-                                                <td className="px-5 py-3 text-center">
-                                                    <div className="flex justify-center">
-                                                        <Switch
-                                                            checked={
-                                                                agency.status ===
-                                                                "active"
-                                                            }
-                                                            onChange={(
-                                                                checked,
-                                                            ) => {
-                                                                router.patch(
-                                                                    route(
-                                                                        "admin.agencies.update",
-                                                                        agency.id,
-                                                                    ),
-                                                                    {
-                                                                        ...agency,
-                                                                        status: checked
-                                                                            ? "active"
-                                                                            : "inactive",
-                                                                    },
-                                                                    {
-                                                                        preserveScroll: true,
-                                                                    },
-                                                                );
-                                                            }}
-                                                        />
-                                                    </div>
-                                                </td>
-                                                <td className="px-5 py-3 text-right">
-                                                    <div className="flex items-center justify-end gap-2">
-                                                        <Link
-                                                            href={route(
-                                                                "admin.agencies.edit",
-                                                                agency.id,
-                                                            )}
-                                                            className="p-1 text-gray-400 hover:text-gray-600"
-                                                        >
-                                                            <Edit2 size={16} />
-                                                        </Link>
-                                                        <Link
-                                                            href={route(
-                                                                "admin.agencies.edit",
-                                                                agency.id,
-                                                            )}
-                                                            className="inline-flex items-center gap-1 px-3 py-1 bg-gray-900 text-white text-xs rounded-lg hover:bg-gray-800 transition-colors"
-                                                        >
-                                                            Manage
-                                                            <ArrowUpRight
-                                                                size={12}
-                                                            />
-                                                        </Link>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))
-                                    ) : (
-                                        <tr>
-                                            <td
-                                                colSpan="5"
-                                                className="px-5 py-8 text-center"
-                                            >
-                                                <p className="text-sm text-gray-400">
-                                                    No agencies found
-                                                </p>
+                                                        Reports
+                                                        <ArrowUpRight size={14} />
+                                                    </Link>
+                                                    <Link
+                                                        href={route("admin.agencies.edit", agency.id)}
+                                                        className="bg-white border border-gray-200 text-gray-600 p-1.5 rounded-lg hover:bg-gray-50 transition-all"
+                                                    >
+                                                        <Edit2 size={16} />
+                                                    </Link>
+                                                </div>
                                             </td>
                                         </tr>
-                                    )}
+                                    ))}
                                 </tbody>
                             </table>
                         </div>
-
-                        {/* Simple Footer */}
-                        {filteredAgencies.length > 0 && (
-                            <div className="px-5 py-3 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
-                                <p className="text-xs text-gray-500">
-                                    Showing {filteredAgencies.length} of{" "}
-                                    {agencyList.length}
-                                </p>
-                                <div className="flex items-center gap-2">
-                                    <button className="px-2 py-1 text-xs text-gray-600 hover:text-gray-900">
-                                        Previous
-                                    </button>
-                                    <button className="px-2 py-1 text-xs bg-gray-200 text-gray-700 rounded">
-                                        1
-                                    </button>
-                                    <button className="px-2 py-1 text-xs text-gray-600 hover:text-gray-900">
-                                        Next
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Simple Footer Stats */}
-                    <div className="mt-4 flex items-center justify-end gap-4 text-xs text-gray-400">
-                        <span>Last updated: Just now</span>
-                        <span>•</span>
-                        <span>{agencyList.length} agencies total</span>
                     </div>
                 </div>
             </div>

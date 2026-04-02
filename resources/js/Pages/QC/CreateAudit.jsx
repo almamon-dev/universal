@@ -139,7 +139,7 @@ export default function CreateAudit({ agency, chatters = [], creators = [] }) {
 
     const onSubmit = (formData) => {
         setIsProcessing(true);
-        router.post(route("admin.agencies.audits.store", agency.id), formData, {
+        router.post(route("qc.agencies.audits.store", agency.id), formData, {
             onSuccess: () => {
                 toast.success("All audits submitted successfully!");
                 setIsProcessing(false);
@@ -170,13 +170,13 @@ export default function CreateAudit({ agency, chatters = [], creators = [] }) {
         <UserLayout>
             <Head title={`New Audit - ${agency.name}`} />
 
-            <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 pb-20 px-4 pt-8">
-                <main className="max-w-6xl mx-auto">
+            <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 pb-20 px-10 pt-2">
+                <main className="max-w-7xl mx-auto">
                     {/* Back Button */}
-                    <div className="mb-6">
+                    <div className="mb-3">
                         <button
                             onClick={() => router.get(route("dashboard"))}
-                            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 hover:shadow-sm transition-all"
+                            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-sm hover:bg-gray-50 hover:border-gray-300 hover:shadow-sm transition-all"
                         >
                             <ArrowLeft size={16} />
                             Back to Dashboard
@@ -184,12 +184,12 @@ export default function CreateAudit({ agency, chatters = [], creators = [] }) {
                     </div>
 
                     {/* Modern Tab Bar */}
-                    <div className="mb-6 bg-white border border-gray-200 rounded-2xl shadow-sm p-1.5 flex items-center gap-1">
+                    <div className="mb-2 bg-white border border-gray-200 rounded-md shadow-sm p-1 flex items-center gap-1">
                         {showScrollButtons && (
                             <button
                                 type="button"
                                 onClick={() => scrollTabs("left")}
-                                className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"
+                                className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-all"
                             >
                                 <ChevronLeft size={20} />
                             </button>
@@ -222,10 +222,10 @@ export default function CreateAudit({ agency, chatters = [], creators = [] }) {
                                         key={field.id}
                                         onClick={() => setActiveTabIndex(index)}
                                         type="button"
-                                        className={`relative flex-shrink-0 flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-xl transition-all ${
+                                        className={`relative flex-shrink-0 flex items-center gap-2 px-4 py-2.5 text-sm font-bold rounded-md transition-all ${
                                             isActive
-                                                ? "bg-gradient-to-r from-indigo-600 to-indigo-700 text-white shadow-lg shadow-indigo-200"
-                                                : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                                                ? "bg-black text-white shadow-lg shadow-black/10"
+                                                : "text-gray-500 hover:text-black hover:bg-gray-100"
                                         }`}
                                     >
                                         <div
@@ -273,7 +273,7 @@ export default function CreateAudit({ agency, chatters = [], creators = [] }) {
                             <button
                                 type="button"
                                 onClick={() => scrollTabs("right")}
-                                className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"
+                                className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-all"
                             >
                                 <ChevronRight size={20} />
                             </button>
@@ -284,7 +284,7 @@ export default function CreateAudit({ agency, chatters = [], creators = [] }) {
                         <button
                             type="button"
                             onClick={addAudit}
-                            className="p-2.5 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all shrink-0"
+                            className="p-2.5 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-all shrink-0"
                             title="Add New Audit"
                         >
                             <Plus size={18} />
@@ -293,7 +293,7 @@ export default function CreateAudit({ agency, chatters = [], creators = [] }) {
 
                     <form
                         onSubmit={handleSubmit(onSubmit)}
-                        className="space-y-6"
+                        className="space-y-3"
                     >
                         {fields.map((field, index) => {
                             if (activeTabIndex !== index) return null;
@@ -305,9 +305,9 @@ export default function CreateAudit({ agency, chatters = [], creators = [] }) {
                             const hasErrors = errors.audits?.[index];
 
                             return (
-                                <div key={field.id} className="space-y-6">
+                                <div key={field.id} className="space-y-3">
                                     {/* Progress Bar */}
-                                    <div className="bg-white border border-gray-200 rounded-xl p-4">
+                                    <div className="bg-white border border-gray-200 rounded-md p-2.5">
                                         <div className="flex items-center justify-between mb-2">
                                             <span className="text-sm font-medium text-gray-700">
                                                 Audit Progress
@@ -331,10 +331,10 @@ export default function CreateAudit({ agency, chatters = [], creators = [] }) {
                                     </div>
 
                                     {/* General Information Card */}
-                                    <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
-                                        <div className="px-6 py-5 bg-gradient-to-r from-indigo-50 via-white to-white border-b border-gray-200">
+                                    <div className="bg-white border border-gray-200 rounded-md shadow-sm overflow-hidden">
+                                        <div className="px-4 py-2 bg-gradient-to-r from-indigo-50 via-white to-white border-b border-gray-200">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center">
+                                                <div className="w-10 h-10 rounded-md bg-indigo-100 flex items-center justify-center">
                                                     <FileText
                                                         size={20}
                                                         className="text-indigo-600"
@@ -351,8 +351,8 @@ export default function CreateAudit({ agency, chatters = [], creators = [] }) {
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="p-6">
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="p-5">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                                 <div className="space-y-2">
                                                     <label className="text-sm font-medium text-gray-700">
                                                         Date
@@ -362,7 +362,7 @@ export default function CreateAudit({ agency, chatters = [], creators = [] }) {
                                                             type="text"
                                                             disabled
                                                             value={todayDate}
-                                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-600 cursor-not-allowed group-hover:border-gray-300 transition-colors"
+                                                            className="w-full bg-gray-50 border border-gray-200 rounded-md px-4 py-3 text-sm text-gray-600 cursor-not-allowed group-hover:border-gray-300 transition-colors"
                                                         />
                                                         <Calendar
                                                             size={18}
@@ -379,7 +379,7 @@ export default function CreateAudit({ agency, chatters = [], creators = [] }) {
                                                             type="text"
                                                             disabled
                                                             value={user.name}
-                                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-600 cursor-not-allowed group-hover:border-gray-300 transition-colors"
+                                                            className="w-full bg-gray-50 border border-gray-200 rounded-md px-4 py-3 text-sm text-gray-600 cursor-not-allowed group-hover:border-gray-300 transition-colors"
                                                         />
                                                         <User
                                                             size={18}
@@ -401,7 +401,7 @@ export default function CreateAudit({ agency, chatters = [], creators = [] }) {
                                                                 required: true,
                                                             },
                                                         )}
-                                                        className={`w-full bg-white border rounded-xl px-4 py-3 text-sm focus:outline-none transition-all ${
+                                                        className={`w-full bg-white border rounded-md px-4 py-3 text-sm focus:outline-none transition-all ${
                                                             errors.audits?.[
                                                                 index
                                                             ]?.chatter_id
@@ -436,7 +436,7 @@ export default function CreateAudit({ agency, chatters = [], creators = [] }) {
                                                                 required: true,
                                                             },
                                                         )}
-                                                        className={`w-full bg-white border rounded-xl px-4 py-3 text-sm focus:outline-none transition-all ${
+                                                        className={`w-full bg-white border rounded-md px-4 py-3 text-sm focus:outline-none transition-all ${
                                                             errors.audits?.[
                                                                 index
                                                             ]?.creator_id
@@ -475,7 +475,7 @@ export default function CreateAudit({ agency, chatters = [], creators = [] }) {
                                                             },
                                                         )}
                                                         placeholder="Enter Subscriber UID"
-                                                        className={`w-full bg-white border rounded-xl px-4 py-3 text-sm pl-10 focus:outline-none transition-all ${
+                                                        className={`w-full bg-white border rounded-md px-4 py-3 text-sm pl-10 focus:outline-none transition-all ${
                                                             errors.audits?.[
                                                                 index
                                                             ]?.subscriber_uid
@@ -493,10 +493,10 @@ export default function CreateAudit({ agency, chatters = [], creators = [] }) {
                                     </div>
 
                                     {/* Audit Fields Card */}
-                                    <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
-                                        <div className="px-6 py-5 bg-gradient-to-r from-emerald-50 via-white to-white border-b border-gray-200">
+                                    <div className="bg-white border border-gray-200 rounded-md shadow-sm overflow-hidden">
+                                        <div className="px-6 py-3 bg-gradient-to-r from-emerald-50 via-white to-white border-b border-gray-200">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
+                                                <div className="w-10 h-10 rounded-md bg-emerald-100 flex items-center justify-center">
                                                     <CheckCircle
                                                         size={20}
                                                         className="text-emerald-600"
@@ -524,8 +524,8 @@ export default function CreateAudit({ agency, chatters = [], creators = [] }) {
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="p-6">
-                                            <div className="space-y-6">
+                                        <div className="p-5">
+                                            <div className="space-y-3">
                                                 {auditFields.length > 0 ? (
                                                     auditFields.map(
                                                         (fieldItem, fIdx) => {
@@ -596,7 +596,7 @@ export default function CreateAudit({ agency, chatters = [], creators = [] }) {
                                                                     key={
                                                                         fieldKey
                                                                     }
-                                                                    className="space-y-2 pb-6 border-b border-gray-100 last:border-0 last:pb-0"
+                                                                    className="space-y-1.5 pb-4 border-b border-gray-100 last:border-0 last:pb-0"
                                                                 >
                                                                     <div className="flex items-start justify-between">
                                                                         <label className="text-sm font-medium text-gray-700">
@@ -708,7 +708,7 @@ export default function CreateAudit({ agency, chatters = [], creators = [] }) {
                                                                                                                     },
                                                                                                                 );
                                                                                                         }}
-                                                                                                        className={`flex-1 h-14 rounded-xl border-2 flex items-center justify-center gap-2 transition-all ${
+                                                                                                        className={`flex-1 h-11 rounded-md border-2 flex items-center justify-center gap-2 transition-all ${
                                                                                                             isSelected
                                                                                                                 ? opt.toLowerCase() ===
                                                                                                                   "yes"
@@ -800,9 +800,9 @@ export default function CreateAudit({ agency, chatters = [], creators = [] }) {
                                                                                                                 },
                                                                                                             );
                                                                                                     }}
-                                                                                                    className={`w-full px-5 py-4 rounded-xl border-2 text-left flex items-center gap-3 transition-all ${
+                                                                                                    className={`w-full px-4 py-2.5 rounded-md border-2 text-left flex items-center gap-3 transition-all ${
                                                                                                         isSelected
-                                                                                                            ? "border-indigo-500 bg-indigo-50 shadow-md"
+                                                                                                            ? "border-black bg-gray-50 shadow-sm"
                                                                                                             : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50"
                                                                                                     }`}
                                                                                                 >
@@ -879,7 +879,7 @@ export default function CreateAudit({ agency, chatters = [], creators = [] }) {
                                                                                         },
                                                                                 },
                                                                             )}
-                                                                            className={`w-full bg-white border rounded-xl px-4 py-3 text-sm focus:outline-none transition-all ${
+                                                                            className={`w-full bg-white border rounded-md px-4 py-3 text-sm focus:outline-none transition-all ${
                                                                                 hasError
                                                                                     ? "border-red-500 ring-2 ring-red-500/20"
                                                                                     : currentValue
@@ -933,24 +933,24 @@ export default function CreateAudit({ agency, chatters = [], creators = [] }) {
                                     {/* Instructions & Submit Section */}
                                     <div className="space-y-6">
                                         {/* Instructions Box */}
-                                        <div className="bg-[#eff6ff] border border-blue-100 rounded-[24px] p-8">
+                                        <div className="bg-zinc-200 border border-zinc-100 rounded-md p-6">
                                             <div className="flex items-start gap-4">
                                                 <div className="space-y-4">
-                                                    <h3 className="text-[20px] font-bold text-[#1e3a8a] flex items-center gap-2">
-                                                        Instructions
+                                                    <h3 className="text-lg font-bold text-zinc-900 flex items-center gap-2">
+                                                        Audit Instructions
                                                     </h3>
                                                     <ul className="space-y-2">
                                                         {[
                                                             "All fields marked with * are required",
-                                                            "Please review all information carefully before submitting",
-                                                            "You can cancel at any time to return to the dashboard",
+                                                            "Please review information before submitting",
+                                                            "Cancelled audits cannot be recovered",
                                                             "Submitted audits cannot be edited",
                                                         ].map((step, i) => (
                                                             <li
                                                                 key={i}
-                                                                className="flex items-center gap-3 text-[16px] font-medium text-[#1e40af]"
+                                                                className="flex items-center gap-3 text-sm font-medium text-zinc-600"
                                                             >
-                                                                <div className="w-1.5 h-1.5 rounded-full bg-[#1e40af]" />
+                                                                <div className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
                                                                 {step}
                                                             </li>
                                                         ))}
@@ -961,7 +961,7 @@ export default function CreateAudit({ agency, chatters = [], creators = [] }) {
 
                                         {/* Error/Success Feedbacks (Small/Clean) */}
                                         {hasErrors && (
-                                            <div className="bg-red-50 border border-red-100 rounded-xl p-4 flex items-center gap-3 text-red-700">
+                                            <div className="bg-red-50 border border-red-100 rounded-md p-4 flex items-center gap-3 text-red-700">
                                                 <AlertCircle size={18} />
                                                 <span className="text-sm font-medium">
                                                     Please correct the errors
@@ -974,7 +974,7 @@ export default function CreateAudit({ agency, chatters = [], creators = [] }) {
                                         <button
                                             type="submit"
                                             disabled={isProcessing}
-                                            className="w-full bg-[#111827] text-white py-4 rounded-xl font-bold hover:bg-black transition-all disabled:opacity-50 shadow-sm text-lg"
+                                            className="w-full bg-[#18181b] text-white py-4 rounded-md font-bold hover:bg-black transition-all disabled:opacity-50 shadow-lg shadow-black/5 text-lg"
                                         >
                                             {isProcessing
                                                 ? "Submitting..."

@@ -22,9 +22,9 @@ export default function Discovery({ agency }) {
             href={href}
             className={`flex flex-col p-8 rounded-2xl border ${
                 isMain
-                    ? "bg-indigo-600 border-indigo-600 text-white"
-                    : "bg-white border-gray-200 text-gray-600"
-            }`}
+                    ? "bg-indigo-600 border-indigo-600 text-white shadow-xl shadow-indigo-100"
+                    : "bg-white border-gray-200 text-gray-600 shadow-sm"
+            } hover:scale-[1.02] transition-all`}
         >
             <div className="flex flex-col h-full gap-6">
                 <div
@@ -68,7 +68,7 @@ export default function Discovery({ agency }) {
                     <div className="flex items-center gap-4">
                         <Link
                             href={route("admin.agencies.edit", agency.id)}
-                            className="w-10 h-10 border border-gray-200 rounded-lg flex items-center justify-center text-gray-600"
+                            className="w-10 h-10 border border-gray-200 rounded-lg flex items-center justify-center text-gray-600 hover:bg-gray-50"
                         >
                             <ArrowLeft size={18} />
                         </Link>

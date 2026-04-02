@@ -4,7 +4,6 @@ import {
     ArrowLeft,
     LayoutDashboard,
     Activity,
-    Users,
     Target,
     Zap,
 } from "lucide-react";
@@ -14,34 +13,30 @@ export default function Summary() {
         <AdminLayout>
             <Head title="Executive Summary — Report" />
 
-            <div className="min-h-screen bg-gray-50 py-12 px-6">
+            <div className="min-h-screen bg-zinc-50/50 py-12 px-6 md:px-8">
                 <div className="max-w-6xl mx-auto">
                     {/* Breadcrumbs */}
                     <Link
                         href={route("admin.report.index")}
-                        className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 mb-8 transition-colors"
+                        className="inline-flex items-center gap-1.5 text-[10px] font-bold text-zinc-400 hover:text-black transition-colors group mb-8"
                     >
-                        <ArrowLeft size={16} />
-                        Back to Reports
+                        <ArrowLeft size={12} className="group-hover:-translate-x-0.5 transition-transform" />
+                        System dashboard
                     </Link>
 
                     {/* Header */}
-                    <div className="bg-white p-10 rounded-[40px] border border-gray-100 shadow-sm mb-10 overflow-hidden relative">
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-blue-50 rounded-full -mr-32 -mt-32 blur-3xl opacity-50" />
-
-                        <div className="relative z-10">
-                            <div className="flex items-center gap-4 mb-6">
-                                <div className="w-12 h-12 bg-blue-600 rounded-sm flex items-center justify-center text-white shadow-lg shadow-blue-200">
+                    <div className="bg-white p-10 rounded-xl border border-zinc-200 shadow-sm mb-10 overflow-hidden relative">
+                        <div className="relative z-10 space-y-6">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 bg-zinc-900 rounded-lg flex items-center justify-center text-white shadow-sm">
                                     <LayoutDashboard size={24} />
                                 </div>
-                                <h1 className="text-3xl font-black text-gray-900 tracking-tight">
-                                    Executive Summary
+                                <h1 className="text-4xl font-bold text-zinc-900 tracking-tight">
+                                    Executive summary
                                 </h1>
                             </div>
-                            <p className="text-gray-600 max-w-2xl text-lg leading-relaxed">
-                                A comprehensive overview of the agency's
-                                operational health, key performance indicators,
-                                and critical growth vectors.
+                            <p className="text-zinc-500 max-w-2xl text-lg leading-relaxed">
+                                A comprehensive overview of the agency's operational health, key performance indicators, and critical growth vectors.
                             </p>
                         </div>
                     </div>
@@ -50,51 +45,40 @@ export default function Summary() {
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                         {/* Stats Card */}
                         <div className="lg:col-span-2 space-y-8">
-                            <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
-                                <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
-                                    <Activity
-                                        className="text-blue-500"
-                                        size={20}
-                                    />
-                                    Growth Overview
+                            <div className="bg-white p-8 rounded-xl border border-zinc-200 shadow-sm">
+                                <h3 className="text-sm font-bold text-zinc-900 mb-8 flex items-center gap-2">
+                                    <Activity className="text-zinc-400" size={18} />
+                                    Growth overview
                                 </h3>
-                                <div className="h-64 bg-gray-50 rounded-sm flex items-center justify-center border border-dashed border-gray-200">
-                                    <p className="text-sm text-gray-400">
-                                        Growth Chart Visualization Placeholder
+                                <div className="h-64 bg-zinc-50 rounded-lg flex items-center justify-center border border-dashed border-zinc-200">
+                                    <p className="text-[10px] font-bold text-zinc-300">
+                                        Data visualization pending
                                     </p>
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
-                                    <Zap
-                                        className="text-amber-500 mb-4"
-                                        size={24}
-                                    />
-                                    <h4 className="font-bold text-gray-900 mb-1">
-                                        Impact Velocity
+                                <div className="bg-white p-8 rounded-xl border border-zinc-200 shadow-sm group hover:border-zinc-900 transition-all">
+                                    <Zap className="text-zinc-400 mb-6" size={20} />
+                                    <h4 className="text-[10px] font-bold text-zinc-400 mb-1 group-hover:text-zinc-900 transition-colors">
+                                        Impact velocity
                                     </h4>
-                                    <p className="text-sm text-gray-500">
-                                        Speed of conversion across all traffic
-                                        sources.
+                                    <p className="text-[11px] font-medium text-zinc-500 leading-relaxed">
+                                        Speed of conversion across all traffic sources.
                                     </p>
-                                    <div className="mt-4 text-2xl font-black text-gray-900">
+                                    <div className="mt-8 text-3xl font-bold text-zinc-900 tracking-tighter">
                                         84.2%
                                     </div>
                                 </div>
-                                <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
-                                    <Target
-                                        className="text-emerald-500 mb-4"
-                                        size={24}
-                                    />
-                                    <h4 className="font-bold text-gray-900 mb-1">
-                                        Target Alignment
+                                <div className="bg-white p-8 rounded-xl border border-zinc-200 shadow-sm group hover:border-zinc-900 transition-all">
+                                    <Target className="text-zinc-400 mb-6" size={20} />
+                                    <h4 className="text-[10px] font-bold text-zinc-400 mb-1 group-hover:text-zinc-900 transition-colors">
+                                        Target alignment
                                     </h4>
-                                    <p className="text-sm text-gray-500">
-                                        Adherence to established system
-                                        protocols.
+                                    <p className="text-[11px] font-medium text-zinc-500 leading-relaxed">
+                                        Adherence to established system protocols.
                                     </p>
-                                    <div className="mt-4 text-2xl font-black text-gray-900">
+                                    <div className="mt-8 text-3xl font-bold text-zinc-900 tracking-tighter">
                                         91.0%
                                     </div>
                                 </div>
@@ -102,31 +86,32 @@ export default function Summary() {
                         </div>
 
                         {/* Sidebar Info */}
-                        <div className="bg-gray-900 text-white p-8 rounded-[40px] shadow-2xl relative overflow-hidden">
-                            <div className="absolute bottom-0 right-0 w-32 h-32 bg-blue-500/20 rounded-full -mb-16 -mr-16 blur-2xl" />
-                            <h3 className="text-xl font-bold mb-6">
-                                Key Insights
-                            </h3>
-                            <ul className="space-y-6">
-                                {[
-                                    "Revenue retention is up 12% following QC intervention.",
-                                    "Chatter efficiency peaked during peak weekend hours.",
-                                    "New subscriber onboarding requires tighter protocol discipline.",
-                                ].map((insight, i) => (
-                                    <li key={i} className="flex gap-4">
-                                        <div className="w-1.5 h-1.5 bg-blue-400 rounded-full mt-2 shrink-0" />
-                                        <p className="text-sm text-gray-300 leading-relaxed">
-                                            {insight}
-                                        </p>
-                                    </li>
-                                ))}
-                            </ul>
+                        <div className="bg-zinc-900 text-white p-8 rounded-xl shadow-xl relative overflow-hidden flex flex-col justify-between">
+                            <div>
+                                <h3 className="text-sm font-bold mb-8 text-white/50">
+                                    Key insights
+                                </h3>
+                                <ul className="space-y-8">
+                                    {[
+                                        "Revenue retention is up 12% following QC intervention.",
+                                        "Chatter efficiency peaked during peak weekend hours.",
+                                        "New subscriber onboarding requires tighter protocol discipline.",
+                                    ].map((insight, i) => (
+                                        <li key={i} className="flex gap-4">
+                                            <div className="w-1.5 h-1.5 bg-zinc-400 rounded-full mt-2 shrink-0" />
+                                            <p className="text-[11px] font-medium text-zinc-300 leading-relaxed">
+                                                {insight}
+                                            </p>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
 
-                            <div className="mt-12 p-6 bg-white/5 border border-white/10 rounded-sm">
-                                <p className="text-xs font-medium text-gray-400 uppercase tracking-widest mb-2">
-                                    Health Score
+                            <div className="mt-12 p-6 bg-white/5 border border-white/10 rounded-lg">
+                                <p className="text-[9px] font-bold text-zinc-500 mb-2">
+                                    Health score
                                 </p>
-                                <div className="text-4xl font-black text-white">
+                                <div className="text-4xl font-bold text-white tracking-tighter">
                                     A+
                                 </div>
                             </div>

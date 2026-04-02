@@ -27,6 +27,92 @@ import {
 import { toast } from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 
+const TIMEZONES = {
+    "United States & Canada": [
+        "Eastern Time (New York, Toronto)",
+        "Central Time (Chicago, Mexico City)",
+        "Mountain Time (Denver, Phoenix)",
+        "Pacific Time (Los Angeles, Vancouver)",
+        "Alaska Time (Anchorage)",
+        "Hawaii Time (Honolulu)",
+    ],
+    "Europe - Western": ["UK (London, Dublin)", "Portugal (Lisbon)", "Iceland (Reykjavik)"],
+    "Europe - Central": [
+        "France (Paris)",
+        "Germany (Berlin, Frankfurt)",
+        "Italy (Rome, Milan)",
+        "Spain (Madrid, Barcelona)",
+        "Netherlands (Amsterdam)",
+        "Belgium (Brussels)",
+        "Austria (Vienna)",
+        "Czech Republic (Prague)",
+        "Sweden (Stockholm)",
+        "Norway (Oslo)",
+        "Denmark (Copenhagen)",
+        "Switzerland (Zurich)",
+        "Poland (Warsaw)",
+    ],
+    "Europe - Eastern": [
+        "Greece (Athens)",
+        "Romania (Bucharest)",
+        "Finland (Helsinki)",
+        "Ukraine (Kyiv)",
+        "Turkey (Istanbul)",
+        "Russia (Moscow)",
+    ],
+    "Middle East & Africa": [
+        "UAE (Dubai, Abu Dhabi)",
+        "Saudi Arabia (Riyadh)",
+        "Qatar (Doha)",
+        "Kuwait",
+        "Bahrain",
+        "Iran (Tehran)",
+        "Israel (Jerusalem)",
+        "South Africa (Johannesburg)",
+        "Nigeria (Lagos)",
+        "Kenya (Nairobi)",
+        "Morocco (Casablanca)",
+    ],
+    "Asia - East": [
+        "Japan (Tokyo, Osaka)",
+        "South Korea (Seoul)",
+        "China (Beijing, Shanghai)",
+        "Hong Kong",
+        "Taiwan (Taipei)",
+    ],
+    "Asia - Southeast": [
+        "Singapore",
+        "Philippines (Manila)",
+        "Thailand (Bangkok)",
+        "Indonesia (Jakarta)",
+        "Malaysia (Kuala Lumpur)",
+        "Vietnam (Ho Chi Minh)",
+    ],
+    "Asia - South": [
+        "India (Mumbai, Delhi, Bangalore)",
+        "Pakistan (Karachi)",
+        "Bangladesh (Dhaka)",
+        "Sri Lanka (Colombo)",
+    ],
+    Oceania: [
+        "Australia East (Sydney, Melbourne)",
+        "Australia Queensland (Brisbane)",
+        "Australia Central (Adelaide)",
+        "Australia West (Perth)",
+        "New Zealand (Auckland)",
+        "Fiji",
+    ],
+    "South America": [
+        "Brazil (São Paulo, Rio)",
+        "Argentina (Buenos Aires)",
+        "Chile (Santiago)",
+        "Colombia (Bogotá)",
+        "Peru (Lima)",
+        "Venezuela (Caracas)",
+    ],
+    Other: ["UTC (Coordinated Universal Time)", "GMT (Greenwich Mean Time)"],
+};
+
 export default function Edit({
     agency,
     stats,
@@ -363,28 +449,31 @@ export default function Edit({
             {!isEditing ? (
                 <>
                     <Head title="Create Agency" />
-                    <div className="max-w-4xl mx-auto px-4 py-6">
-                        <div className="mb-6 flex items-center justify-between">
-                            <div>
-                                <Link
-                                    href="/dashboard"
-                                    className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-900 mb-4"
-                                >
-                                    <ArrowLeft size={16} />
-                                    Back
-                                </Link>
-                                <h1 className="text-2xl font-semibold text-gray-900">
-                                    {isEditing
-                                        ? "Agency Settings"
-                                        : "New Agency"}
-                                </h1>
+                    <div className="max-w-4xl mx-auto px-4 py-8">
+                        <div className="mb-8">
+                            <Link
+                                href={route("admin.dashboard")}
+                                className="inline-flex items-center gap-1.5 text-xs font-semibold text-zinc-500 hover:text-black transition-colors mb-4 group"
+                            >
+                                <ArrowLeft size={14} className="transition-transform group-hover:-translate-x-0.5" />
+                                Back to Dashboard
+                            </Link>
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
+                                        Create New Agency
+                                    </h1>
+                                    <p className="text-sm text-zinc-500 mt-1">
+                                        Initialize a new agency profile and configure operational parameters
+                                    </p>
+                                </div>
+                                {!canEdit && (
+                                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 text-amber-600 text-[10px] font-black uppercase tracking-widest rounded-lg border border-amber-100">
+                                        <Shield size={12} />
+                                        Read Only
+                                    </span>
+                                )}
                             </div>
-                            {!canEdit && (
-                                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-500/10 border border-amber-500/20 text-amber-600 text-[10px] font-black uppercase tracking-widest rounded-lg shadow-sm">
-                                    <Lock size={12} />
-                                    View Only
-                                </span>
-                            )}
                         </div>
 
                         {errors.error && (
@@ -397,11 +486,14 @@ export default function Edit({
 
                         <form onSubmit={handleSubmit} className="space-y-6">
                             {/* Basic Information */}
-                            <div className="bg-white border border-gray-200 rounded-xl p-6">
-                                <h2 className="text-lg font-medium text-gray-900 mb-4">
-                                    Agency Information
-                                </h2>
-                                <div className="space-y-4">
+                            <div className="bg-white border border-gray-200 rounded-xl shadow-[0_1px_3px_0_rgba(0,0,0,0.02)] overflow-hidden">
+                                <div className="px-6 py-4 border-b border-gray-100">
+                                    <h2 className="text-sm font-semibold text-gray-900">
+                                        Core Profile
+                                    </h2>
+                                    <p className="text-xs text-gray-400">Basic identification and regional settings</p>
+                                </div>
+                                <div className="p-6 space-y-4">
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">
                                             Agency Name
@@ -427,8 +519,7 @@ export default function Edit({
                                         <label className="block text-sm font-medium text-gray-700 mb-1">
                                             Timezone
                                         </label>
-                                        <input
-                                            type="text"
+                                        <select
                                             value={data.timezone}
                                             disabled={!canEdit}
                                             onChange={(e) =>
@@ -437,9 +528,17 @@ export default function Edit({
                                                     e.target.value,
                                                 )
                                             }
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 disabled:bg-gray-50 disabled:text-gray-500"
-                                            placeholder="e.g., Eastern Time"
-                                        />
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 disabled:bg-gray-50 disabled:text-gray-500 bg-white"
+                                        >
+                                            <option value="">Select Timezone</option>
+                                            {Object.entries(TIMEZONES).map(([region, zones]) => (
+                                                <optgroup key={region} label={region}>
+                                                    {zones.map(zone => (
+                                                        <option key={zone} value={zone}>{zone}</option>
+                                                    ))}
+                                                </optgroup>
+                                            ))}
+                                        </select>
                                     </div>
 
                                     <div>
@@ -469,13 +568,16 @@ export default function Edit({
                             </div>
 
                             {/* Pricing */}
-                            <div className="bg-white border border-gray-200 rounded-xl p-6">
-                                <h2 className="text-lg font-medium text-gray-900 mb-4">
-                                    Pricing Configuration
-                                </h2>
-                                <div className="space-y-4">
+                            <div className="bg-white border border-gray-200 rounded-xl shadow-[0_1px_3px_0_rgba(0,0,0,0.02)] overflow-hidden">
+                                <div className="px-6 py-4 border-b border-gray-100">
+                                    <h2 className="text-sm font-semibold text-gray-900">
+                                        Revenue Configuration
+                                    </h2>
+                                    <p className="text-xs text-gray-400">Set standardized pricing for automated reporting</p>
+                                </div>
+                                <div className="p-6 space-y-4">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        <label className="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">
                                             First Paywall Sexting
                                         </label>
                                         <div className="relative">
@@ -550,25 +652,27 @@ export default function Edit({
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-
-                            {/* QC Management */}
-                            <div className="bg-white border border-gray-200 rounded-xl p-6">
-                                <div className="flex items-center justify-between mb-4">
-                                    <h2 className="text-lg font-medium text-gray-900">
-                                        QC Members
-                                    </h2>
+                            </div>                            {/* QC Management */}
+                            <div className="bg-white border border-gray-200 rounded-xl shadow-[0_1px_3px_0_rgba(0,0,0,0.02)] overflow-hidden">
+                                <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                                    <div>
+                                        <h2 className="text-sm font-semibold text-gray-900">
+                                            Quality Control Team
+                                        </h2>
+                                        <p className="text-xs text-gray-400">Manage specialized members for this agency</p>
+                                    </div>
                                     {canEdit && (
                                         <button
                                             type="button"
                                             onClick={() => setShowQCForm(true)}
-                                            className="inline-flex items-center gap-1 px-3 py-1.5 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-all active:scale-95"
+                                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 text-gray-900 text-xs font-semibold rounded-md hover:bg-gray-50 transition-all shadow-sm active:scale-95"
                                         >
-                                            <Plus size={16} />
-                                            Add QC
+                                            <Plus size={14} />
+                                            Add Member
                                         </button>
                                     )}
                                 </div>
+                                <div className="p-6">
 
                                 {data.qcs.length > 0 ? (
                                     <div className="space-y-2">
@@ -626,6 +730,7 @@ export default function Edit({
                                     </p>
                                 )}
                             </div>
+                        </div>
 
                             {/* Form Actions */}
                             <div className="flex justify-end gap-3">
@@ -653,50 +758,54 @@ export default function Edit({
                     </div>
                 </>
             ) : (
-                <div className="max-w-7xl mx-auto px-4 py-6">
-                    <Head title={`${agency.name} - Dashboard`} />
+                <div className="max-w-7xl mx-auto px-4 py-8">
+                    <Head title={`${agency.name} - Agency Hub`} />
 
-                    {/* Header */}
-                    <div className="flex items-center justify-between mb-6">
-                        <div className="flex flex-col gap-2">
-                            <div className="flex items-center gap-3">
-                                <h1 className="text-2xl font-bold tracking-tight text-white mb-1">
+                    {/* Dashboard Header */}
+                    <div className="flex items-center justify-between mb-8">
+                        <div>
+                            <div className="flex items-center gap-2 mb-2">
+                                <Link
+                                    href={route("admin.dashboard")}
+                                    className="text-xs font-semibold text-zinc-400 hover:text-black transition-colors"
+                                >
+                                    Agencies
+                                </Link>
+                                <span className="text-zinc-300 text-xs">/</span>
+                                <span className="text-xs font-bold text-gray-900">{agency.name}</span>
+                            </div>
+                            <div className="flex items-center gap-4">
+                                <h1 className="text-3xl font-black tracking-tighter text-gray-900">
                                     {agency.name}
                                 </h1>
-                                {!canEdit && (
-                                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-purple-600/10 border border-purple-600/20 text-purple-400 text-[10px] font-black uppercase tracking-widest rounded-lg">
-                                        <Lock size={12} />
-                                        Viewer
-                                    </span>
-                                )}
-                            </div>
-                            <div className="flex items-center gap-4 text-xs font-medium text-gray-500 uppercase tracking-widest">
-                                <span>
-                                    Established{" "}
-                                    {new Date(
-                                        agency.created_at,
-                                    ).toLocaleDateString()}
-                                </span>
-                                <span className="w-1 h-1 bg-gray-700 rounded-full"></span>
                                 <span
-                                    className={
+                                    className={`inline-flex px-2 py-0.5 text-[10px] font-bold rounded-full border ${
                                         agency.status === "active"
-                                            ? "text-emerald-500"
-                                            : "text-rose-500"
-                                    }
+                                            ? "bg-emerald-50 text-emerald-700 border-emerald-100"
+                                            : "bg-gray-50 text-gray-500 border-gray-200"
+                                    }`}
                                 >
-                                    {agency.status}
+                                    {agency.status === "active" ? "Operational" : "Paused"}
                                 </span>
                             </div>
                         </div>
-                        {canEdit && (
-                            <button
-                                onClick={handleDelete}
-                                className="p-2.5 text-gray-500 hover:text-red-500 border border-[#27272A] rounded-xl hover:border-red-500/30 transition-all active:scale-95"
+                        <div className="flex items-center gap-3">
+                            <Link
+                                href={route("admin.agencies.audits", agency.id)}
+                                className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-900 text-sm font-semibold rounded-md hover:bg-gray-50 transition-all shadow-sm"
                             >
-                                <Trash2 size={18} />
-                            </button>
-                        )}
+                                <Settings size={16} className="text-gray-400" />
+                                Configure Fields
+                            </Link>
+                            {canEdit && (
+                                <button
+                                    onClick={handleDelete}
+                                    className="p-2 text-zinc-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-100 rounded-md transition-all active:scale-95"
+                                >
+                                    <Trash2 size={18} />
+                                </button>
+                            )}
+                        </div>
                     </div>
 
                     {/* Main Grid */}
@@ -976,8 +1085,8 @@ export default function Edit({
 
                         {/* Right Column - 1 col */}
                         <div className="space-y-4">
-                            {/* Action Grid */}
-                            <div className="bg-white border border-gray-200 rounded-xl p-4">
+                            {/* Action Grid Card */}
+                            <div className="bg-white border border-gray-200 rounded-md p-4 space-y-4">
                                 <div className="grid grid-cols-2 gap-3">
                                     <ActionBox
                                         icon={Search}
@@ -1031,18 +1140,17 @@ export default function Edit({
                                         color="text-blue-600"
                                     />
                                 </div>
-                            </div>
 
-                            {/* Manager Button */}
-                            <Link
-                                href={route(
-                                    "admin.agencies.registry",
-                                    agency.id,
-                                )}
-                                className="block w-full bg-gray-900 text-white text-center px-4 py-3 rounded-xl text-sm font-medium hover:bg-gray-800"
-                            >
-                                Chatter & Creator Manager
-                            </Link>
+                                <Link
+                                    href={route(
+                                        "admin.agencies.registry",
+                                        agency.id,
+                                    )}
+                                    className="block w-full bg-black text-white text-center px-4 py-3 rounded-md text-sm font-bold hover:bg-zinc-800 transition-all shadow-sm"
+                                >
+                                    Chatter & Creator Manager
+                                </Link>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1088,7 +1196,7 @@ export default function Edit({
                                     <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Current Members
                                     </p>
-                                    {(agency.qcs || []).map((qc) => (
+                                    {(agency?.qcs || []).map((qc) => (
                                         <div
                                             key={qc.id}
                                             className="flex items-center justify-between p-2 bg-gray-50 rounded-lg"
@@ -1116,7 +1224,7 @@ export default function Edit({
                                             </div>
                                         </div>
                                     ))}
-                                    {agency.qcs?.length === 0 && (
+                                    {(agency?.qcs || []).length === 0 && (
                                         <p className="text-sm text-gray-400 italic">
                                             No members added yet.
                                         </p>

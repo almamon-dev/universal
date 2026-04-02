@@ -1,6 +1,6 @@
 import AdminLayout from "@/Layouts/AdminLayout";
 import UserLayout from "@/Layouts/UserLayout";
-import { Head, Link, useForm } from "@inertiajs/react";
+import { Head, Link, useForm, router } from "@inertiajs/react";
 import {
     ArrowLeft,
     Search,
@@ -119,7 +119,7 @@ const TEMPLATES = [
     },
     {
         id: "content_pitched_type",
-        name: "Content Type Pitched",
+        name: "What type of content was pitched?",
         field_label: "What type of content was pitched?",
         type: "select",
         required: false,
@@ -276,6 +276,7 @@ const TEMPLATES = [
         is_locked: true,
     },
 ];
+
 export default function Audits({ auth, agency, audits, audit_fields }) {
     const user = auth?.user;
     const isQC = user?.role === "qc";
@@ -284,6 +285,7 @@ export default function Audits({ auth, agency, audits, audit_fields }) {
     const [isAddingTemplate, setIsAddingTemplate] = useState(false);
     const [selectedTemplateIds, setSelectedTemplateIds] = useState([]);
     const [editingFieldIndex, setEditingFieldIndex] = useState(null);
+    const [selectedFieldIndices, setSelectedFieldIndices] = useState([]);
     const [showSuccess, setShowSuccess] = useState(false);
 
     const { data, setData, post, processing, errors } = useForm({
@@ -303,11 +305,75 @@ export default function Audits({ auth, agency, audits, audit_fields }) {
         }
     }, [audit_fields]);
 
-    const removeField = (index) => {
-        setData(
-            "fields",
-            data.fields.filter((_, i) => i !== index),
+    const persistFields = (newFields) => {
+        setData("fields", newFields);
+        router.post(
+            route("admin.agencies.audit-fields.update", agency.id),
+            { fields: newFields },
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setShowSuccess(true);
+                    setTimeout(() => setShowSuccess(false), 3000);
+                },
+            },
         );
+    };
+
+    const removeField = (index) => {
+        if (!confirm("Remove this field permanently from the database?"))
+            return;
+
+        const newFields = data.fields.filter((_, i) => i !== index);
+        persistFields(newFields);
+
+        // Adjust selected indices to account for the shift
+        setSelectedFieldIndices((prev) =>
+            prev
+                .filter((i) => i !== index)
+                .map((i) => (i > index ? i - 1 : i)),
+        );
+
+        // If we were editing this field, close the editor
+        if (editingFieldIndex === index) {
+            setEditingFieldIndex(null);
+        } else if (editingFieldIndex > index) {
+            setEditingFieldIndex(editingFieldIndex - 1);
+        }
+    };
+
+    const removeSelectedFields = () => {
+        if (
+            !confirm(
+                `Are you sure you want to delete ${selectedFieldIndices.length} selected fields permanently?`,
+            )
+        )
+            return;
+
+        const newFields = data.fields.filter(
+            (_, i) => !selectedFieldIndices.includes(i),
+        );
+        persistFields(newFields);
+        setSelectedFieldIndices([]);
+        setEditingFieldIndex(null);
+    };
+
+    const toggleFieldSelection = (index) => {
+        if (selectedFieldIndices.includes(index)) {
+            setSelectedFieldIndices(
+                selectedFieldIndices.filter((i) => i !== index),
+            );
+        } else {
+            setSelectedFieldIndices([...selectedFieldIndices, index]);
+        }
+    };
+
+    const toggleSelectAllFields = () => {
+        if (selectedFieldIndices.length === data.fields.length) {
+            setSelectedFieldIndices([]);
+        } else {
+            setSelectedFieldIndices(data.fields.map((_, i) => i));
+        }
     };
 
     const updateField = (index, key, value) => {
@@ -329,9 +395,10 @@ export default function Audits({ auth, agency, audits, audit_fields }) {
     };
 
     const handleAddSelectedTemplates = () => {
+        const currentFieldIds = data.fields.map((f) => f.id).filter(Boolean);
         const selectedFields = TEMPLATES.filter((t) =>
             selectedTemplateIds.includes(t.id),
-        );
+        ).filter((t) => !currentFieldIds.includes(t.id));
 
         setData("fields", [...data.fields, ...selectedFields]);
         setIsAddingTemplate(false);
@@ -347,10 +414,15 @@ export default function Audits({ auth, agency, audits, audit_fields }) {
     };
 
     const handleSelectAllTemplates = () => {
-        if (selectedTemplateIds.length === TEMPLATES.length) {
+        const currentFieldIds = data.fields.map((f) => f.id).filter(Boolean);
+        const addableTemplates = TEMPLATES.filter(
+            (t) => !currentFieldIds.includes(t.id),
+        );
+
+        if (selectedTemplateIds.length === addableTemplates.length) {
             setSelectedTemplateIds([]);
         } else {
-            setSelectedTemplateIds(TEMPLATES.map((t) => t.id));
+            setSelectedTemplateIds(addableTemplates.map((t) => t.id));
         }
     };
 
@@ -363,16 +435,12 @@ export default function Audits({ auth, agency, audits, audit_fields }) {
                 .toLowerCase()
                 .includes(searchTerm.toLowerCase()),
     );
-
     const Layout = isQC ? UserLayout : AdminLayout;
 
     return (
         <Layout>
             <Head title={`Agency Audits - ${agency.name}`} />
-
-            <div
-                className={`max-w-7xl mx-auto px-4 py-8 ${isQC ? "pb-20" : ""}`}
-            >
+            <div className={`max-w-7xl mx-auto px-4 py-8 ${isQC ? "pb-20" : ""}`}>
                 {/* Header */}
                 <div className="mb-10">
                     <Link
@@ -381,7 +449,11 @@ export default function Audits({ auth, agency, audits, audit_fields }) {
                                 ? route("dashboard")
                                 : route("admin.agencies.edit", agency.id)
                         }
-                        className={`inline-flex items-center gap-2 text-sm font-medium transition-all px-4 py-2 rounded-xl mb-6 border ${isQC ? "bg-[#18181B] border-[#27272A] text-gray-400 hover:text-white" : "text-gray-500 hover:text-gray-900 border-gray-200 bg-white"}`}
+                        className={`inline-flex items-center gap-2 text-sm font-medium transition-all px-4 py-2 rounded-md mb-6 border ${
+                            isQC
+                                ? "bg-[#18181B] border-[#27272A] text-gray-400 hover:text-white"
+                                : "text-gray-500 hover:text-gray-900 border-gray-200 bg-white"
+                        }`}
                     >
                         <ArrowLeft size={16} />
                         Back to {isQC ? "Dashboard" : "Agency"}
@@ -402,38 +474,10 @@ export default function Audits({ auth, agency, audits, audit_fields }) {
                     </div>
                 </div>
 
-                {/* Tabs */}
-                {!isAddingTemplate && !isQC && (
-                    <div className="border-b border-gray-200 mb-8">
-                        <div className="flex items-center gap-6">
-                            <button
-                                onClick={() => setActiveTab("fields")}
-                                className={`pb-3 text-sm font-medium transition-all relative ${
-                                    activeTab === "fields"
-                                        ? "text-indigo-600 border-b-2 border-indigo-600"
-                                        : "text-gray-500 hover:text-gray-900"
-                                }`}
-                            >
-                                Audit Configuration
-                            </button>
-                            <button
-                                onClick={() => setActiveTab("audits")}
-                                className={`pb-3 text-sm font-medium transition-all relative ${
-                                    activeTab === "audits"
-                                        ? "text-indigo-600 border-b-2 border-indigo-600"
-                                        : "text-gray-500 hover:text-gray-900"
-                                }`}
-                            >
-                                Audit History
-                            </button>
-                        </div>
-                    </div>
-                )}
-
+                {/* Configuration Section (No Tabs) */}
                 {isAddingTemplate ? (
                     <div className="space-y-6">
-                        {/* Template Selection Header */}
-                        <div className="bg-white border border-gray-200 rounded-lg p-4 flex items-center justify-between">
+                        <div className="bg-white border border-gray-200 rounded-md p-4 flex items-center justify-between shadow-sm">
                             <div className="flex items-center gap-3">
                                 <button
                                     onClick={() => setIsAddingTemplate(false)}
@@ -441,180 +485,156 @@ export default function Audits({ auth, agency, audits, audit_fields }) {
                                 >
                                     <X size={18} />
                                 </button>
-                                <p className="text-sm text-gray-600">
+                                <p className="text-sm text-gray-600 font-medium">
                                     Select fields to add to your audit structure
                                 </p>
                             </div>
                             <div className="flex items-center gap-3">
                                 <button
                                     onClick={handleSelectAllTemplates}
-                                    className="text-sm text-indigo-600 hover:text-indigo-700 px-3 py-1.5 font-medium"
+                                    className="text-xs font-bold text-indigo-600 uppercase tracking-widest hover:text-indigo-700 transition-colors"
                                 >
-                                    {selectedTemplateIds.length ===
-                                    TEMPLATES.length
+                                    {selectedTemplateIds.length > 0
                                         ? "Deselect All"
                                         : "Select All"}
                                 </button>
                                 <button
                                     onClick={handleAddSelectedTemplates}
                                     disabled={selectedTemplateIds.length === 0}
-                                    className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    className="px-6 py-2 bg-indigo-600 text-white text-sm font-bold rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md shadow-indigo-600/10"
                                 >
                                     Add Selected ({selectedTemplateIds.length})
                                 </button>
                             </div>
                         </div>
 
-                        {/* Templates List */}
-                        <div className="space-y-3">
-                            {TEMPLATES.map((field) => (
-                                <div
-                                    key={field.id}
-                                    onClick={() =>
-                                        toggleTemplateSelect(field.id)
-                                    }
-                                    className={`p-5 border rounded-lg cursor-pointer transition-all ${
-                                        selectedTemplateIds.includes(field.id)
-                                            ? "border-indigo-200 bg-indigo-50/30"
-                                            : "border-gray-200 hover:border-gray-300 bg-white"
-                                    }`}
-                                >
-                                    <div className="flex gap-3">
-                                        <div className="pt-0.5">
-                                            <div
-                                                className={`w-5 h-5 rounded border flex items-center justify-center transition-all ${
-                                                    selectedTemplateIds.includes(
-                                                        field.id,
-                                                    )
-                                                        ? "bg-indigo-600 border-indigo-600"
-                                                        : "border-gray-300"
-                                                }`}
-                                            >
-                                                {selectedTemplateIds.includes(
-                                                    field.id,
-                                                ) && (
-                                                    <CheckCircle2
-                                                        size={14}
-                                                        className="text-white"
-                                                    />
-                                                )}
-                                            </div>
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <div className="flex items-center gap-2 mb-2 flex-wrap">
-                                                <h3 className="text-base font-medium text-gray-900">
-                                                    {field.name}
-                                                </h3>
-                                                <div className="flex items-center gap-1.5">
-                                                    {field.is_locked && (
-                                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-purple-50 text-purple-700 text-xs font-medium rounded">
-                                                            <Lock size={10} />
-                                                            Locked
-                                                        </span>
-                                                    )}
-                                                    {field.is_conditional && (
-                                                        <span className="px-2 py-0.5 bg-blue-50 text-blue-700 text-xs font-medium rounded">
-                                                            Conditional
-                                                        </span>
+                        <div className="space-y-4">
+                            {TEMPLATES.map((field) => {
+                                const isAlreadyAdded = data.fields.some(
+                                    (f) => f.id === field.id,
+                                );
+                                return (
+                                    <div
+                                        key={field.id}
+                                        onClick={() =>
+                                            !isAlreadyAdded &&
+                                            toggleTemplateSelect(field.id)
+                                        }
+                                        className={`p-6 border rounded-xl transition-all ${
+                                            isAlreadyAdded
+                                                ? "opacity-60 bg-gray-50/50 cursor-not-allowed border-gray-100"
+                                                : selectedTemplateIds.includes(
+                                                      field.id,
+                                                  )
+                                                ? "border-indigo-600 bg-indigo-50/20 ring-1 ring-indigo-600 shadow-lg"
+                                                : "border-gray-200 hover:border-indigo-300 bg-white cursor-pointer shadow-sm hover:shadow-md"
+                                        }`}
+                                    >
+                                        <div className="flex gap-4">
+                                            <div className="pt-1">
+                                                <div
+                                                    className={`w-5 h-5 rounded border flex items-center justify-center transition-all ${
+                                                        isAlreadyAdded
+                                                            ? "bg-emerald-500 border-emerald-500 shadow-sm"
+                                                            : selectedTemplateIds.includes(
+                                                                  field.id,
+                                                              )
+                                                            ? "bg-indigo-600 border-indigo-600 shadow-md"
+                                                            : "border-gray-300 bg-white hover:border-gray-400"
+                                                    }`}
+                                                >
+                                                    {isAlreadyAdded ? (
+                                                        <CheckCircle2
+                                                            size={14}
+                                                            className="text-white"
+                                                        />
+                                                    ) : (
+                                                        selectedTemplateIds.includes(
+                                                            field.id,
+                                                        ) && (
+                                                            <div className="w-2 h-2 bg-white rounded-full" />
+                                                        )
                                                     )}
                                                 </div>
                                             </div>
+                                            <div className="flex-1 space-y-4">
+                                                <div className="flex items-center gap-3 flex-wrap">
+                                                    <h3 className="text-lg font-bold text-gray-900 leading-tight">
+                                                        {field.name}
+                                                    </h3>
+                                                    <div className="flex items-center gap-2">
+                                                        {field.is_locked && (
+                                                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#8B5CF6] text-white text-[10px] font-black uppercase tracking-widest rounded shadow-sm">
+                                                                <Lock size={12} />
+                                                                LOCKED
+                                                            </span>
+                                                        )}
+                                                        {field.is_conditional && (
+                                                            <span className="px-2.5 py-1 bg-[#2563EB] text-white text-[10px] font-black uppercase tracking-widest rounded shadow-sm">
+                                                                Conditional
+                                                            </span>
+                                                        )}
+                                                        {isAlreadyAdded && (
+                                                            <span className="px-2.5 py-1 bg-emerald-500 text-white text-[10px] font-black uppercase tracking-widest rounded shadow-sm">
+                                                                ALREADY ADDED
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
 
-                                            <div className="space-y-3">
                                                 <div className="space-y-1">
-                                                    <p className="text-sm flex items-baseline gap-2">
-                                                        <span className="text-gray-500 min-w-[40px]">
-                                                            Field:
-                                                        </span>
-                                                        <span className="font-medium text-gray-900">
-                                                            {field.field_label ||
-                                                                field.name}
-                                                        </span>
+                                                    <p className="text-sm text-gray-600">
+                                                        Field: <span className="font-bold text-gray-900">{field.field_label || field.name}</span>
                                                     </p>
-                                                    <p className="text-sm flex items-baseline gap-2">
-                                                        <span className="text-gray-500 min-w-[40px]">
-                                                            Type:
-                                                        </span>
-                                                        <span className="text-gray-700">
-                                                            {field.type ===
-                                                            "select"
-                                                                ? "Dropdown"
-                                                                : field.type ===
-                                                                    "textarea"
-                                                                  ? "Text Area"
-                                                                  : field.type}
-                                                            {field.required &&
-                                                                " • Required"}
-                                                        </span>
+                                                    <p className="text-sm text-gray-600">
+                                                        Type: <span className="text-gray-900 capitalize">{field.type}</span>
                                                     </p>
                                                 </div>
 
                                                 {field.required_if && (
-                                                    <div className="p-3 rounded bg-gray-50 border border-gray-200 max-w-full">
-                                                        <p className="text-xs text-gray-500 mb-0.5">
-                                                            Required if:
+                                                    <div className="p-3 bg-[#EFF6FF] border border-[#BFDBFE] rounded-md">
+                                                        <p className="text-xs font-medium text-[#1E40AF]">
+                                                            Required ONLY if:
                                                         </p>
-                                                        <p className="text-sm text-gray-700">
+                                                        <p className="text-sm text-[#2563EB] font-bold mt-1">
                                                             {field.required_if}
                                                         </p>
                                                     </div>
                                                 )}
 
-                                                {field.options && (
-                                                    <div className="max-w-2xl">
-                                                        <p className="text-xs text-gray-500 mb-1">
-                                                            Options:
-                                                        </p>
-                                                        <div className="flex flex-wrap gap-1.5">
-                                                            {field.options
-                                                                .split(",")
-                                                                .map(
-                                                                    (
-                                                                        opt,
-                                                                        i,
-                                                                    ) => (
-                                                                        <span
-                                                                            key={
-                                                                                i
-                                                                            }
-                                                                            className="px-2 py-0.5 bg-gray-100 text-gray-700 text-xs rounded"
-                                                                        >
-                                                                            {opt.trim()}
-                                                                        </span>
-                                                                    ),
-                                                                )}
-                                                        </div>
-                                                    </div>
-                                                )}
-
-                                                {field.special_banner && (
-                                                    <div className="p-3 bg-amber-50 border border-amber-200 rounded max-w-2xl">
-                                                        <p className="text-xs text-amber-800">
-                                                            {
-                                                                field.special_banner
-                                                            }
-                                                        </p>
-                                                    </div>
-                                                )}
-
                                                 {field.help_text && (
-                                                    <div className="p-3 bg-gray-50 border border-gray-200 rounded max-w-full">
-                                                        <p className="text-xs text-gray-600">
+                                                    <div className="p-3 bg-[#F9FAFB] border border-[#F3F4F6] rounded-md">
+                                                        <p className="text-xs font-medium text-gray-500">
+                                                            Description:
+                                                        </p>
+                                                        <p className="text-sm text-gray-600 mt-1">
                                                             {field.help_text}
                                                         </p>
+                                                    </div>
+                                                )}
+
+                                                {field.options && !isAlreadyAdded && (
+                                                    <div className="pt-2">
+                                                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Available Options:</p>
+                                                        <div className="flex flex-wrap gap-1.5">
+                                                            {field.options.split(',').map((opt, i) => (
+                                                                <span key={i} className="px-2.5 py-1 bg-white border border-gray-200 text-gray-600 text-[11px] font-bold rounded shadow-sm">
+                                                                    {opt.trim()}
+                                                                </span>
+                                                            ))}
+                                                        </div>
                                                     </div>
                                                 )}
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     </div>
-                ) : activeTab === "fields" ? (
+                ) : (
                     <div className="space-y-6">
-                        {/* Audit Fields Editor */}
-                        <div className="bg-white border border-gray-200 rounded-lg p-6">
+                        <div className="bg-white border border-gray-200 rounded-md p-6">
                             <div className="flex items-center justify-between mb-6">
                                 <div>
                                     <h2 className="text-lg font-medium text-gray-900">
@@ -625,18 +645,29 @@ export default function Audits({ auth, agency, audits, audit_fields }) {
                                         forms
                                     </p>
                                 </div>
-                                <button
-                                    type="button"
-                                    onClick={() => setIsAddingTemplate(true)}
-                                    className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors"
-                                >
-                                    <Plus size={16} />
-                                    Add Template Fields
-                                </button>
+                                <div className="flex items-center gap-3">
+                                    {data.fields.length > 0 && (
+                                        <button
+                                            onClick={handleSaveFields}
+                                            disabled={processing}
+                                            className="px-4 py-2 bg-emerald-600 text-white text-sm font-bold rounded-md hover:bg-emerald-700 disabled:opacity-50 transition-all shadow-md shadow-emerald-600/10"
+                                        >
+                                            {processing ? "Saving..." : "Save Changes"}
+                                        </button>
+                                    )}
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsAddingTemplate(true)}
+                                        className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 transition-colors"
+                                    >
+                                        <Plus size={16} />
+                                        Add Template Fields
+                                    </button>
+                                </div>
                             </div>
 
                             {showSuccess && (
-                                <div className="mb-6 p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
+                                <div className="mb-6 p-3 bg-emerald-50 border border-emerald-200 rounded-md">
                                     <div className="flex items-center gap-2">
                                         <CheckCircle2
                                             size={16}
@@ -650,7 +681,7 @@ export default function Audits({ auth, agency, audits, audit_fields }) {
                             )}
 
                             {Object.keys(errors).length > 0 && (
-                                <div className="mb-6 p-3 bg-red-50 border border-red-200 rounded-lg">
+                                <div className="mb-6 p-3 bg-red-50 border border-red-200 rounded-md">
                                     <div className="flex items-center gap-2">
                                         <X size={16} className="text-red-600" />
                                         <p className="text-sm text-red-700">
@@ -661,105 +692,96 @@ export default function Audits({ auth, agency, audits, audit_fields }) {
                             )}
 
                             {data.fields.length > 0 ? (
-                                <div className="space-y-2">
-                                    {data.fields.map((field, index) => (
-                                        <div
-                                            key={index}
-                                            className="border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition-colors"
-                                        >
-                                            {editingFieldIndex === index ? (
-                                                <div className="space-y-4">
-                                                    <div className="flex items-center justify-between mb-2">
-                                                        <span className="text-sm font-medium text-gray-900">
-                                                            Edit Field
-                                                        </span>
-                                                        <button
-                                                            type="button"
-                                                            onClick={() =>
-                                                                setEditingFieldIndex(
-                                                                    null,
-                                                                )
-                                                            }
-                                                            className="text-sm text-gray-500 hover:text-gray-700"
-                                                        >
-                                                            Close
-                                                        </button>
-                                                    </div>
+                                <div className="space-y-4">
+                                    <div className="flex items-center justify-between py-3 px-4 bg-gray-50 border border-gray-200 rounded-md">
+                                        <div className="flex items-center gap-3">
+                                            <input
+                                                type="checkbox"
+                                                checked={
+                                                    data.fields.length > 0 &&
+                                                    selectedFieldIndices.length ===
+                                                        data.fields.length
+                                                }
+                                                onChange={toggleSelectAllFields}
+                                                className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                                            />
+                                            <span className="text-xs font-medium text-gray-500">
+                                                {selectedFieldIndices.length}{" "}
+                                                selected
+                                            </span>
+                                        </div>
+                                        {selectedFieldIndices.length > 0 && (
+                                            <button
+                                                onClick={removeSelectedFields}
+                                                className="px-3 py-1.5 bg-rose-50 text-rose-600 text-xs font-medium rounded border border-rose-100 hover:bg-rose-100 transition-all flex items-center gap-2"
+                                            >
+                                                <Trash2 size={12} />
+                                                Delete Selected
+                                            </button>
+                                        )}
+                                    </div>
 
-                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                        <div>
-                                                            <label className="block text-xs text-gray-500 mb-1">
-                                                                Field Name
-                                                            </label>
-                                                            <input
-                                                                type="text"
-                                                                value={
-                                                                    field.name
-                                                                }
-                                                                disabled={
-                                                                    field.is_locked
-                                                                }
-                                                                onChange={(e) =>
-                                                                    updateField(
-                                                                        index,
-                                                                        "name",
-                                                                        e.target
-                                                                            .value,
+                                    <div className="space-y-2">
+                                        {data.fields.map((field, index) => (
+                                            <div
+                                                key={index}
+                                                className={`border rounded-md p-4 transition-all ${
+                                                    selectedFieldIndices.includes(
+                                                        index,
+                                                    )
+                                                        ? "border-indigo-600 bg-indigo-50/10 shadow-sm"
+                                                        : "border-gray-200 hover:border-gray-300 bg-white"
+                                                }`}
+                                            >
+                                                {editingFieldIndex === index ? (
+                                                    <div className="space-y-4">
+                                                        <div className="flex items-center justify-between mb-4">
+                                                            <div className="flex items-center gap-3">
+                                                                <span className="text-sm font-bold text-gray-900">
+                                                                    Edit Field Details
+                                                                </span>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() =>
+                                                                        updateField(
+                                                                            index,
+                                                                            "is_locked",
+                                                                            !field.is_locked,
+                                                                        )
+                                                                    }
+                                                                    className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest transition-all border ${
+                                                                        field.is_locked
+                                                                            ? "bg-amber-50 text-amber-600 border-amber-200"
+                                                                            : "bg-indigo-50 text-indigo-600 border-indigo-200"
+                                                                    }`}
+                                                                >
+                                                                    {field.is_locked
+                                                                        ? "Unlock for Editing"
+                                                                        : "Lock Field"}
+                                                                </button>
+                                                            </div>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() =>
+                                                                    setEditingFieldIndex(
+                                                                        null,
                                                                     )
                                                                 }
-                                                                className="w-full px-3 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 disabled:bg-gray-50"
-                                                            />
-                                                        </div>
-                                                        <div>
-                                                            <label className="block text-xs text-gray-500 mb-1">
-                                                                Field Type
-                                                            </label>
-                                                            <select
-                                                                value={
-                                                                    field.type
-                                                                }
-                                                                disabled={
-                                                                    field.is_locked
-                                                                }
-                                                                onChange={(e) =>
-                                                                    updateField(
-                                                                        index,
-                                                                        "type",
-                                                                        e.target
-                                                                            .value,
-                                                                    )
-                                                                }
-                                                                className="w-full px-3 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 disabled:bg-gray-50"
+                                                                className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
                                                             >
-                                                                <option value="text">
-                                                                    Text Input
-                                                                </option>
-                                                                <option value="textarea">
-                                                                    Textarea
-                                                                </option>
-                                                                <option value="number">
-                                                                    Number
-                                                                </option>
-                                                                <option value="select">
-                                                                    Dropdown
-                                                                </option>
-                                                                <option value="checkbox">
-                                                                    Checkbox
-                                                                </option>
-                                                            </select>
+                                                                Close
+                                                            </button>
                                                         </div>
-                                                        {field.type ===
-                                                            "select" && (
-                                                            <div className="md:col-span-2">
+
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                            <div>
                                                                 <label className="block text-xs text-gray-500 mb-1">
-                                                                    Options
-                                                                    (comma-separated)
+                                                                    Field Name
                                                                 </label>
                                                                 <input
                                                                     type="text"
                                                                     value={
-                                                                        field.options ||
-                                                                        ""
+                                                                        field.name
                                                                     }
                                                                     disabled={
                                                                         field.is_locked
@@ -769,23 +791,22 @@ export default function Audits({ auth, agency, audits, audit_fields }) {
                                                                     ) =>
                                                                         updateField(
                                                                             index,
-                                                                            "options",
+                                                                            "name",
                                                                             e
                                                                                 .target
                                                                                 .value,
                                                                         )
                                                                     }
                                                                     className="w-full px-3 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 disabled:bg-gray-50"
-                                                                    placeholder="Option 1, Option 2, Option 3"
                                                                 />
                                                             </div>
-                                                        )}
-                                                        <div className="flex items-center">
-                                                            <label className="flex items-center gap-2 cursor-pointer">
-                                                                <input
-                                                                    type="checkbox"
-                                                                    checked={
-                                                                        field.required
+                                                            <div>
+                                                                <label className="block text-xs text-gray-500 mb-1">
+                                                                    Field Type
+                                                                </label>
+                                                                <select
+                                                                    value={
+                                                                        field.type
                                                                     }
                                                                     disabled={
                                                                         field.is_locked
@@ -795,101 +816,227 @@ export default function Audits({ auth, agency, audits, audit_fields }) {
                                                                     ) =>
                                                                         updateField(
                                                                             index,
-                                                                            "required",
+                                                                            "type",
                                                                             e
                                                                                 .target
-                                                                                .checked,
+                                                                                .value,
                                                                         )
                                                                     }
-                                                                    className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-200"
-                                                                />
-                                                                <span className="text-sm text-gray-700">
-                                                                    Required
-                                                                    field
-                                                                </span>
-                                                            </label>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            ) : (
-                                                <div className="flex items-start justify-between">
-                                                    <div className="space-y-1.5">
-                                                        <div className="flex items-center gap-2 flex-wrap">
-                                                            <span className="text-sm font-medium text-gray-900">
-                                                                {index + 1}.{" "}
-                                                                {field.name}
-                                                            </span>
-                                                            {field.required && (
-                                                                <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 text-xs rounded">
-                                                                    Required
-                                                                </span>
-                                                            )}
-                                                            {field.is_locked && (
-                                                                <span className="px-2 py-0.5 bg-purple-50 text-purple-700 text-xs rounded flex items-center gap-1">
-                                                                    <Lock
-                                                                        size={
-                                                                            10
+                                                                    className="w-full px-3 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 disabled:bg-gray-50"
+                                                                >
+                                                                    <option value="text">
+                                                                        Text Input
+                                                                    </option>
+                                                                    <option value="textarea">
+                                                                        Textarea
+                                                                    </option>
+                                                                    <option value="number">
+                                                                        Number
+                                                                    </option>
+                                                                    <option value="select">
+                                                                        Dropdown
+                                                                    </option>
+                                                                    <option value="checkbox">
+                                                                        Checkbox
+                                                                    </option>
+                                                                </select>
+                                                            </div>
+                                                            {field.type ===
+                                                                "select" && (
+                                                                <div className="md:col-span-2">
+                                                                    <label className="block text-xs text-gray-500 mb-1">
+                                                                        Options
+                                                                        (comma-separated)
+                                                                    </label>
+                                                                    <input
+                                                                        type="text"
+                                                                        value={
+                                                                            field.options ||
+                                                                            ""
                                                                         }
+                                                                        disabled={
+                                                                            field.is_locked
+                                                                        }
+                                                                        onChange={(
+                                                                            e,
+                                                                        ) =>
+                                                                            updateField(
+                                                                                index,
+                                                                                "options",
+                                                                                e
+                                                                                    .target
+                                                                                    .value,
+                                                                            )
+                                                                        }
+                                                                        className="w-full px-3 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 disabled:bg-gray-50"
+                                                                        placeholder="Option 1, Option 2, Option 3"
                                                                     />
-                                                                    Locked
-                                                                </span>
+                                                                </div>
                                                             )}
-                                                            {field.is_conditional && (
-                                                                <span className="px-2 py-0.5 bg-blue-50 text-blue-700 text-xs rounded">
-                                                                    Conditional
-                                                                </span>
-                                                            )}
+                                                            <div className="flex items-center">
+                                                                <label className="flex items-center gap-2 cursor-pointer">
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        checked={
+                                                                            field.required
+                                                                        }
+                                                                        disabled={
+                                                                            field.is_locked
+                                                                        }
+                                                                        onChange={(
+                                                                            e,
+                                                                        ) =>
+                                                                            updateField(
+                                                                                index,
+                                                                                "required",
+                                                                                e
+                                                                                    .target
+                                                                                    .checked,
+                                                                            )
+                                                                        }
+                                                                        className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-200"
+                                                                    />
+                                                                    <span className="text-sm text-gray-700">
+                                                                        Required
+                                                                        field
+                                                                    </span>
+                                                                </label>
+                                                            </div>
                                                         </div>
-                                                        <p className="text-xs text-gray-500">
-                                                            Type: {field.type}
-                                                            {field.options &&
-                                                                ` • ${field.options.split(",").length} options`}
-                                                        </p>
-                                                        {field.help_text && (
-                                                            <p className="text-xs text-gray-400">
-                                                                {
-                                                                    field.help_text
-                                                                }
-                                                            </p>
-                                                        )}
                                                     </div>
-                                                    <div className="flex items-center gap-0.5">
-                                                        <button
-                                                            type="button"
-                                                            onClick={() =>
-                                                                setEditingFieldIndex(
+                                                ) : (
+                                                    <div className="flex gap-4">
+                                                        <div className="pt-1">
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={selectedFieldIndices.includes(
                                                                     index,
-                                                                )
-                                                            }
-                                                            className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-gray-100 rounded transition-colors"
-                                                        >
-                                                            <Settings
-                                                                size={14}
-                                                            />
-                                                        </button>
-                                                        {!field.is_locked && (
-                                                            <button
-                                                                type="button"
-                                                                onClick={() =>
-                                                                    removeField(
+                                                                )}
+                                                                onChange={() =>
+                                                                    toggleFieldSelection(
                                                                         index,
                                                                     )
                                                                 }
-                                                                className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-gray-100 rounded transition-colors"
-                                                            >
-                                                                <Trash2
-                                                                    size={14}
-                                                                />
-                                                            </button>
-                                                        )}
+                                                                className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                                                            />
+                                                        </div>
+                                                        <div className="flex-1 space-y-3">
+                                                            <div className="flex items-start justify-between">
+                                                                <div className="flex flex-col gap-1.5">
+                                                                    <div className="flex items-center gap-2 flex-wrap">
+                                                                        <h3 className="text-sm font-bold text-zinc-900 tracking-tight">
+                                                                            {index + 1}. {field.name}
+                                                                        </h3>
+                                                                        <div className="flex items-center gap-1.5">
+                                                                            {field.required && (
+                                                                                <span className="px-1.5 py-0.5 bg-zinc-900 text-white text-[9px] font-black uppercase tracking-tighter rounded">
+                                                                                    Required
+                                                                                </span>
+                                                                            )}
+                                                                            {field.is_locked && (
+                                                                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-zinc-100 text-zinc-600 border border-zinc-200 text-[9px] font-black uppercase tracking-tighter rounded">
+                                                                                    <Lock size={10} />
+                                                                                    System
+                                                                                </span>
+                                                                            )}
+                                                                            {field.is_conditional && (
+                                                                                <span className="px-1.5 py-0.5 bg-zinc-50 text-zinc-500 border border-zinc-200 text-[9px] font-black uppercase tracking-tighter rounded">
+                                                                                    Conditional
+                                                                                </span>
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+                                                                    <p className="text-xs text-zinc-400 font-medium italic">
+                                                                        {field.field_label || field.name} • {field.type}
+                                                                    </p>
+                                                                </div>
+                                                                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() =>
+                                                                            setEditingFieldIndex(
+                                                                                index,
+                                                                            )
+                                                                        }
+                                                                        className="p-2 text-zinc-400 hover:text-black hover:bg-zinc-100 rounded-md transition-all active:scale-95"
+                                                                        title="Configure Logic"
+                                                                    >
+                                                                        <Settings size={16} />
+                                                                    </button>
+                                                                    {!field.is_locked && (
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() =>
+                                                                                removeField(
+                                                                                    index,
+                                                                                )
+                                                                            }
+                                                                            className="p-2 text-zinc-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-all active:scale-95"
+                                                                            title="Delete Field"
+                                                                        >
+                                                                            <Trash2 size={16} />
+                                                                        </button>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                                <div className="space-y-1">
+                                                                    <p className="text-sm text-gray-600">
+                                                                        Field: <span className="font-bold text-gray-900">{field.field_label || field.name}</span>
+                                                                    </p>
+                                                                    <p className="text-sm text-gray-600">
+                                                                        Type: <span className="text-gray-900 capitalize">{field.type}</span>
+                                                                    </p>
+                                                                </div>
+                                                            {field.options && (
+                                                                <div>
+                                                                    <div className="flex flex-wrap gap-1">
+                                                                        {field.options.split(',').slice(0, 5).map((opt, i) => (
+                                                                            <span key={i} className="px-2 py-0.5 bg-zinc-50 border border-zinc-100 text-zinc-400 text-[10px] font-medium rounded uppercase tracking-tighter">
+                                                                                {opt.trim()}
+                                                                            </span>
+                                                                        ))}
+                                                                        {field.options.split(',').length > 5 && (
+                                                                            <span className="text-[10px] font-bold text-zinc-300 pl-1 self-center">
+                                                                                +{field.options.split(',').length - 5}
+                                                                            </span>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                        </div>
+
+                                                            {field.required_if && (
+                                                                <div className="p-3 bg-[#EFF6FF] border border-[#BFDBFE] rounded-lg">
+                                                                    <p className="text-[10px] font-black text-[#1E40AF] uppercase tracking-widest">
+                                                                        Required ONLY if:
+                                                                    </p>
+                                                                    <p className="text-sm text-[#2563EB] font-bold mt-1">
+                                                                        {field.required_if}
+                                                                    </p>
+                                                                </div>
+                                                            )}
+
+                                                            {field.help_text && (
+                                                                <div className="p-3 bg-gray-50 border border-gray-100 rounded-lg">
+                                                                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                                                                        Description:
+                                                                    </p>
+                                                                    <p className="text-sm text-gray-600 mt-1 italic">
+                                                                        "{field.help_text}"
+                                                                    </p>
+                                                                </div>
+                                                            )}
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    ))}
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
                             ) : (
-                                <div className="text-center py-12 border-2 border-dashed border-gray-200 rounded-lg">
+                                <div className="text-center py-12 border-2 border-dashed border-gray-200 rounded-md">
                                     <Settings
                                         size={32}
                                         className="mx-auto mb-3 text-gray-300"
@@ -916,103 +1063,11 @@ export default function Audits({ auth, agency, audits, audit_fields }) {
                                 <button
                                     onClick={handleSaveFields}
                                     disabled={processing}
-                                    className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+                                    className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 disabled:opacity-50 transition-colors"
                                 >
                                     {processing ? "Saving..." : "Save Changes"}
                                 </button>
                             </div>
-                        </div>
-                    </div>
-                ) : (
-                    <div className="space-y-6">
-                        {/* Search */}
-                        <div className="relative max-w-md">
-                            <Search
-                                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                                size={18}
-                            />
-                            <input
-                                type="text"
-                                placeholder="Search by URL or email..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                            />
-                        </div>
-
-                        {/* Audit List */}
-                        <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                            <table className="w-full">
-                                <thead className="bg-gray-50">
-                                    <tr>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            URL
-                                        </th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Email
-                                        </th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Date
-                                        </th>
-                                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Actions
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-200">
-                                    {filteredAudits.length > 0 ? (
-                                        filteredAudits.map((audit) => (
-                                            <tr
-                                                key={audit.id}
-                                                className="hover:bg-gray-50 transition-colors"
-                                            >
-                                                <td className="px-4 py-3">
-                                                    <div className="flex items-center gap-2">
-                                                        <FileText
-                                                            size={14}
-                                                            className="text-gray-400"
-                                                        />
-                                                        <span className="text-sm text-gray-900 truncate max-w-xs">
-                                                            {audit.url}
-                                                        </span>
-                                                    </div>
-                                                </td>
-                                                <td className="px-4 py-3 text-sm text-gray-600">
-                                                    {audit.email || "—"}
-                                                </td>
-                                                <td className="px-4 py-3">
-                                                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                                                        <Calendar
-                                                            size={14}
-                                                            className="text-gray-400"
-                                                        />
-                                                        {new Date(
-                                                            audit.created_at,
-                                                        ).toLocaleDateString()}
-                                                    </div>
-                                                </td>
-                                                <td className="px-4 py-3 text-right">
-                                                    <button className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 text-indigo-700 text-xs font-medium rounded hover:bg-indigo-100 transition-colors">
-                                                        <ExternalLink
-                                                            size={12}
-                                                        />
-                                                        View
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        ))
-                                    ) : (
-                                        <tr>
-                                            <td
-                                                colSpan="4"
-                                                className="px-4 py-8 text-center text-sm text-gray-500"
-                                            >
-                                                No audits found
-                                            </td>
-                                        </tr>
-                                    )}
-                                </tbody>
-                            </table>
                         </div>
                     </div>
                 )}

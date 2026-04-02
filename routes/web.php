@@ -33,6 +33,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    // QC Routes
+    Route::prefix('qc')->name('qc.')->group(function () {
+        Route::get('agencies/{agency}/protocols', [AgencyController::class, 'protocols'])->name('agencies.protocols');
+        Route::get('agencies/{agency}/audits/create', [AgencyController::class, 'createAudit'])->name('agencies.audits.create');
+        Route::post('agencies/{agency}/audits', [AgencyController::class, 'storeAudit'])->name('agencies.audits.store');
+    });
+
     // Admin Settings
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/settings/system', [SystemSettingsController::class, 'edit'])->name('settings.system');
@@ -58,10 +65,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('agencies/{agency}/view-system/discovery', [AgencyController::class, 'viewSystemDiscovery'])->name('agencies.view-system-discovery');
         Route::post('agencies/{agency}/protocols', [AgencyController::class, 'updateProtocols'])->name('agencies.protocols.update');
 
-        // Audit Routes
+        // Maintain Admin's ability to view/edit protocols if needed
         Route::get('agencies/{agency}/protocols', [AgencyController::class, 'protocols'])->name('agencies.protocols');
-        Route::get('agencies/{agency}/audits/create', [AgencyController::class, 'createAudit'])->name('agencies.audits.create');
-        Route::post('agencies/{agency}/audits', [AgencyController::class, 'storeAudit'])->name('agencies.audits.store');
         
         // Instant QC Management
         Route::post('agencies/{agency}/qcs', [AgencyController::class, 'storeQC'])->name('agencies.qcs.store');

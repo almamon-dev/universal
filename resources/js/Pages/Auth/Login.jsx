@@ -35,7 +35,7 @@ export default function Login({ status }) {
                 </div>
 
                 {status && (
-                    <div className="mb-6 p-4 rounded-xl bg-green-50 text-sm font-medium text-green-600 border border-green-100">
+                    <div className="mb-6 p-4 rounded-md bg-green-50 text-sm font-medium text-green-600 border border-green-100">
                         {status}
                     </div>
                 )}

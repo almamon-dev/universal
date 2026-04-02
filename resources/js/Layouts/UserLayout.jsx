@@ -34,7 +34,7 @@ export default function UserLayout({ children }) {
             />
 
             {/* Main Content Area */}
-            <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+            <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden lg:ml-64 transition-all duration-300">
                 {/* Header */}
                 <header className="h-16 bg-white border-b border-gray-100 flex items-center justify-between px-4 md:px-8 sticky top-0 z-30 shadow-sm">
                     <button

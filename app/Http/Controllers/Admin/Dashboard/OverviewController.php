@@ -16,10 +16,10 @@ class OverviewController extends Controller
         // If hitting generic /dashboard, redirect to proper one
         if (request()->routeIs('dashboard')) {
             if ($user->is_admin) {
-                return redirect()->route('admin.dashboard');
+                return redirect()->route('admin.dashboard')->withQueryString();
             }
             if ($user->role === 'qc') {
-                return redirect()->route('qc.dashboard');
+                return redirect()->route('qc.dashboard')->withQueryString();
             }
         }
 
@@ -45,20 +45,59 @@ class OverviewController extends Controller
 
         if (Auth::user() && Auth::user()->role === 'qc') {
             $agency = Auth::user()->agency;
+            $filterDateStr = request('date', now()->format('Y-m-d'));
+            $filterDate = \Carbon\Carbon::parse($filterDateStr);
+            
             $totalAudits = $agency ? $agency->audits()->count() : 0;
-            $todayAudits = $agency ? $agency->audits()->whereDate('seo_audits.created_at', now())->count() : 0;
-            $recentAudits = $agency ? $agency->audits()->with(['user', 'chatter'])->latest('seo_audits.created_at')->limit(5)->get() : [];
+            $selectedDateAudits = $agency ? $agency->audits()->whereDate('seo_audits.created_at', $filterDateStr)->count() : 0;
+            
+            // Graph Data (7 days up to filter date)
+            $graphData = [];
+            if ($agency) {
+                for ($i = 6; $i >= 0; $i--) {
+                    $d = $filterDate->copy()->subDays($i);
+                    $dateKey = $d->format('Y-m-d');
+                    $count = $agency->audits()->whereDate('seo_audits.created_at', $dateKey)->count();
+                    $graphData[] = [
+                        'date' => $d->format('d M'),
+                        'count' => $count
+                    ];
+                }
+            }
 
             return Inertia::render('QC/Dashboard', [
                 'agency' => $agency,
                 'stats' => [
                     'total_audits' => $totalAudits,
-                    'today_audits' => $todayAudits,
-                ],
-                'recent_audits' => $recentAudits,
+                    'today_audits' => $selectedDateAudits,
+                    'filter_date' => $filterDateStr,
+                    'graph_data' => $graphData
+                ]
             ]);
         }
 
-        return Inertia::render('Dashboard');
+        // Default Dashboard (Generic User)
+        $graphData = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $graphData[] = [
+                'date' => now()->subDays($i)->format('d M'),
+                'count' => rand(1, 10) // Placeholder activity data
+            ];
+        }
+
+        return Inertia::render('Dashboard', [
+            'dashboard_data' => [
+                'stats' => [
+                    [
+                        'title' => 'Campaign Growth',
+                        'value' => '12.5%',
+                        'subtitle' => 'Trending Up',
+                        'icon' => 'BarChart',
+                        'color' => 'bg-indigo-600',
+                    ],
+                ],
+                'graph_data' => $graphData
+            ]
+        ]);
     }
 }

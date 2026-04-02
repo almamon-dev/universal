@@ -11,69 +11,48 @@ import {
 
 export default function Revenue() {
     const metrics = [
-        {
-            label: "Total Gross",
-            value: "$142,500",
-            trend: "+12%",
-            color: "text-emerald-600",
-        },
-        {
-            label: "Net Profit",
-            value: "$98,200",
-            trend: "+8%",
-            color: "text-blue-600",
-        },
-        {
-            label: "Avg Ticket",
-            value: "$42.50",
-            trend: "-2%",
-            color: "text-rose-600",
-        },
-        {
-            label: "Retention",
-            value: "68%",
-            trend: "+5%",
-            color: "text-purple-600",
-        },
+        { label: "Total gross", value: "$142,500", trend: "+12%" },
+        { label: "Net profit", value: "$98,200", trend: "+8%" },
+        { label: "Avg ticket", value: "$42.50", trend: "-2%" },
+        { label: "Retention rate", value: "68%", trend: "+5%" },
     ];
 
     return (
         <AdminLayout>
             <Head title="Revenue Analysis — Report" />
 
-            <div className="min-h-screen bg-[#FAFAFA] py-12 px-6">
+            <div className="min-h-screen bg-zinc-50/50 py-12 px-6 md:px-8">
                 <div className="max-w-6xl mx-auto">
                     <Link
-                        href="/admin/report"
-                        className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 mb-8 transition-colors"
+                        href={route("admin.report.index")}
+                        className="inline-flex items-center gap-1.5 text-[10px] font-bold text-zinc-400 hover:text-black transition-colors group mb-8"
                     >
-                        <ArrowLeft size={16} />
-                        Back to Reports
+                        <ArrowLeft size={12} className="group-hover:-translate-x-0.5 transition-transform" />
+                        System dashboard
                     </Link>
 
                     {/* Header */}
                     <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
-                        <div>
-                            <div className="flex items-center gap-3 mb-4">
-                                <div className="w-12 h-12 bg-emerald-600 rounded-sm flex items-center justify-center text-white shadow-lg shadow-emerald-200">
-                                    <TrendingUp size={24} />
+                        <div className="space-y-4">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-zinc-900 rounded-lg flex items-center justify-center text-white shadow-sm">
+                                    <TrendingUp size={20} />
                                 </div>
-                                <h1 className="text-3xl font-black text-gray-900 tracking-tight">
-                                    Revenue Analysis
+                                <h1 className="text-4xl font-bold text-zinc-900 tracking-tight leading-none">
+                                    Revenue analysis
                                 </h1>
                             </div>
-                            <p className="text-gray-500 text-lg">
-                                Financial diagnostics and profitability
-                                insights.
+                            <p className="text-zinc-500 text-lg leading-relaxed max-w-xl">
+                                Financial diagnostics and profitability insights across the commercial spectrum.
                             </p>
                         </div>
 
-                        <div className="flex gap-3">
-                            <button className="px-6 py-2.5 bg-white border border-gray-200 rounded-sm text-sm font-bold text-gray-700 hover:bg-gray-50 transition-all">
-                                Export CSV
+                        <div className="flex items-center gap-2 p-1 bg-zinc-100 rounded-lg border border-zinc-200">
+                            <button className="px-6 py-2 bg-white border border-zinc-200 rounded-md text-[10px] font-bold text-zinc-500 hover:text-zinc-900 transition-all shadow-sm">
+                                Export dataset
                             </button>
-                            <button className="px-6 py-2.5 bg-black text-white rounded-sm text-sm font-bold hover:bg-zinc-800 transition-all shadow-xl shadow-black/10">
-                                New Forecast
+                            <button className="px-6 py-2 bg-zinc-900 text-white rounded-md text-[10px] font-bold hover:bg-zinc-800 transition-all">
+                                New forecast
                             </button>
                         </div>
                     </div>
@@ -83,17 +62,17 @@ export default function Revenue() {
                         {metrics.map((m, i) => (
                             <div
                                 key={i}
-                                className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm transition-transform hover:-translate-y-1"
+                                className="bg-white p-8 rounded-xl border border-zinc-200 hover:border-zinc-900 transition-all shadow-sm group"
                             >
-                                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">
+                                <p className="text-[10px] font-bold text-zinc-400 mb-6 group-hover:text-zinc-900 transition-colors">
                                     {m.label}
                                 </p>
-                                <div className="flex items-baseline gap-2">
-                                    <span className="text-2xl font-black text-gray-900">
+                                <div className="flex items-baseline justify-between">
+                                    <span className="text-3xl font-bold text-zinc-900 tracking-tighter">
                                         {m.value}
                                     </span>
                                     <span
-                                        className={`text-xs font-bold px-2 py-0.5 rounded-full ${m.trend.startsWith("+") ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600"}`}
+                                        className={`text-[9px] font-bold px-2 py-0.5 rounded border ${m.trend.startsWith("+") ? "bg-zinc-50 border-zinc-200 text-zinc-900" : "bg-zinc-50 border-zinc-100 text-zinc-400"}`}
                                     >
                                         {m.trend}
                                     </span>
@@ -104,24 +83,18 @@ export default function Revenue() {
 
                     {/* Charts & Tables */}
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        <div className="lg:col-span-2 bg-white p-8 rounded-[40px] border border-gray-100 shadow-sm">
-                            <div className="flex items-center justify-between mb-8">
-                                <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                                    <DollarSign
-                                        className="text-emerald-500"
-                                        size={20}
-                                    />
-                                    Transaction History
+                        <div className="lg:col-span-2 bg-white p-8 rounded-xl border border-zinc-200 shadow-sm overflow-hidden">
+                            <div className="flex items-center justify-between mb-8 pb-4 border-b border-zinc-100">
+                                <h3 className="text-sm font-bold text-zinc-900 flex items-center gap-2">
+                                    <DollarSign className="text-zinc-400" size={16} />
+                                    Transaction history
                                 </h3>
                                 <div className="relative">
-                                    <Search
-                                        className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                                        size={14}
-                                    />
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={12} />
                                     <input
                                         type="text"
-                                        placeholder="Search logs..."
-                                        className="pl-9 pr-4 py-2 bg-gray-50 border-transparent rounded-sm text-xs focus:bg-white focus:ring-0 w-48 transition-all"
+                                        placeholder="Search records..."
+                                        className="pl-9 pr-4 py-1.5 bg-zinc-50 border-zinc-200 rounded-md text-[10px] focus:bg-white focus:ring-0 w-48 transition-all"
                                     />
                                 </div>
                             </div>
@@ -129,55 +102,34 @@ export default function Revenue() {
                             <div className="overflow-x-auto">
                                 <table className="w-full text-left">
                                     <thead>
-                                        <tr className="border-b border-gray-50">
-                                            <th className="pb-4 text-xs font-bold text-gray-400 uppercase">
+                                        <tr className="border-b border-zinc-50">
+                                            <th className="pb-4 text-[10px] font-bold text-zinc-400">
                                                 Gateway
                                             </th>
-                                            <th className="pb-4 text-xs font-bold text-gray-400 uppercase">
+                                            <th className="pb-4 text-[10px] font-bold text-zinc-400">
                                                 Amount
                                             </th>
-                                            <th className="pb-4 text-xs font-bold text-gray-400 uppercase text-right">
+                                            <th className="pb-4 text-[10px] font-bold text-zinc-400 text-right">
                                                 Status
                                             </th>
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-gray-50">
+                                    <tbody className="divide-y divide-zinc-50">
                                         {[
-                                            {
-                                                name: "Sexting Paywall",
-                                                val: "+$1,200",
-                                                status: "Verified",
-                                            },
-                                            {
-                                                name: "Pre-recorded PPV",
-                                                val: "+$850",
-                                                status: "Verified",
-                                            },
-                                            {
-                                                name: "Renewal Subscription",
-                                                val: "+$3,400",
-                                                status: "Pending",
-                                            },
-                                            {
-                                                name: "Bonus Content",
-                                                val: "+$120",
-                                                status: "Verified",
-                                            },
+                                            { name: "Sexting paywall", val: "+$1,200", status: "Verified" },
+                                            { name: "Pre-recorded PPV", val: "+$850", status: "Verified" },
+                                            { name: "Renewal subscription", val: "+$3,400", status: "Pending" },
+                                            { name: "Bonus content", val: "+$120", status: "Verified" },
                                         ].map((t, i) => (
-                                            <tr
-                                                key={i}
-                                                className="group hover:bg-gray-50/50 transition-colors"
-                                            >
-                                                <td className="py-5 text-sm font-medium text-gray-900">
+                                            <tr key={i} className="group hover:bg-zinc-50/50 transition-colors">
+                                                <td className="py-4 text-[11px] font-bold text-zinc-900">
                                                     {t.name}
                                                 </td>
-                                                <td className="py-5 text-sm font-bold text-emerald-600">
+                                                <td className="py-4 text-[11px] font-bold text-zinc-900">
                                                     {t.val}
                                                 </td>
-                                                <td className="py-5 text-right">
-                                                    <span
-                                                        className={`text-[10px] font-black uppercase px-2 py-1 rounded-md ${t.status === "Verified" ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600"}`}
-                                                    >
+                                                <td className="py-4 text-right">
+                                                    <span className={`text-[9px] font-bold px-2 py-0.5 rounded border ${t.status === "Verified" ? "bg-zinc-100 border-zinc-200 text-zinc-900" : "bg-zinc-50 border-zinc-100 text-zinc-400"}`}>
                                                         {t.status}
                                                     </span>
                                                 </td>
@@ -188,66 +140,47 @@ export default function Revenue() {
                             </div>
                         </div>
 
-                        <div className="bg-white p-8 rounded-[40px] border border-gray-100 shadow-sm">
-                            <h3 className="text-lg font-bold text-gray-900 mb-8 flex items-center gap-2">
-                                <PieChart className="text-blue-500" size={20} />
-                                Revenue Split
-                            </h3>
-                            <div className="space-y-6">
-                                {[
-                                    {
-                                        label: "New Subs",
-                                        percent: 45,
-                                        color: "bg-blue-500",
-                                    },
-                                    {
-                                        label: "Renewals",
-                                        percent: 35,
-                                        color: "bg-purple-500",
-                                    },
-                                    {
-                                        label: "Upsells",
-                                        percent: 20,
-                                        color: "bg-emerald-500",
-                                    },
-                                ].map((s, i) => (
-                                    <div key={i}>
-                                        <div className="flex justify-between text-sm font-bold mb-2">
-                                            <span className="text-gray-600">
-                                                {s.label}
-                                            </span>
-                                            <span className="text-gray-900">
-                                                {s.percent}%
-                                            </span>
+                        <div className="space-y-8">
+                            <div className="bg-white p-8 rounded-xl border border-zinc-200 shadow-sm relative overflow-hidden">
+                                <h3 className="text-sm font-bold text-zinc-900 mb-8 flex items-center gap-2">
+                                    <PieChart className="text-zinc-400" size={16} />
+                                    Revenue split
+                                </h3>
+                                <div className="space-y-6">
+                                    {[
+                                        { label: "New subs", percent: 45 },
+                                        { label: "Renewals", percent: 35 },
+                                        { label: "Upsells", percent: 20 },
+                                    ].map((s, i) => (
+                                        <div key={i}>
+                                            <div className="flex justify-between text-[10px] font-bold mb-2">
+                                                <span className="text-zinc-400">{s.label}</span>
+                                                <span className="text-zinc-900">{s.percent}%</span>
+                                            </div>
+                                            <div className="h-1 bg-zinc-100 rounded-full overflow-hidden">
+                                                <div
+                                                    className="h-full bg-zinc-900"
+                                                    style={{ width: `${s.percent}%` }}
+                                                />
+                                            </div>
                                         </div>
-                                        <div className="h-2 bg-gray-50 rounded-full overflow-hidden">
-                                            <div
-                                                className={`h-full ${s.color}`}
-                                                style={{
-                                                    width: `${s.percent}%`,
-                                                }}
-                                            />
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
+                                    ))}
+                                </div>
 
-                            <div className="mt-12 p-6 bg-gray-900 rounded-3xl text-white">
-                                <div className="flex justify-between items-center mb-4">
-                                    <span className="text-xs font-bold uppercase tracking-widest text-gray-400">
-                                        Total Yield
-                                    </span>
-                                    <ArrowUpRight
-                                        size={16}
-                                        className="text-emerald-400"
-                                    />
+                                <div className="mt-12 p-6 bg-zinc-50 rounded-xl border border-zinc-200">
+                                    <div className="flex justify-between items-center mb-4">
+                                        <span className="text-[10px] font-bold text-zinc-400">
+                                            Total yield
+                                        </span>
+                                        <ArrowUpRight size={14} className="text-zinc-900" />
+                                    </div>
+                                    <div className="text-3xl font-bold text-zinc-900 tracking-tighter">
+                                        $24,800
+                                    </div>
+                                    <p className="text-[9px] font-bold text-zinc-400 mt-2 leading-tight">
+                                        Projected velocity based on historical conversion curves.
+                                    </p>
                                 </div>
-                                <div className="text-3xl font-black">
-                                    $24.8k
-                                </div>
-                                <p className="text-[10px] text-gray-400 mt-2">
-                                    Projected next 30 days based on velocity
-                                </p>
                             </div>
                         </div>
                     </div>
