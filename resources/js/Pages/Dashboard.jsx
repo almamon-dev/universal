@@ -63,7 +63,7 @@ export default function Dashboard({ dashboard_data }) {
                                 ></div>
 
                                 <div className="flex justify-between items-start z-10">
-                                    <span className="text-gray-400 font-black text-[11px] uppercase tracking-[0.2em]">
+                                    <span className="text-gray-400 font-black text-[11px]  tracking-[0.2em]">
                                         {stat.title}
                                     </span>
                                     <div
@@ -77,7 +77,7 @@ export default function Dashboard({ dashboard_data }) {
                                     <h3 className="text-4xl font-black text-white mb-1 tracking-tighter">
                                         {stat.value}
                                     </h3>
-                                    <p className="text-[11px] text-gray-500 font-bold uppercase tracking-widest flex items-center gap-1.5">
+                                    <p className="text-[11px] text-gray-500 font-bold  tracking-widest flex items-center gap-1.5">
                                         <ArrowUpRight size={12} className="text-emerald-500" />
                                         {stat.subtitle}
                                     </p>
@@ -92,9 +92,9 @@ export default function Dashboard({ dashboard_data }) {
                     <div className="flex items-center justify-between mb-8 z-10 relative">
                         <div>
                             <h2 className="text-xl font-black text-white tracking-tight">Growth Analytics</h2>
-                            <p className="text-xs text-gray-500 font-semibold mt-1 uppercase tracking-widest opacity-60">Performance Trends • Last 7 Days</p>
+                            <p className="text-xs text-gray-500 font-semibold mt-1  tracking-widest opacity-60">Performance Trends • Last 7 Days</p>
                         </div>
-                        <div className="px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 rounded-xl text-[10px] font-black uppercase tracking-widest">
+                        <div className="px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 rounded-xl text-[10px] font-black  tracking-widest">
                             Real-time
                         </div>
                     </div>
@@ -103,22 +103,22 @@ export default function Dashboard({ dashboard_data }) {
                         <ResponsiveContainer width="100%" height="100%">
                             <LineChart data={graphData}>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#27272A" />
-                                <XAxis 
-                                    dataKey="date" 
-                                    axisLine={false} 
+                                <XAxis
+                                    dataKey="date"
+                                    axisLine={false}
                                     tickLine={false}
                                     tick={{ fill: '#71717A', fontSize: 10, fontWeight: 700 }}
                                     dy={10}
                                 />
-                                <YAxis 
-                                    axisLine={false} 
+                                <YAxis
+                                    axisLine={false}
                                     tickLine={false}
                                     tick={{ fill: '#71717A', fontSize: 10, fontWeight: 700 }}
                                 />
-                                <Tooltip 
-                                    contentStyle={{ 
-                                        backgroundColor: '#18181B', 
-                                        borderRadius: '16px', 
+                                <Tooltip
+                                    contentStyle={{
+                                        backgroundColor: '#18181B',
+                                        borderRadius: '16px',
                                         border: '1px solid #27272A',
                                         fontSize: '12px',
                                         fontWeight: 'bold',
@@ -126,10 +126,10 @@ export default function Dashboard({ dashboard_data }) {
                                     }}
                                     itemStyle={{ color: '#fff' }}
                                 />
-                                <Line 
-                                    type="monotone" 
-                                    dataKey="count" 
-                                    stroke="#8B5CF6" 
+                                <Line
+                                    type="monotone"
+                                    dataKey="count"
+                                    stroke="#8B5CF6"
                                     strokeWidth={4}
                                     dot={{ r: 4, fill: '#8B5CF6', strokeWidth: 0 }}
                                     activeDot={{ r: 8, fill: '#8B5CF6', strokeWidth: 4, stroke: '#18181B' }}
@@ -155,7 +155,7 @@ export default function Dashboard({ dashboard_data }) {
                                             <LucideBarChart size={20} />
                                         </div>
                                         <div>
-                                            <h4 className="text-white font-black text-sm group-hover:text-indigo-400 transition-colors uppercase tracking-tight">
+                                            <h4 className="text-white font-black text-sm group-hover:text-indigo-400 transition-colors  tracking-tight">
                                                 {activity.title}
                                             </h4>
                                             <p className="text-gray-500 text-xs mt-1 font-semibold">
@@ -163,13 +163,13 @@ export default function Dashboard({ dashboard_data }) {
                                             </p>
                                         </div>
                                     </div>
-                                    <span className="text-[10px] text-gray-500 font-black uppercase tracking-widest opacity-60">
+                                    <span className="text-[10px] text-gray-500 font-black  tracking-widest opacity-60">
                                         {activity.time}
                                     </span>
                                 </div>
                             ))
                         ) : (
-                            <p className="text-center py-10 text-gray-600 font-black uppercase tracking-widest opacity-20">No Recent Activity Found</p>
+                            <p className="text-center py-10 text-gray-600 font-black  tracking-widest opacity-20">No Recent Activity Found</p>
                         )}
                     </div>
                 </div>

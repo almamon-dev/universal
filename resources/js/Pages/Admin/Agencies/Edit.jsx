@@ -316,7 +316,7 @@ export default function Edit({
                 .split(/[-_\s]/)
                 .map(
                     (word) =>
-                        word.charAt(0).toUpperCase() +
+                        word.charAt(0).to() +
                         word.slice(1).toLowerCase(),
                 )
                 .join(" ");
@@ -352,9 +352,8 @@ export default function Edit({
                     </div>
                     <ChevronDown
                         size={18}
-                        className={`text-gray-400 transition-transform duration-200 ${
-                            isExpanded ? "rotate-180" : ""
-                        }`}
+                        className={`text-gray-400 transition-transform duration-200 ${isExpanded ? "rotate-180" : ""
+                            }`}
                     />
                 </div>
 
@@ -468,7 +467,7 @@ export default function Edit({
                                     </p>
                                 </div>
                                 {!canEdit && (
-                                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 text-amber-600 text-[10px] font-black uppercase tracking-widest rounded-lg border border-amber-100">
+                                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 text-amber-600 text-[10px] font-black  tracking-widest rounded-lg border border-amber-100">
                                         <Shield size={12} />
                                         Read Only
                                     </span>
@@ -577,7 +576,7 @@ export default function Edit({
                                 </div>
                                 <div className="p-6 space-y-4">
                                     <div>
-                                        <label className="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">
+                                        <label className="block text-xs font-semibold text-zinc-500  tracking-wider mb-2">
                                             First Paywall Sexting
                                         </label>
                                         <div className="relative">
@@ -674,63 +673,63 @@ export default function Edit({
                                 </div>
                                 <div className="p-6">
 
-                                {data.qcs.length > 0 ? (
-                                    <div className="space-y-2">
-                                        {data.qcs.map((qc, index) => (
-                                            <div
-                                                key={qc.id}
-                                                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-                                            >
-                                                <span className="text-sm font-medium text-gray-900">
-                                                    {index + 1}. {qc.name}
-                                                </span>
-                                                <div className="flex items-center gap-2">
-                                                    {canEdit && (
-                                                        <>
-                                                            <button
-                                                                type="button"
-                                                                onClick={() =>
-                                                                    handleEditQC(
-                                                                        qc,
-                                                                    )
-                                                                }
-                                                                className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
-                                                            >
-                                                                <Settings
-                                                                    size={16}
-                                                                />
-                                                            </button>
-                                                            <button
-                                                                type="button"
-                                                                onClick={() =>
-                                                                    handleRemoveQC(
-                                                                        qc.id,
-                                                                    )
-                                                                }
-                                                                className="p-1 text-gray-400 hover:text-red-500 transition-colors"
-                                                            >
-                                                                <Trash2
-                                                                    size={16}
-                                                                />
-                                                            </button>
-                                                        </>
-                                                    )}
-                                                    {!canEdit && (
-                                                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-tight">
-                                                            Active Member
-                                                        </span>
-                                                    )}
+                                    {data.qcs.length > 0 ? (
+                                        <div className="space-y-2">
+                                            {data.qcs.map((qc, index) => (
+                                                <div
+                                                    key={qc.id}
+                                                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                                                >
+                                                    <span className="text-sm font-medium text-gray-900">
+                                                        {index + 1}. {qc.name}
+                                                    </span>
+                                                    <div className="flex items-center gap-2">
+                                                        {canEdit && (
+                                                            <>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() =>
+                                                                        handleEditQC(
+                                                                            qc,
+                                                                        )
+                                                                    }
+                                                                    className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                                                                >
+                                                                    <Settings
+                                                                        size={16}
+                                                                    />
+                                                                </button>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() =>
+                                                                        handleRemoveQC(
+                                                                            qc.id,
+                                                                        )
+                                                                    }
+                                                                    className="p-1 text-gray-400 hover:text-red-500 transition-colors"
+                                                                >
+                                                                    <Trash2
+                                                                        size={16}
+                                                                    />
+                                                                </button>
+                                                            </>
+                                                        )}
+                                                        {!canEdit && (
+                                                            <span className="text-[10px] font-bold text-gray-400  tracking-tight">
+                                                                Active Member
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <p className="text-sm text-gray-500 text-center py-6 border border-dashed border-gray-200 rounded-lg">
-                                        No QC members added yet
-                                    </p>
-                                )}
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <p className="text-sm text-gray-500 text-center py-6 border border-dashed border-gray-200 rounded-lg">
+                                            No QC members added yet
+                                        </p>
+                                    )}
+                                </div>
                             </div>
-                        </div>
 
                             {/* Form Actions */}
                             <div className="flex justify-end gap-3">
@@ -749,8 +748,8 @@ export default function Edit({
                                         {processing
                                             ? "Saving..."
                                             : isEditing
-                                              ? "Save Changes"
-                                              : "Create Agency"}
+                                                ? "Save Changes"
+                                                : "Create Agency"}
                                     </button>
                                 )}
                             </div>
@@ -779,11 +778,10 @@ export default function Edit({
                                     {agency.name}
                                 </h1>
                                 <span
-                                    className={`inline-flex px-2 py-0.5 text-[10px] font-bold rounded-full border ${
-                                        agency.status === "active"
+                                    className={`inline-flex px-2 py-0.5 text-[10px] font-bold rounded-full border ${agency.status === "active"
                                             ? "bg-emerald-50 text-emerald-700 border-emerald-100"
                                             : "bg-gray-50 text-gray-500 border-gray-200"
-                                    }`}
+                                        }`}
                                 >
                                     {agency.status === "active" ? "Operational" : "Paused"}
                                 </span>
@@ -897,9 +895,8 @@ export default function Edit({
                                     </div>
                                     <ChevronDown
                                         size={18}
-                                        className={`text-gray-400 transition-transform ${
-                                            showFields ? "rotate-180" : ""
-                                        }`}
+                                        className={`text-gray-400 transition-transform ${showFields ? "rotate-180" : ""
+                                            }`}
                                     />
                                 </button>
 
@@ -914,7 +911,7 @@ export default function Edit({
                                         >
                                             <div className="p-4">
                                                 {agency.audit_fields?.length >
-                                                0 ? (
+                                                    0 ? (
                                                     <div className="grid grid-cols-2 gap-2">
                                                         {agency.audit_fields.map(
                                                             (field, idx) => (
@@ -988,9 +985,8 @@ export default function Edit({
                                     </div>
                                     <ChevronDown
                                         size={18}
-                                        className={`text-gray-400 transition-transform ${
-                                            showAudits ? "rotate-180" : ""
-                                        }`}
+                                        className={`text-gray-400 transition-transform ${showAudits ? "rotate-180" : ""
+                                            }`}
                                     />
                                 </button>
 
@@ -1043,13 +1039,13 @@ export default function Edit({
                                                                         );
                                                                 const matchesChatter =
                                                                     selectedChatter ===
-                                                                        "all" ||
+                                                                    "all" ||
                                                                     String(
                                                                         a.chatter_id,
                                                                     ) ===
-                                                                        String(
-                                                                            selectedChatter,
-                                                                        );
+                                                                    String(
+                                                                        selectedChatter,
+                                                                    );
                                                                 return (
                                                                     matchesSearch &&
                                                                     matchesChatter
@@ -1193,7 +1189,7 @@ export default function Edit({
                             <div className="p-4 space-y-4">
                                 {/* Current QC List */}
                                 <div className="space-y-2 max-h-48 overflow-y-auto">
-                                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <p className="text-xs font-medium text-gray-500  tracking-wider">
                                         Current Members
                                     </p>
                                     {(agency?.qcs || []).map((qc) => (

@@ -449,11 +449,10 @@ export default function Audits({ auth, agency, audits, audit_fields }) {
                                 ? route("dashboard")
                                 : route("admin.agencies.edit", agency.id)
                         }
-                        className={`inline-flex items-center gap-2 text-sm font-medium transition-all px-4 py-2 rounded-md mb-6 border ${
-                            isQC
+                        className={`inline-flex items-center gap-2 text-sm font-medium transition-all px-4 py-2 rounded-md mb-6 border ${isQC
                                 ? "bg-[#18181B] border-[#27272A] text-gray-400 hover:text-white"
                                 : "text-gray-500 hover:text-gray-900 border-gray-200 bg-white"
-                        }`}
+                            }`}
                     >
                         <ArrowLeft size={16} />
                         Back to {isQC ? "Dashboard" : "Agency"}
@@ -492,7 +491,7 @@ export default function Audits({ auth, agency, audits, audit_fields }) {
                             <div className="flex items-center gap-3">
                                 <button
                                     onClick={handleSelectAllTemplates}
-                                    className="text-xs font-bold text-indigo-600 uppercase tracking-widest hover:text-indigo-700 transition-colors"
+                                    className="text-xs font-bold text-indigo-600  tracking-widest hover:text-indigo-700 transition-colors"
                                 >
                                     {selectedTemplateIds.length > 0
                                         ? "Deselect All"
@@ -520,28 +519,26 @@ export default function Audits({ auth, agency, audits, audit_fields }) {
                                             !isAlreadyAdded &&
                                             toggleTemplateSelect(field.id)
                                         }
-                                        className={`p-6 border rounded-xl transition-all ${
-                                            isAlreadyAdded
+                                        className={`p-6 border rounded-xl transition-all ${isAlreadyAdded
                                                 ? "opacity-60 bg-gray-50/50 cursor-not-allowed border-gray-100"
                                                 : selectedTemplateIds.includes(
-                                                      field.id,
-                                                  )
-                                                ? "border-indigo-600 bg-indigo-50/20 ring-1 ring-indigo-600 shadow-lg"
-                                                : "border-gray-200 hover:border-indigo-300 bg-white cursor-pointer shadow-sm hover:shadow-md"
-                                        }`}
+                                                    field.id,
+                                                )
+                                                    ? "border-indigo-600 bg-indigo-50/20 ring-1 ring-indigo-600 shadow-lg"
+                                                    : "border-gray-200 hover:border-indigo-300 bg-white cursor-pointer shadow-sm hover:shadow-md"
+                                            }`}
                                     >
                                         <div className="flex gap-4">
                                             <div className="pt-1">
                                                 <div
-                                                    className={`w-5 h-5 rounded border flex items-center justify-center transition-all ${
-                                                        isAlreadyAdded
+                                                    className={`w-5 h-5 rounded border flex items-center justify-center transition-all ${isAlreadyAdded
                                                             ? "bg-emerald-500 border-emerald-500 shadow-sm"
                                                             : selectedTemplateIds.includes(
-                                                                  field.id,
-                                                              )
-                                                            ? "bg-indigo-600 border-indigo-600 shadow-md"
-                                                            : "border-gray-300 bg-white hover:border-gray-400"
-                                                    }`}
+                                                                field.id,
+                                                            )
+                                                                ? "bg-indigo-600 border-indigo-600 shadow-md"
+                                                                : "border-gray-300 bg-white hover:border-gray-400"
+                                                        }`}
                                                 >
                                                     {isAlreadyAdded ? (
                                                         <CheckCircle2
@@ -564,18 +561,18 @@ export default function Audits({ auth, agency, audits, audit_fields }) {
                                                     </h3>
                                                     <div className="flex items-center gap-2">
                                                         {field.is_locked && (
-                                                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#8B5CF6] text-white text-[10px] font-black uppercase tracking-widest rounded shadow-sm">
+                                                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#8B5CF6] text-white text-[10px] font-black  tracking-widest rounded shadow-sm">
                                                                 <Lock size={12} />
                                                                 LOCKED
                                                             </span>
                                                         )}
                                                         {field.is_conditional && (
-                                                            <span className="px-2.5 py-1 bg-[#2563EB] text-white text-[10px] font-black uppercase tracking-widest rounded shadow-sm">
+                                                            <span className="px-2.5 py-1 bg-[#2563EB] text-white text-[10px] font-black  tracking-widest rounded shadow-sm">
                                                                 Conditional
                                                             </span>
                                                         )}
                                                         {isAlreadyAdded && (
-                                                            <span className="px-2.5 py-1 bg-emerald-500 text-white text-[10px] font-black uppercase tracking-widest rounded shadow-sm">
+                                                            <span className="px-2.5 py-1 bg-emerald-500 text-white text-[10px] font-black  tracking-widest rounded shadow-sm">
                                                                 ALREADY ADDED
                                                             </span>
                                                         )}
@@ -615,7 +612,7 @@ export default function Audits({ auth, agency, audits, audit_fields }) {
 
                                                 {field.options && !isAlreadyAdded && (
                                                     <div className="pt-2">
-                                                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Available Options:</p>
+                                                        <p className="text-[10px] font-black text-gray-400  tracking-widest mb-2">Available Options:</p>
                                                         <div className="flex flex-wrap gap-1.5">
                                                             {field.options.split(',').map((opt, i) => (
                                                                 <span key={i} className="px-2.5 py-1 bg-white border border-gray-200 text-gray-600 text-[11px] font-bold rounded shadow-sm">
@@ -700,7 +697,7 @@ export default function Audits({ auth, agency, audits, audit_fields }) {
                                                 checked={
                                                     data.fields.length > 0 &&
                                                     selectedFieldIndices.length ===
-                                                        data.fields.length
+                                                    data.fields.length
                                                 }
                                                 onChange={toggleSelectAllFields}
                                                 className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
@@ -725,13 +722,12 @@ export default function Audits({ auth, agency, audits, audit_fields }) {
                                         {data.fields.map((field, index) => (
                                             <div
                                                 key={index}
-                                                className={`border rounded-md p-4 transition-all ${
-                                                    selectedFieldIndices.includes(
-                                                        index,
-                                                    )
+                                                className={`border rounded-md p-4 transition-all ${selectedFieldIndices.includes(
+                                                    index,
+                                                )
                                                         ? "border-indigo-600 bg-indigo-50/10 shadow-sm"
                                                         : "border-gray-200 hover:border-gray-300 bg-white"
-                                                }`}
+                                                    }`}
                                             >
                                                 {editingFieldIndex === index ? (
                                                     <div className="space-y-4">
@@ -749,11 +745,10 @@ export default function Audits({ auth, agency, audits, audit_fields }) {
                                                                             !field.is_locked,
                                                                         )
                                                                     }
-                                                                    className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest transition-all border ${
-                                                                        field.is_locked
+                                                                    className={`px-2 py-0.5 rounded text-[10px] font-black  tracking-widest transition-all border ${field.is_locked
                                                                             ? "bg-amber-50 text-amber-600 border-amber-200"
                                                                             : "bg-indigo-50 text-indigo-600 border-indigo-200"
-                                                                    }`}
+                                                                        }`}
                                                                 >
                                                                     {field.is_locked
                                                                         ? "Unlock for Editing"
@@ -843,36 +838,36 @@ export default function Audits({ auth, agency, audits, audit_fields }) {
                                                             </div>
                                                             {field.type ===
                                                                 "select" && (
-                                                                <div className="md:col-span-2">
-                                                                    <label className="block text-xs text-gray-500 mb-1">
-                                                                        Options
-                                                                        (comma-separated)
-                                                                    </label>
-                                                                    <input
-                                                                        type="text"
-                                                                        value={
-                                                                            field.options ||
-                                                                            ""
-                                                                        }
-                                                                        disabled={
-                                                                            field.is_locked
-                                                                        }
-                                                                        onChange={(
-                                                                            e,
-                                                                        ) =>
-                                                                            updateField(
-                                                                                index,
-                                                                                "options",
-                                                                                e
-                                                                                    .target
-                                                                                    .value,
-                                                                            )
-                                                                        }
-                                                                        className="w-full px-3 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 disabled:bg-gray-50"
-                                                                        placeholder="Option 1, Option 2, Option 3"
-                                                                    />
-                                                                </div>
-                                                            )}
+                                                                    <div className="md:col-span-2">
+                                                                        <label className="block text-xs text-gray-500 mb-1">
+                                                                            Options
+                                                                            (comma-separated)
+                                                                        </label>
+                                                                        <input
+                                                                            type="text"
+                                                                            value={
+                                                                                field.options ||
+                                                                                ""
+                                                                            }
+                                                                            disabled={
+                                                                                field.is_locked
+                                                                            }
+                                                                            onChange={(
+                                                                                e,
+                                                                            ) =>
+                                                                                updateField(
+                                                                                    index,
+                                                                                    "options",
+                                                                                    e
+                                                                                        .target
+                                                                                        .value,
+                                                                                )
+                                                                            }
+                                                                            className="w-full px-3 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 disabled:bg-gray-50"
+                                                                            placeholder="Option 1, Option 2, Option 3"
+                                                                        />
+                                                                    </div>
+                                                                )}
                                                             <div className="flex items-center">
                                                                 <label className="flex items-center gap-2 cursor-pointer">
                                                                     <input
@@ -929,18 +924,18 @@ export default function Audits({ auth, agency, audits, audit_fields }) {
                                                                         </h3>
                                                                         <div className="flex items-center gap-1.5">
                                                                             {field.required && (
-                                                                                <span className="px-1.5 py-0.5 bg-zinc-900 text-white text-[9px] font-black uppercase tracking-tighter rounded">
+                                                                                <span className="px-1.5 py-0.5 bg-zinc-900 text-white text-[9px] font-black  tracking-tighter rounded">
                                                                                     Required
                                                                                 </span>
                                                                             )}
                                                                             {field.is_locked && (
-                                                                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-zinc-100 text-zinc-600 border border-zinc-200 text-[9px] font-black uppercase tracking-tighter rounded">
+                                                                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-zinc-100 text-zinc-600 border border-zinc-200 text-[9px] font-black  tracking-tighter rounded">
                                                                                     <Lock size={10} />
                                                                                     System
                                                                                 </span>
                                                                             )}
                                                                             {field.is_conditional && (
-                                                                                <span className="px-1.5 py-0.5 bg-zinc-50 text-zinc-500 border border-zinc-200 text-[9px] font-black uppercase tracking-tighter rounded">
+                                                                                <span className="px-1.5 py-0.5 bg-zinc-50 text-zinc-500 border border-zinc-200 text-[9px] font-black  tracking-tighter rounded">
                                                                                     Conditional
                                                                                 </span>
                                                                             )}
@@ -989,27 +984,27 @@ export default function Audits({ auth, agency, audits, audit_fields }) {
                                                                         Type: <span className="text-gray-900 capitalize">{field.type}</span>
                                                                     </p>
                                                                 </div>
-                                                            {field.options && (
-                                                                <div>
-                                                                    <div className="flex flex-wrap gap-1">
-                                                                        {field.options.split(',').slice(0, 5).map((opt, i) => (
-                                                                            <span key={i} className="px-2 py-0.5 bg-zinc-50 border border-zinc-100 text-zinc-400 text-[10px] font-medium rounded uppercase tracking-tighter">
-                                                                                {opt.trim()}
-                                                                            </span>
-                                                                        ))}
-                                                                        {field.options.split(',').length > 5 && (
-                                                                            <span className="text-[10px] font-bold text-zinc-300 pl-1 self-center">
-                                                                                +{field.options.split(',').length - 5}
-                                                                            </span>
-                                                                        )}
+                                                                {field.options && (
+                                                                    <div>
+                                                                        <div className="flex flex-wrap gap-1">
+                                                                            {field.options.split(',').slice(0, 5).map((opt, i) => (
+                                                                                <span key={i} className="px-2 py-0.5 bg-zinc-50 border border-zinc-100 text-zinc-400 text-[10px] font-medium rounded  tracking-tighter">
+                                                                                    {opt.trim()}
+                                                                                </span>
+                                                                            ))}
+                                                                            {field.options.split(',').length > 5 && (
+                                                                                <span className="text-[10px] font-bold text-zinc-300 pl-1 self-center">
+                                                                                    +{field.options.split(',').length - 5}
+                                                                                </span>
+                                                                            )}
+                                                                        </div>
                                                                     </div>
-                                                                </div>
-                                                            )}
-                                                        </div>
+                                                                )}
+                                                            </div>
 
                                                             {field.required_if && (
                                                                 <div className="p-3 bg-[#EFF6FF] border border-[#BFDBFE] rounded-lg">
-                                                                    <p className="text-[10px] font-black text-[#1E40AF] uppercase tracking-widest">
+                                                                    <p className="text-[10px] font-black text-[#1E40AF]  tracking-widest">
                                                                         Required ONLY if:
                                                                     </p>
                                                                     <p className="text-sm text-[#2563EB] font-bold mt-1">
@@ -1020,7 +1015,7 @@ export default function Audits({ auth, agency, audits, audit_fields }) {
 
                                                             {field.help_text && (
                                                                 <div className="p-3 bg-gray-50 border border-gray-100 rounded-lg">
-                                                                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                                                                    <p className="text-[10px] font-black text-gray-400  tracking-widest">
                                                                         Description:
                                                                     </p>
                                                                     <p className="text-sm text-gray-600 mt-1 italic">

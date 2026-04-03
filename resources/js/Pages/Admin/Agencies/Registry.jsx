@@ -111,7 +111,7 @@ export default function Registry({ agency, chatters, creators }) {
                                         <Users size={18} />
                                     </div>
                                     <div>
-                                        <p className="text-xs font-medium text-indigo-600 uppercase tracking-wider">
+                                        <p className="text-xs font-medium text-indigo-600  tracking-wider">
                                             Total Chatters
                                         </p>
                                         <p className="text-2xl font-semibold text-indigo-900">
@@ -126,7 +126,7 @@ export default function Registry({ agency, chatters, creators }) {
                                         <Star size={18} />
                                     </div>
                                     <div>
-                                        <p className="text-xs font-medium text-purple-600 uppercase tracking-wider">
+                                        <p className="text-xs font-medium text-purple-600  tracking-wider">
                                             Total Creators
                                         </p>
                                         <p className="text-2xl font-semibold text-purple-900">

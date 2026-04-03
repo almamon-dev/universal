@@ -148,7 +148,7 @@ const discoveryData = [
 const SectionBox = ({ title, subtitle, footerNote, children }) => (
     <div className="bg-white border border-gray-200 rounded-lg p-6 space-y-6">
         <div className="space-y-1 pb-4 border-b border-gray-100">
-            <h2 className="text-xs font-medium text-gray-900 uppercase tracking-wider">
+            <h2 className="text-xs font-medium text-gray-900  tracking-wider">
                 {title}
             </h2>
             {subtitle && <p className="text-xs text-gray-500">{subtitle}</p>}
@@ -196,7 +196,7 @@ const QuestionField = React.memo(
                             checked={
                                 type === "checkbox"
                                     ? Array.isArray(data[qId]) &&
-                                      data[qId].includes(option)
+                                    data[qId].includes(option)
                                     : data[qId] === option
                             }
                             onChange={() =>
@@ -318,7 +318,7 @@ export default function OwnerDiscovery({ agency, discovery }) {
                         <button
                             onClick={handleSave}
                             disabled={processing}
-                            className="px-8 py-3 bg-black text-white text-[13px] font-black uppercase tracking-widest rounded-xl hover:bg-zinc-800 transition-all shadow-xl shadow-black/10 disabled:opacity-50 active:scale-95"
+                            className="px-8 py-3 bg-black text-white text-[13px] font-black  tracking-widest rounded-xl hover:bg-zinc-800 transition-all shadow-xl shadow-black/10 disabled:opacity-50 active:scale-95"
                         >
                             {processing ? "Saving..." : "Save Progress"}
                         </button>

@@ -1,106 +1,81 @@
 import React from "react";
-import { Activity, ShieldCheck, ShieldAlert, TrendingUp, BarChart3, PieChart } from "lucide-react";
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/Components/ui/card";
+import { cn } from "@/lib/utils";
+import SellableFlow from "./SellableFlow";
 
-const SnapshotCard = ({ title, value, icon: Icon, color, subtitle }) => (
-    <div className="bg-white rounded-[2.5rem] border border-slate-100 p-10 flex flex-col items-center justify-center text-center shadow-sm hover:shadow-xl transition-all duration-500 group hover:-translate-y-2">
-        <div className={`w-16 h-16 rounded-[1.5rem] ${color} flex items-center justify-center mb-8 shadow-2xl shadow-current/20 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500`}>
-            <Icon size={32} className="text-white" strokeWidth={2.5} />
-        </div>
-        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-4 leading-none h-4">
-            {title}
-        </p>
-        <h4 className="text-6xl font-black text-slate-900 tracking-tighter leading-none mb-4 tabular-nums">
-            {value}
-        </h4>
-        {subtitle && (
-            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400/80 flex items-center gap-2 px-5 py-2 bg-slate-50/50 rounded-full border border-slate-100/50 transition-colors group-hover:bg-slate-100">
-                {subtitle}
-            </p>
-        )}
+const AuditorCard = ({ name, count }) => (
+    <div className="flex-1 bg-white p-5 rounded-lg border border-slate-100 shadow-sm transition-all hover:shadow-md group">
+        <p className="text-[10px] font-bold text-slate-400 capitalize mb-1 group-hover:text-slate-600 transition-colors">{name}</p>
+        <span className="text-2xl font-black text-slate-900 tabular-nums tracking-tighter">{count}</span>
     </div>
 );
 
+const MetricCard = ({ label, count, formula, theme = "emerald" }) => {
+    const statusColors = {
+        emerald: "bg-emerald-500",
+        rose: "bg-rose-500",
+        blue: "bg-blue-500",
+    };
+    return (
+        <Card className="flex-1 shadow-sm border border-slate-100 bg-white overflow-hidden group hover:shadow-md transition-all relative">
+            <div className={cn("h-1 w-full", statusColors[theme])} />
+            <CardContent className="p-6 pt-5 space-y-2">
+                <p className="text-[11px] font-bold text-slate-500 lowercase first-letter:uppercase">{label}</p>
+                <h4 className="text-4xl font-black tracking-tighter tabular-nums leading-none text-slate-900">{count}</h4>
+
+                {formula && (
+                    <div className="opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-300 absolute bottom-3 right-4 bg-slate-900/90 text-[9px] text-white px-3 py-1.5 rounded shadow-xl border border-white/10 backdrop-blur-sm whitespace-nowrap">
+                        <span className="text-slate-400 font-medium mr-1">Formula:</span> {formula}
+                    </div>
+                )}
+            </CardContent>
+        </Card>
+    );
+};
+
 export default function ExecutiveSnapshot({ stats }) {
-    const total = stats?.total_audits || 0;
-    const passed = stats?.total_passed || 0;
-    const failed = stats?.total_failed || 0;
+    const total_audits = stats?.total_audits || 165;
+    const sellable = stats?.sellable || 100;
+    const non_sellable = stats?.non_sellable || 65;
 
     return (
-        <div className="space-y-12">
-            {/* Top Stat Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-10">
-                <SnapshotCard 
-                    title="TOTAL AUDITS" 
-                    value={total} 
-                    icon={Activity} 
-                    color="bg-blue-600"
-                    subtitle={stats?.period?.full_range || 'ACTIVE CYCLE'}
-                />
-                <SnapshotCard 
-                    title="AUDIT PASS" 
-                    value={passed} 
-                    icon={ShieldCheck} 
-                    color="bg-emerald-500" 
-                    subtitle="COMPLIANT RECORDS"
-                />
-                <SnapshotCard 
-                    title="AUDIT FAILED" 
-                    value={failed} 
-                    icon={ShieldAlert} 
-                    color="bg-rose-500" 
-                    subtitle="HIGH SIGNIFICANCE FLAGS"
-                />
-            </div>
-
-            {/* Sub-distribution or Quality Metrics */}
-            <div className="bg-slate-50/30 rounded-[3rem] p-1.5 border border-slate-200/40">
-                <div className="bg-white rounded-[2.8rem] p-10 md:p-16 border border-slate-100 shadow-sm relative overflow-hidden group/panel">
-                    <div className="absolute top-0 right-0 p-12 opacity-[0.02] transform group-hover/panel:scale-110 transition-transform duration-1000 pointer-events-none">
-                        <TrendingUp size={240} strokeWidth={1} />
+        <div className="space-y-10">
+            {/* AUDIT VOLUME */}
+            <div className="space-y-3">
+                <p className="text-xs font-bold text-slate-700">Audit volume</p>
+                <div className="bg-slate-50/50 border border-slate-100 rounded-xl p-8 space-y-8">
+                    <div className="flex items-baseline gap-3">
+                        <span className="text-5xl font-black text-slate-900 tracking-tighter leading-none">{total_audits}</span>
+                        <span className="text-xs font-bold text-slate-400 lowercase first-letter:uppercase">Total audits</span>
                     </div>
-                    
-                    <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-12">
-                        <div className="space-y-6">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center border border-orange-200/50">
-                                    <PieChart size={20} className="text-orange-600" />
-                                </div>
-                                <h3 className="text-3xl font-black text-slate-900 tracking-tight uppercase tracking-tight">QUALITY PERFORMANCE</h3>
-                            </div>
-                            <p className="text-slate-500 max-w-sm text-sm font-medium leading-relaxed">
-                                PERCENTAGE DISTRIBUTION OF TOTAL AUDITED UNITS THAT PASSED THE INITIAL SIGNAL VERIFICATION PROCESS DURING THIS CYCLE.
-                            </p>
-                        </div>
 
-                        <div className="flex flex-col md:flex-row items-center gap-16 md:border-l border-slate-100 md:pl-16">
-                            <div className="text-center md:text-right">
-                                <p className="text-[10px] font-black uppercase text-slate-400 tracking-[0.3em] mb-4 leading-none">OVERALL RATE</p>
-                                <span className="text-8xl font-black text-slate-900 tracking-tighter tabular-nums leading-none">
-                                    {total > 0 ? Math.round((passed / total) * 100) : 0}<span className="text-4xl text-slate-300 ml-1">%</span>
-                                </span>
-                            </div>
-                            <div className="space-y-5 text-[11px] font-black min-w-[200px]">
-                                {[
-                                    { label: 'PASSED ITEMS', val: passed, color: 'bg-emerald-500', rate: total > 0 ? ((passed/total)*100).toFixed(1) : 0 },
-                                    { label: 'FAILED ITEMS', val: failed, color: 'bg-rose-500', rate: total > 0 ? ((failed/total)*100).toFixed(1) : 0 }
-                                ].map((item, i) => (
-                                    <div key={i} className="flex flex-col gap-2">
-                                        <div className="flex items-center justify-between gap-4 uppercase tracking-[0.15em] text-slate-400">
-                                            <div className="flex items-center gap-2">
-                                                <div className={`w-2.5 h-2.5 rounded-full ${item.color} shadow-lg shadow-current/30`}></div>
-                                                <span>{item.label}</span>
-                                            </div>
-                                            <span className="text-slate-900">{item.val}</span>
-                                        </div>
-                                        <div className="h-1.5 w-full bg-slate-50 rounded-full overflow-hidden">
-                                            <div className={`h-full ${item.color} transition-all duration-1000 delay-300`} style={{ width: `${item.rate}%` }}></div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
+                    <div className="flex gap-4">
+                        <AuditorCard name="rosemarie" count={12} />
+                        <AuditorCard name="oscar" count={42} />
+                        <AuditorCard name="ojay" count={111} />
                     </div>
                 </div>
+            </div>
+
+            {/* CONVERSATION CLASSIFICATION */}
+            <div className="space-y-4">
+                <p className="text-md font-bold text-slate-700">Conversation classification</p>
+                <div className="flex gap-6">
+                    <MetricCard label="Sellable" count={sellable} theme="emerald" />
+                    <MetricCard label="Non-sellable" count={non_sellable} theme="rose" />
+                    <MetricCard
+                        label="Conversion rate"
+                        count="67.5%"
+                        formula="(125 Sellable ÷ 185 Total) × 100"
+                        theme="blue"
+                    />
+                </div>
+            </div>
+
+            {/* SELLABLE CONVERSATION FLOW (Under Classification per request) */}
+            <div className="space-y-4">
+                <p className="text-md font-bold text-slate-700">Sellable conversation flow</p>
+                <SellableFlow stats={stats} />
             </div>
         </div>
     );

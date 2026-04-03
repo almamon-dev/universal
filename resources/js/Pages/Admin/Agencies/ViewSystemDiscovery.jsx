@@ -40,7 +40,7 @@ export default function ViewSystemDiscovery({ agency }) {
                 </div>
 
                 <div className="mt-4 space-y-1">
-                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <p className="text-xs font-medium text-gray-500  tracking-wider">
                         {label}
                     </p>
                     <div className="flex items-baseline gap-1">
@@ -73,19 +73,17 @@ export default function ViewSystemDiscovery({ agency }) {
     }) => (
         <Link
             href={href}
-            className={`relative group block h-full ${
-                isMain
+            className={`relative group block h-full ${isMain
                     ? "transform hover:-translate-y-1"
                     : "hover:-translate-y-0.5"
-            } transition-all duration-300`}
+                } transition-all duration-300`}
         >
             {/* Main Card */}
             <div
                 className={`relative h-full p-6 rounded-xl border transition-all duration-300 overflow-hidden
-                    ${
-                        isMain
-                            ? "bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 border-transparent shadow-xl hover:shadow-2xl"
-                            : "bg-white border-gray-200 hover:border-transparent hover:shadow-xl"
+                    ${isMain
+                        ? "bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 border-transparent shadow-xl hover:shadow-2xl"
+                        : "bg-white border-gray-200 hover:border-transparent hover:shadow-xl"
                     }`}
             >
                 {/* Animated background pattern for main card */}
@@ -100,11 +98,10 @@ export default function ViewSystemDiscovery({ agency }) {
                     {/* Icon and Badge */}
                     <div className="flex items-start justify-between mb-4">
                         <div
-                            className={`w-12 h-12 rounded-lg flex items-center justify-center ${
-                                isMain
+                            className={`w-12 h-12 rounded-lg flex items-center justify-center ${isMain
                                     ? "bg-white/20 text-white"
                                     : `bg-gradient-to-br ${gradient} bg-opacity-10 text-gray-900`
-                            }`}
+                                }`}
                         >
                             <Icon
                                 size={24}
@@ -113,11 +110,10 @@ export default function ViewSystemDiscovery({ agency }) {
                         </div>
                         {badge && (
                             <span
-                                className={`px-2 py-1 text-xs font-medium rounded-full ${
-                                    isMain
+                                className={`px-2 py-1 text-xs font-medium rounded-full ${isMain
                                         ? "bg-white/20 text-white"
                                         : "bg-gray-100 text-gray-600"
-                                }`}
+                                    }`}
                             >
                                 {badge}
                             </span>
@@ -127,16 +123,14 @@ export default function ViewSystemDiscovery({ agency }) {
                     {/* Text Content */}
                     <div className="flex-1">
                         <h3
-                            className={`text-lg font-semibold mb-2 ${
-                                isMain ? "text-white" : "text-gray-900"
-                            }`}
+                            className={`text-lg font-semibold mb-2 ${isMain ? "text-white" : "text-gray-900"
+                                }`}
                         >
                             {label}
                         </h3>
                         <p
-                            className={`text-sm leading-relaxed ${
-                                isMain ? "text-white/80" : "text-gray-500"
-                            }`}
+                            className={`text-sm leading-relaxed ${isMain ? "text-white/80" : "text-gray-500"
+                                }`}
                         >
                             {description}
                         </p>
@@ -145,18 +139,16 @@ export default function ViewSystemDiscovery({ agency }) {
                     {/* Footer */}
                     <div className="mt-6 pt-4 border-t border-current border-opacity-10 flex items-center justify-between">
                         <span
-                            className={`text-xs font-medium ${
-                                isMain ? "text-white/90" : "text-gray-600"
-                            }`}
+                            className={`text-xs font-medium ${isMain ? "text-white/90" : "text-gray-600"
+                                }`}
                         >
                             Explore Protocol
                         </span>
                         <div
-                            className={`w-7 h-7 rounded-full flex items-center justify-center transition-all group-hover:translate-x-1 ${
-                                isMain
+                            className={`w-7 h-7 rounded-full flex items-center justify-center transition-all group-hover:translate-x-1 ${isMain
                                     ? "bg-white/20 text-white"
                                     : "bg-gray-100 text-gray-700 group-hover:bg-gradient-to-br group-hover:from-indigo-600 group-hover:to-purple-600 group-hover:text-white"
-                            }`}
+                                }`}
                         >
                             <ArrowUpRight size={14} />
                         </div>
@@ -236,7 +228,7 @@ export default function ViewSystemDiscovery({ agency }) {
                     {/* Discovery Sections */}
                     <div className="space-y-6">
                         <div className="flex items-center gap-3">
-                            <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wider">
+                            <h2 className="text-sm font-semibold text-gray-700  tracking-wider">
                                 Protocol Explorations
                             </h2>
                             <div className="h-px flex-1 bg-gradient-to-r from-gray-200 to-transparent" />

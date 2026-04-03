@@ -29,7 +29,7 @@ export default function QCDashboard({ agency, stats }) {
     const handleDateChange = (e) => {
         const newDate = e.target.value;
         setSelectedDate(newDate);
-        router.get(window.location.pathname, { date: newDate }, { 
+        router.get(window.location.pathname, { date: newDate }, {
             preserveState: true,
             preserveScroll: true
         });
@@ -55,13 +55,13 @@ export default function QCDashboard({ agency, stats }) {
                     <div className="flex items-center gap-3">
                         {/* Date Filter */}
                         <div className="bg-white border border-gray-100 px-3 py-1.5 rounded-md flex items-center gap-2 shadow-sm mr-2 group focus-within:border-indigo-200 transition-all">
-                             <Calendar size={16} className="text-gray-400 group-focus-within:text-indigo-500" />
-                             <input 
-                                type="date" 
+                            <Calendar size={16} className="text-gray-400 group-focus-within:text-indigo-500" />
+                            <input
+                                type="date"
                                 value={selectedDate}
                                 onChange={handleDateChange}
-                                className="border-none p-0 text-[13px] font-bold text-gray-700 focus:ring-0 outline-none w-[115px]" 
-                             />
+                                className="border-none p-0 text-[13px] font-bold text-gray-700 focus:ring-0 outline-none w-[115px]"
+                            />
                         </div>
                         <Link
                             href={user?.agency_id ? route("qc.agencies.protocols", user.agency_id) : "#"}
@@ -96,7 +96,7 @@ export default function QCDashboard({ agency, stats }) {
                             <h3 className="text-xl font-bold text-black truncate">
                                 {agency?.name || "N/A"}
                             </h3>
-                            <p className="text-[10px] text-gray-400 uppercase font-black tracking-widest">ID: {agency?.id}</p>
+                            <p className="text-[10px] text-gray-400  font-black tracking-widest">ID: {agency?.id}</p>
                         </div>
                     </div>
 
@@ -161,49 +161,49 @@ export default function QCDashboard({ agency, stats }) {
                             Live Statistics
                         </div>
                     </div>
-                    
+
                     <div className="h-[220px] w-full">
                         <ResponsiveContainer width="100%" height="100%">
                             <AreaChart data={graphData}>
                                 <defs>
                                     <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#4F46E5" stopOpacity={0.1}/>
-                                        <stop offset="95%" stopColor="#4F46E5" stopOpacity={0}/>
+                                        <stop offset="5%" stopColor="#4F46E5" stopOpacity={0.1} />
+                                        <stop offset="95%" stopColor="#4F46E5" stopOpacity={0} />
                                     </linearGradient>
                                 </defs>
-                                <CartesianGrid 
-                                    strokeDasharray="3 3" 
-                                    vertical={false} 
+                                <CartesianGrid
+                                    strokeDasharray="3 3"
+                                    vertical={false}
                                     stroke="#F3F4F6"
                                 />
-                                <XAxis 
-                                    dataKey="date" 
-                                    axisLine={false} 
+                                <XAxis
+                                    dataKey="date"
+                                    axisLine={false}
                                     tickLine={false}
                                     tick={{ fill: '#9CA3AF', fontSize: 10, fontWeight: 600 }}
                                     dy={10}
                                 />
-                                <YAxis 
-                                    axisLine={false} 
+                                <YAxis
+                                    axisLine={false}
                                     tickLine={false}
                                     tick={{ fill: '#9CA3AF', fontSize: 10, fontWeight: 600 }}
                                 />
-                                <Tooltip 
-                                    contentStyle={{ 
-                                        borderRadius: '12px', 
-                                        border: 'none', 
+                                <Tooltip
+                                    contentStyle={{
+                                        borderRadius: '12px',
+                                        border: 'none',
                                         boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)',
                                         fontSize: '12px',
                                         fontWeight: 'bold'
                                     }}
                                 />
-                                <Area 
-                                    type="monotone" 
-                                    dataKey="count" 
-                                    stroke="#4F46E5" 
+                                <Area
+                                    type="monotone"
+                                    dataKey="count"
+                                    stroke="#4F46E5"
                                     strokeWidth={3}
-                                    fillOpacity={1} 
-                                    fill="url(#colorCount)" 
+                                    fillOpacity={1}
+                                    fill="url(#colorCount)"
                                     activeDot={{ r: 6, fill: '#4F46E5', strokeWidth: 0 }}
                                 />
                             </AreaChart>

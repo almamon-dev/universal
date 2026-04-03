@@ -34,10 +34,10 @@ const Sidebar = ({ isCollapsed, toggleCollapse }) => {
                         <Shield size={28} className="text-black" />
                     </div>
                     <div className="flex flex-col">
-                        <span className="font-bold text-black text-[15px] leading-tight tracking-widest uppercase">
+                        <span className="font-bold text-black text-[15px] leading-tight tracking-widest ">
                             Invariant
                         </span>
-                        <span className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em]">
+                        <span className="text-[10px] text-gray-400 font-bold  tracking-[0.2em]">
                             Consulting
                         </span>
                     </div>
@@ -52,10 +52,9 @@ const Sidebar = ({ isCollapsed, toggleCollapse }) => {
                         href={item.path}
                         className={`
                             flex items-center gap-3 py-3 px-5 rounded-md transition-all duration-200 group
-                            ${
-                                item.active
-                                    ? "bg-[#111] text-white shadow-xl shadow-black/10"
-                                    : "text-gray-500 hover:bg-gray-50 hover:text-black"
+                            ${item.active
+                                ? "bg-[#111] text-white shadow-xl shadow-black/10"
+                                : "text-gray-500 hover:bg-gray-50 hover:text-black"
                             }
                         `}
                     >

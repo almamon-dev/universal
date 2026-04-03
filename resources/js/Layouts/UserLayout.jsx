@@ -76,7 +76,7 @@ export default function UserLayout({ children }) {
                                     />
                                     <div className="absolute right-0 mt-2 w-52 bg-white border border-gray-100 rounded-2xl shadow-xl py-2 z-20 overflow-hidden">
                                         <div className="px-4 py-3 border-b border-gray-50 mb-1">
-                                            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+                                            <p className="text-xs font-bold text-gray-400  tracking-widest">
                                                 Signed in as
                                             </p>
                                             <p className="text-sm font-bold text-gray-900 truncate mt-0.5">

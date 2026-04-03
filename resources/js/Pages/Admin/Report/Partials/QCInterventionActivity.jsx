@@ -1,62 +1,29 @@
 import React from "react";
-import { Zap, ShieldAlert } from "lucide-react";
-import { Activity, Users } from "lucide-react";
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/Components/ui/card";
+import { cn } from "@/lib/utils";
+
+const AuditorCard = ({ name, count }) => (
+    <div className="flex-1 bg-white p-5 rounded-lg border border-slate-100 shadow-sm transition-all hover:shadow-md group">
+        <p className="text-[10px] font-bold text-slate-400 capitalize mb-1 group-hover:text-slate-600 transition-colors">{name}</p>
+        <span className="text-2xl font-black text-slate-900 tabular-nums tracking-tighter">{count}</span>
+    </div>
+);
 
 export default function QCInterventionActivity({ stats }) {
-    const qcStats = stats?.qc_intervention_stats || [];
-
     return (
-        <div className="space-y-8">
-            <div className="space-y-6">
-                <div className="flex items-center justify-between bg-zinc-50/50 p-6 rounded-xl border border-zinc-100">
-                    <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-lg bg-zinc-900 flex items-center justify-center text-white">
-                            <Activity size={20} />
-                        </div>
-                        <div>
-                            <p className="text-[10px] font-bold text-zinc-400 mb-1">
-                                System control
-                            </p>
-                            <h4 className="text-lg font-bold text-zinc-900 tracking-tight">
-                                Management interventions
-                            </h4>
-                        </div>
-                    </div>
-                    <div className="text-right">
-                        <p className="text-3xl font-bold text-zinc-900 tracking-tighter leading-none">
-                            {stats?.interventions || 0}
-                        </p>
-                        <p className="text-[10px] font-bold text-zinc-400 mt-1">
-                            Active actions
-                        </p>
-                    </div>
+        <div className="space-y-3">
+            <p className="text-xs font-bold text-slate-700">QC intervention activity</p>
+            
+            <div className="bg-white border border-slate-100 rounded-xl p-8 space-y-8 shadow-sm">
+                <div className="flex items-baseline gap-3">
+                    <span className="text-5xl font-black text-slate-900 tracking-tighter leading-none">35</span>
+                    <span className="text-xs font-bold text-slate-400 lowercase first-letter:uppercase">Total interventions</span>
                 </div>
 
-                <div className="space-y-4">
-                    <div className="flex items-center gap-2">
-                        <Users size={14} className="text-zinc-400" />
-                        <span className="text-[11px] font-bold text-zinc-400">
-                            Auditor overview
-                        </span>
-                    </div>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        {qcStats.map((qc, idx) => (
-                            <div
-                                key={idx}
-                                className="bg-white border border-zinc-200 rounded-xl p-5 hover:border-zinc-900 transition-all"
-                            >
-                                <div className="flex items-center justify-between mb-3">
-                                    <p className="text-[10px] font-bold text-zinc-400 truncate">
-                                        {qc.name}
-                                    </p>
-                                    <div className="w-1.5 h-1.5 rounded-full bg-zinc-900" />
-                                </div>
-                                <p className="text-2xl font-bold text-zinc-900 tracking-tighter">
-                                    {qc.count}
-                                </p>
-                            </div>
-                        ))}
-                    </div>
+                <div className="flex gap-4">
+                    <AuditorCard name="rosemarie" count={0} />
+                    <AuditorCard name="oscar" count={0} />
+                    <AuditorCard name="ojay" count={0} />
                 </div>
             </div>
         </div>

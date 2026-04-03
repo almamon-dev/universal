@@ -40,11 +40,10 @@ export default function UserSidebar({ isSidebarOpen, setIsSidebarOpen }) {
 
     return (
         <aside
-            className={`fixed inset-y-0 left-0 w-64 bg-white border-r border-gray-100 z-50 transition-transform duration-300 ${
-                isSidebarOpen
+            className={`fixed inset-y-0 left-0 w-64 bg-white border-r border-gray-100 z-50 transition-transform duration-300 ${isSidebarOpen
                     ? "translate-x-0 shadow-2xl"
                     : "-translate-x-full lg:translate-x-0"
-            }`}
+                }`}
         >
             <div className="h-full flex flex-col">
                 {/* Logo Section */}
@@ -54,10 +53,10 @@ export default function UserSidebar({ isSidebarOpen, setIsSidebarOpen }) {
                             <LayoutDashboard size={22} strokeWidth={2.5} />
                         </div>
                         <div className="flex flex-col">
-                            <span className="font-black text-black text-[13px] leading-tight tracking-[0.15em] uppercase">
-                                   QC 
+                            <span className="font-black text-black text-[13px] leading-tight tracking-[0.15em] ">
+                                QC
                             </span>
-                            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em]">
+                            <span className="text-[10px] text-gray-400 font-bold  tracking-[0.2em]">
                                 Dashboard
                             </span>
                         </div>
@@ -72,10 +71,9 @@ export default function UserSidebar({ isSidebarOpen, setIsSidebarOpen }) {
                             href={item.href}
                             onClick={() => setIsSidebarOpen(false)}
                             className={`flex items-center gap-3 px-4 py-3 rounded-md text-[14px] font-bold transition-all duration-200 group relative
-                                ${
-                                    item.active
-                                        ? "bg-[#18181b] text-white shadow-lg shadow-black/5"
-                                        : "text-gray-500 hover:text-black hover:bg-gray-50"
+                                ${item.active
+                                    ? "bg-[#18181b] text-white shadow-lg shadow-black/5"
+                                    : "text-gray-500 hover:text-black hover:bg-gray-50"
                                 }
                             `}
                         >

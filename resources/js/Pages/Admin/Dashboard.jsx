@@ -133,16 +133,16 @@ export default function Dashboard({ auth, stats, agencies }) {
                             <table className="w-full text-left">
                                 <thead>
                                     <tr className="bg-gray-50/50">
-                                        <th className="px-6 py-3 text-xs font-bold text-gray-400 uppercase tracking-wider">
+                                        <th className="px-6 py-3 text-xs font-bold text-gray-400  tracking-wider">
                                             Agency Info
                                         </th>
-                                        <th className="px-6 py-3 text-xs font-bold text-gray-400 uppercase tracking-wider">
+                                        <th className="px-6 py-3 text-xs font-bold text-gray-400  tracking-wider">
                                             Status
                                         </th>
-                                        <th className="px-6 py-3 text-xs font-bold text-gray-400 uppercase tracking-wider">
+                                        <th className="px-6 py-3 text-xs font-bold text-gray-400  tracking-wider">
                                             Statistics
                                         </th>
-                                        <th className="px-6 py-3 text-xs font-bold text-gray-400 uppercase tracking-wider text-right">
+                                        <th className="px-6 py-3 text-xs font-bold text-gray-400  tracking-wider text-right">
                                             Quick Actions
                                         </th>
                                     </tr>
@@ -191,7 +191,7 @@ export default function Dashboard({ auth, stats, agencies }) {
                                                         className="data-[state=checked]:bg-indigo-600"
                                                     />
                                                     <span
-                                                        className={`text-xs font-bold uppercase tracking-wider ${agency.status === "active" ? "text-indigo-600" : "text-gray-400"}`}
+                                                        className={`text-xs font-bold  tracking-wider ${agency.status === "active" ? "text-indigo-600" : "text-gray-400"}`}
                                                     >
                                                         {agency.status}
                                                     </span>

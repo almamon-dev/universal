@@ -20,17 +20,15 @@ export default function Discovery({ agency }) {
     }) => (
         <Link
             href={href}
-            className={`flex flex-col p-8 rounded-2xl border ${
-                isMain
+            className={`flex flex-col p-8 rounded-2xl border ${isMain
                     ? "bg-indigo-600 border-indigo-600 text-white shadow-xl shadow-indigo-100"
                     : "bg-white border-gray-200 text-gray-600 shadow-sm"
-            } hover:scale-[1.02] transition-all`}
+                } hover:scale-[1.02] transition-all`}
         >
             <div className="flex flex-col h-full gap-6">
                 <div
-                    className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                        isMain ? "bg-white/10 text-white" : colorClass
-                    }`}
+                    className={`w-12 h-12 rounded-xl flex items-center justify-center ${isMain ? "bg-white/10 text-white" : colorClass
+                        }`}
                 >
                     <Icon size={24} />
                 </div>
@@ -49,7 +47,7 @@ export default function Discovery({ agency }) {
                 </div>
 
                 <div className="mt-auto pt-5 flex items-center justify-between border-t border-gray-100/10">
-                    <span className="text-xs font-medium uppercase tracking-wider opacity-70">
+                    <span className="text-xs font-medium  tracking-wider opacity-70">
                         Explore System
                     </span>
                     <ArrowUpRight size={16} />
@@ -101,7 +99,7 @@ export default function Discovery({ agency }) {
                         </div>
                         <div className="flex gap-3">
                             <div className="flex-1 p-3 bg-gray-50 rounded-xl border border-gray-100">
-                                <p className="text-[10px] uppercase font-bold text-gray-400">
+                                <p className="text-[10px]  font-bold text-gray-400">
                                     Status
                                 </p>
                                 <p className="text-sm font-semibold text-gray-900">
@@ -109,7 +107,7 @@ export default function Discovery({ agency }) {
                                 </p>
                             </div>
                             <div className="flex-1 p-3 bg-gray-50 rounded-xl border border-gray-100">
-                                <p className="text-[10px] uppercase font-bold text-gray-400">
+                                <p className="text-[10px]  font-bold text-gray-400">
                                     Nodes
                                 </p>
                                 <p className="text-sm font-semibold text-gray-900">

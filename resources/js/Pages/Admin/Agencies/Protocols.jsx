@@ -131,7 +131,7 @@ export default function Protocols({ agency }) {
                             <Info size={24} />
                         </div>
                         <div className="flex-1">
-                            <h3 className="text-sm font-bold mb-4 uppercase tracking-widest text-indigo-900">
+                            <h3 className="text-sm font-bold mb-4  tracking-widest text-indigo-900">
                                 Protocol Best Practices
                             </h3>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

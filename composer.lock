@@ -354,7 +354,7 @@
                 "plural",
                 "singular",
                 "strings",
-                "uppercase",
+                "",
                 "words"
             ],
             "support": {

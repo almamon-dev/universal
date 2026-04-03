@@ -1,115 +1,220 @@
 import React from "react";
 import AdminLayout from "@/Layouts/AdminLayout";
-import { Head } from "@inertiajs/react";
-import { Activity, Download } from "lucide-react";
+import { Head, Link } from "@inertiajs/react";
+import { cn } from "@/lib/utils";
+import {
+    Activity,
+    Calendar,
+    ChevronDown,
+    Download,
+    Filter,
+    Shield,
+    FileText,
+    ArrowLeft,
+    ChevronUp
+} from "lucide-react";
+import { Card, CardContent } from "@/Components/ui/card";
+import { Button } from "@/Components/ui/button";
 import ReportSection from "./Partials/ReportSection";
 import ExecutiveSnapshot from "./Partials/ExecutiveSnapshot";
 import UnitVolume from "./Partials/UnitVolume";
-import SellableFlow from "./Partials/SellableFlow";
-import MetricGrids from "./Partials/MetricGrids";
 import RevenueLeakage from "./Partials/RevenueLeakage";
 import RevenueFaultMapping from "./Partials/RevenueFaultMapping";
 import DailyAuditCoverage from "./Partials/DailyAuditCoverage";
 import QCInterventionActivity from "./Partials/QCInterventionActivity";
+import ChatterAuditReport from "./Partials/ChatterAuditReport";
+import CreatorAuditReport from "./Partials/CreatorAuditReport";
 
-export default function WeeklyReport({ agency, stats = {} }) {
+export default function WeeklyReport({ agency, stats }) {
+    const [isComparisonOpen, setIsComparisonOpen] = React.useState(false);
+    const [activeTab, setActiveTab] = React.useState("weekly");
+    const [startDate, setStartDate] = React.useState("2026-02-10");
+    const [endDate, setEndDate] = React.useState("2026-02-17");
+
     return (
         <AdminLayout>
-            <Head title={`WEEKLY REPORT - ${agency.name}`} />
+            <Head title={`${activeTab === 'weekly' ? 'Weekly Quality Control' : activeTab === 'chatter' ? 'Chatter Audit' : 'Creator Audit'} Report — ${agency.name}`} />
 
-            <div className="min-h-screen bg-[#F8FAFC] pb-24">
-                <main className="max-w-[1400px] mx-auto px-4 md:px-8 space-y-10 pt-10">
-                    {/* Report Hero Card */}
-                    <div className="bg-white rounded-[2.5rem] border border-slate-200/60 shadow-[0_12px_40px_rgb(0,0,0,0.03)] overflow-hidden">
-                        <div className="p-10 md:p-16 bg-gradient-to-br from-white via-white to-slate-50/50 relative overflow-hidden">
-                            <div className="absolute top-0 right-0 p-12 opacity-[0.02] pointer-events-none">
-                                <Activity size={320} strokeWidth={1} />
+            <div className="min-h-screen bg-[#F8FAFC]" style={{ fontFamily: "'Inter', sans-serif" }}>
+                <div className="max-w-7xl mx-auto px-4 py-4 space-y-4">
+
+                    {/* Top Row: Back link and Save button */}
+                    <div className="flex items-center justify-between">
+                        <Link
+                            href={route("admin.agencies.edit", agency.id)}
+                            className="flex items-center gap-3 text-slate-600 hover:text-slate-950 transition-colors font-bold text-sm"
+                        >
+                            <ArrowLeft size={20} /> Back to Dashboard
+                        </Link>
+
+                        <button className="bg-[#2563EB] hover:bg-blue-700 text-white font-bold text-xs px-8 py-3 rounded-lg shadow-lg shadow-blue-100 flex items-center gap-2">
+                            <Download size={14} className="stroke-[3]" /> Save as PDF
+                        </button>
+                    </div>
+
+                    {/* Filter Card: Date Selectors */}
+                    <Card className="shadow-none border-slate-100 bg-white rounded-md overflow-hidden">
+                        <CardContent className="p-8 flex items-center gap-10">
+                            <div className="flex items-center gap-3 pr-2 border-r border-slate-50">
+                                <Calendar size={24} className="text-slate-400 stroke-[1.5]" />
                             </div>
-
-                            <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-12">
-                                <div className="space-y-6">
-                                    <div className="inline-flex items-center gap-2.5 px-4 py-1.5 bg-blue-50 text-blue-700 rounded-full text-[10px] font-black tracking-[0.2em] uppercase ring-1 ring-blue-100/50">
-                                        <span className="relative flex h-2 w-2">
-                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                                            <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-600"></span>
-                                        </span>
-                                        INTERNAL ANALYTICAL AUDIT 2.0
+                            <div className="flex items-center gap-10">
+                                <div className="flex items-center gap-4">
+                                    <span className="text-xs font-bold text-slate-500 lowercase first-letter:uppercase">Start Date:</span>
+                                    <div className="relative group">
+                                        <input
+                                            type="date"
+                                            value={startDate}
+                                            onChange={(e) => setStartDate(e.target.value)}
+                                            className="w-52 bg-white border border-slate-200 rounded-md px-5 py-3 text-[11px] font-bold text-slate-700 shadow-sm hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/5 transition-all outline-none"
+                                        />
                                     </div>
-                                    <div>
-                                        <h1 className="text-5xl md:text-6xl font-black text-slate-900 tracking-tighter leading-[0.95] uppercase">
-                                            WEEKLY QUALITY <br />
-                                            <span className="text-blue-600">CONTROL REPORT</span>
-                                        </h1>
-                                        <div className="flex flex-wrap items-center gap-4 mt-8">
-                                            <div className="px-5 py-2 bg-slate-900 rounded-2xl shadow-lg shadow-black/10">
-                                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">PARTNER</p>
-                                                <p className="text-white font-bold text-sm uppercase">{agency.name}</p>
-                                            </div>
-                                            <div className="px-5 py-2 bg-white rounded-2xl border border-slate-200">
-                                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">REPORTING CYCLE</p>
-                                                <p className="text-slate-900 font-bold text-sm tracking-tight uppercase">{stats?.period?.full_range || "CURRENT ACTIVE CYCLE"}</p>
-                                            </div>
+                                </div>
+
+                                <div className="flex items-center gap-4">
+                                    <span className="text-xs font-bold text-slate-500 lowercase first-letter:uppercase">End Date:</span>
+                                    <div className="relative group">
+                                        <input
+                                            type="date"
+                                            value={endDate}
+                                            onChange={(e) => setEndDate(e.target.value)}
+                                            className="w-52 bg-white border border-slate-200 rounded-md px-5 py-3 text-[11px] font-bold text-slate-700 shadow-sm hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/5 transition-all outline-none"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* Tabs Card */}
+                    <Card className="bg-white border-slate-100 rounded-md p-1 shadow-sm overflow-hidden animate-in fade-in duration-500 w-fit">
+                        <div className="flex items-center gap-3 p-1">
+                            <button
+                                onClick={() => setActiveTab("weekly")}
+                                className={cn(
+                                    "px-10 py-4 rounded-md text-sm font-bold transition-all duration-300",
+                                    activeTab === "weekly"
+                                        ? "bg-[#2563EB] text-white shadow-[0_4px_12px_rgba(37,99,235,0.25)]"
+                                        : "bg-slate-50 text-slate-600 hover:bg-slate-100/80 hover:text-slate-900"
+                                )}
+                            >
+                                Weekly Quality Control Report
+                            </button>
+                            <button
+                                onClick={() => setActiveTab("chatter")}
+                                className={cn(
+                                    "px-10 py-4 rounded-md text-sm font-bold transition-all duration-300",
+                                    activeTab === "chatter"
+                                        ? "bg-[#2563EB] text-white shadow-[0_4px_12px_rgba(37,99,235,0.25)]"
+                                        : "bg-slate-50 text-slate-600 hover:bg-slate-100/80 hover:text-slate-900"
+                                )}
+                            >
+                                Chatter Audit Report
+                            </button>
+                            <button
+                                onClick={() => setActiveTab("creator")}
+                                className={cn(
+                                    "px-10 py-4 rounded-md text-sm font-bold transition-all duration-300",
+                                    activeTab === "creator"
+                                        ? "bg-[#2563EB] text-white shadow-[0_4px_12px_rgba(37,99,235,0.25)]"
+                                        : "bg-slate-50 text-slate-600 hover:bg-slate-100/80 hover:text-slate-900"
+                                )}
+                            >
+                                Creator Audit Report
+                            </button>
+                        </div>
+                    </Card>
+
+                    {activeTab === "weekly" && (
+                        <Card className="shadow-none border-slate-100 bg-white rounded-md overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-700">
+                            <div className="px-12 pt-8 pb-6 space-y-8">
+
+                                {/* Title Card Content */}
+                                <div className="space-y-10">
+                                    <div className="space-y-1">
+                                        <h1 className="text-lg font-bold text-slate-900 tracking-tight leading-none">Weekly Quality Control Report</h1>
+                                        <p className="text-[10px] font-bold text-slate-400 tracking-wide">Prepared by Invariant Consulting</p>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-y-4 gap-x-8 pt-4 border-t border-slate-50 mt-6">
+                                        <div className="space-y-1.5 px-1">
+                                            <p className="text-[10px] text-slate-400 font-bold tracking-tight">Agency</p>
+                                            <p className="text-sm text-slate-900 font-black leading-none">{agency.name}</p>
+                                        </div>
+                                        <div className="space-y-1.5 px-1">
+                                            <p className="text-[10px] text-slate-400 font-bold tracking-tight">Reporting period</p>
+                                            <p className="text-sm text-slate-900 font-black leading-none">{stats?.period?.full_range || 'Feb 10 – Feb 17, 2026'}</p>
+                                        </div>
+                                        <div className="space-y-1.5 px-1">
+                                            <p className="text-[10px] text-slate-400 font-bold tracking-tight">Report status</p>
+                                            <p className="text-sm text-slate-900 font-black leading-none">Finalized</p>
+                                        </div>
+                                        <div className="space-y-1.5 px-1">
+                                            <p className="text-[10px] text-slate-400 font-bold tracking-tight">Generated</p>
+                                            <p className="text-sm text-slate-900 font-black leading-none">{new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-6 w-full lg:w-auto">
-                                    <div className="p-6 bg-white rounded-[2rem] border border-slate-100 shadow-sm flex flex-col justify-center min-w-[180px]">
-                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 leading-none text-center">GENERATED</p>
-                                        <p className="text-slate-900 font-extrabold text-xl text-center tabular-nums">
-                                            {new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }).toUpperCase()}
-                                        </p>
-                                    </div>
-                                    <div className="p-6 bg-white rounded-[2rem] border border-slate-100 shadow-sm flex flex-col justify-center min-w-[180px]">
-                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 leading-none text-center">STATUS</p>
-                                        <p className="text-emerald-600 font-extrabold text-xl flex items-center justify-center gap-2 uppercase tracking-tighter">
-                                            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                                            VERIFIED
-                                        </p>
-                                    </div>
+                                {/* Section Wrapper */}
+                                <div className="pt-6 border-t border-slate-50/50 space-y-8">
+
+                                    <ReportSection title="Executive Snapshot" label="Audit volume summary">
+                                        <ExecutiveSnapshot stats={stats} />
+                                    </ReportSection>
+
+                                    <ReportSection title="Quality Breakdown" label="Operational classification">
+                                        <div className="space-y-8">
+                                            <QCInterventionActivity stats={stats} />
+                                            <UnitVolume stats={stats} />
+                                        </div>
+                                    </ReportSection>
+
+                                    <ReportSection title="Phase I — Signal Audit" label="Revenue leakage analysis">
+                                        <RevenueLeakage stats={stats} />
+                                    </ReportSection>
+
+                                    <ReportSection title="Phase II — Revenue Fault Mapping" label="Diagnostic fault matrix">
+                                        <RevenueFaultMapping isComparisonOpen={false} />
+                                    </ReportSection>
+
+                                    <ReportSection
+                                        title="Phase II - Revenue Fault Mapping: Week-by-Week Comparison"
+                                        label="Diagnostic fault comparison"
+                                        action={
+                                            <button
+                                                onClick={() => setIsComparisonOpen(!isComparisonOpen)}
+                                                className="bg-[#2563EB] hover:bg-blue-700 text-white font-bold text-xs px-4 py-2 rounded-lg flex items-center gap-2 transition-all shadow-md"
+                                            >
+                                                {isComparisonOpen ? <ChevronUp size={14} strokeWidth={3} /> : <ChevronDown size={14} strokeWidth={3} />}
+                                                {isComparisonOpen ? "Hide Comparison" : "Show Comparison"}
+                                            </button>
+                                        }
+                                    >
+                                        {isComparisonOpen && <RevenueFaultMapping isComparisonOpen={true} />}
+                                    </ReportSection>
+
+                                    <ReportSection title="Operations & Coverage" label="Audit frequency timeline">
+                                        <DailyAuditCoverage stats={stats} />
+                                    </ReportSection>
                                 </div>
                             </div>
-                        </div>
-                    </div>
+                        </Card>
+                    )}
 
-                    {/* Sections Content as individual cards */}
-                        <div className="space-y-6 md:space-y-10">
-                            <ReportSection title="EXECUTIVE SNAPSHOT" subtitle="SUMMARY OF AUDIT VOLUME AND PERFORMANCE">
-                                <ExecutiveSnapshot stats={stats} />
-                            </ReportSection>
+                    {activeTab === "chatter" && (
+                        <Card className="shadow-none border-slate-100 bg-white rounded-md overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-700">
+                            <ChatterAuditReport agency={agency} stats={stats} />
+                        </Card>
+                    )}
 
-                            <ReportSection title="QUALITY BREAKDOWN" subtitle="PERFORMANCE DISTRIBUTION AND MANAGEMENT ACTIONS">
-                                <div className="grid grid-cols-1 gap-12">
-                                    <UnitVolume stats={stats} />
-                                    <QCInterventionActivity stats={stats} />
-                                </div>
-                            </ReportSection>
-
-                            <ReportSection title="PHASE I • SIGNAL AUDIT" subtitle="REVENUE LEAKAGE AND IDENTIFIER ANALYSIS">
-                                <RevenueLeakage stats={stats} />
-                            </ReportSection>
-
-                            <ReportSection title="PHASE II • REVENUE FAULT MAPPING" subtitle="COMPREHENSIVE FAULT MAPPING ACROSS CATEGORIES">
-                                <RevenueFaultMapping stats={stats} />
-                            </ReportSection>
-
-                            <ReportSection title="PHASE III • TREND ANALYSIS" subtitle="WEEK-OVER-WEEK VARIANCE PERFORMANCE">
-                                <MetricGrids stats={stats} />
-                            </ReportSection>
-
-                            <ReportSection title="OPERATIONS & COVERAGE" subtitle="DAILY AUDIT ACTIVITY AND PERFORMANCE VELOCITY">
-                                <DailyAuditCoverage stats={stats} />
-                            </ReportSection>
-                        </div>
-                </main>
+                    {activeTab === "creator" && (
+                        <Card className="shadow-none border-slate-100 bg-white rounded-md overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-700">
+                            <CreatorAuditReport agency={agency} stats={stats} />
+                        </Card>
+                    )}
+                </div>
             </div>
-
-            <style>{`
-                @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-                body { font-family: 'Plus Jakarta Sans', sans-serif !important; }
-                * { text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
-            `}</style>
         </AdminLayout>
     );
 }
-
