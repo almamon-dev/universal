@@ -941,7 +941,7 @@ export default function Audits({ auth, agency, audits, audit_fields }) {
                                                                             )}
                                                                         </div>
                                                                     </div>
-                                                                    <p className="text-xs text-zinc-400 font-medium italic">
+                                                                    <p className="text-xs text-zinc-400 font-medium">
                                                                         {field.field_label || field.name} • {field.type}
                                                                     </p>
                                                                 </div>
@@ -1018,7 +1018,7 @@ export default function Audits({ auth, agency, audits, audit_fields }) {
                                                                     <p className="text-[10px] font-black text-gray-400  tracking-widest">
                                                                         Description:
                                                                     </p>
-                                                                    <p className="text-sm text-gray-600 mt-1 italic">
+                                                                    <p className="text-sm text-gray-600 mt-1">
                                                                         "{field.help_text}"
                                                                     </p>
                                                                 </div>

@@ -63,12 +63,6 @@ export default function ExecutiveSnapshot({ stats }) {
                 <div className="flex gap-6">
                     <MetricCard label="Sellable" count={sellable} theme="emerald" />
                     <MetricCard label="Non-sellable" count={non_sellable} theme="rose" />
-                    <MetricCard
-                        label="Conversion rate"
-                        count="67.5%"
-                        formula="(125 Sellable ÷ 185 Total) × 100"
-                        theme="blue"
-                    />
                 </div>
             </div>
 

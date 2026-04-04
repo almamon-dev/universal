@@ -163,7 +163,7 @@ export default function WeeklyReport({ agency, stats }) {
                                         <ExecutiveSnapshot stats={stats} />
                                     </ReportSection>
 
-                                    <ReportSection title="Quality Breakdown" label="Operational classification">
+                                    <ReportSection>
                                         <div className="space-y-8">
                                             <QCInterventionActivity stats={stats} />
                                             <UnitVolume stats={stats} />
@@ -194,7 +194,7 @@ export default function WeeklyReport({ agency, stats }) {
                                         {isComparisonOpen && <RevenueFaultMapping isComparisonOpen={true} />}
                                     </ReportSection>
 
-                                    <ReportSection title="Operations & Coverage" label="Audit frequency timeline">
+                                    <ReportSection>
                                         <DailyAuditCoverage stats={stats} />
                                     </ReportSection>
                                 </div>

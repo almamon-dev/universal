@@ -1,15 +1,18 @@
 import React from "react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LabelList } from "recharts";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/Components/ui/card";
 
 const data = [
-    { name: "Jan 25", audits: 35 },
-    { name: "Jan 26", audits: 48 },
-    { name: "Jan 27", audits: 40 },
-    { name: "Jan 28", audits: 120 },
-    { name: "Jan 29", audits: 32 },
-    { name: "Jan 30", audits: 48 },
-    { name: "Jan 31", audits: 28 },
+    { name: "Apr 01", audits: 85 }, { name: "Apr 02", audits: 62 }, { name: "Apr 03", audits: 94 },
+    { name: "Apr 04", audits: 110 }, { name: "Apr 05", audits: 45 }, { name: "Apr 06", audits: 78 },
+    { name: "Apr 07", audits: 64 }, { name: "Apr 08", audits: 92 }, { name: "Apr 09", audits: 88 },
+    { name: "Apr 10", audits: 105 }, { name: "Apr 11", audits: 56 }, { name: "Apr 12", audits: 42 },
+    { name: "Apr 13", audits: 88 }, { name: "Apr 14", audits: 95 }, { name: "Apr 15", audits: 112 },
+    { name: "Apr 16", audits: 84 }, { name: "Apr 17", audits: 76 }, { name: "Apr 18", audits: 65 },
+    { name: "Apr 19", audits: 52 }, { name: "Apr 20", audits: 91 }, { name: "Apr 21", audits: 87 },
+    { name: "Apr 22", audits: 104 }, { name: "Apr 23", audits: 96 }, { name: "Apr 24", audits: 115 },
+    { name: "Apr 25", audits: 62 }, { name: "Apr 26", audits: 48 }, { name: "Apr 27", audits: 89 },
+    { name: "Apr 28", audits: 97 }, { name: "Apr 29", audits: 108 }, { name: "Apr 30", audits: 125 },
 ];
 
 export default function DailyAuditCoverage({ stats }) {
@@ -31,6 +34,7 @@ export default function DailyAuditCoverage({ stats }) {
                                 tickLine={false}
                                 tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 500 }}
                                 dy={10}
+                                interval={2}
                             />
                             <YAxis
                                 axisLine={false}
@@ -54,7 +58,14 @@ export default function DailyAuditCoverage({ stats }) {
                                 fill="#3b82f6"
                                 radius={[4, 4, 0, 0]}
                                 barSize={40}
-                            />
+                            >
+                                <LabelList 
+                                    dataKey="audits" 
+                                    position="top" 
+                                    style={{ fill: '#64748b', fontSize: '9px', fontWeight: '600' }}
+                                    offset={10}
+                                />
+                            </Bar>
                         </BarChart>
                     </ResponsiveContainer>
                 </div>
