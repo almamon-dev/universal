@@ -20,21 +20,18 @@ import { useState, useRef, useEffect } from "react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import toast from "react-hot-toast";
 
-export default function CreateAudit({ agency, chatters = [], creators = [] }) {
+export default function CreateAudit({ agency, chatters = [], creators = [], audit_templates }) {
     const { auth } = usePage().props;
     const user = auth.user;
-    const auditFields = agency.audit_fields || [];
+    const auditFields = audit_templates || [];
+
     const [activeTabIndex, setActiveTabIndex] = useState(0);
     const tabContainerRef = useRef(null);
     const [showScrollButtons, setShowScrollButtons] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
-
+    
     const generateFieldKey = (field) => {
-        if (field.id) return field.id.toString();
-        return (field.field_label || field.name || "")
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, "_")
-            .replace(/^_+|_+$/g, "");
+        return field.field_key || field.id;
     };
 
     const emptyAudit = {
@@ -534,51 +531,124 @@ export default function CreateAudit({ agency, chatters = [], creators = [] }) {
                                                                     fieldItem,
                                                                 );
 
-                                                            // Waterfall logic
-                                                            const isFirst =
-                                                                fIdx === 0;
-                                                            const prevField =
-                                                                auditFields[
-                                                                    fIdx - 1
-                                                                ];
-                                                            const prevKey =
-                                                                prevField
-                                                                    ? generateFieldKey(
-                                                                          prevField,
-                                                                      )
-                                                                    : null;
-                                                            const prevValue =
-                                                                prevKey
-                                                                    ? responses[
-                                                                          prevKey
-                                                                      ]
-                                                                    : null;
-                                                            const isVisible =
-                                                                isFirst ||
-                                                                (prevValue !==
-                                                                    undefined &&
-                                                                    prevValue !==
-                                                                        null &&
-                                                                    prevValue
-                                                                        .toString()
-                                                                        .trim() !==
-                                                                        "");
+                                                            const slugify = (str) =>
+                                                                (str || "")
+                                                                    .toLowerCase()
+                                                                    .replace(/[^a-z0-9]+/g, "")
+                                                                    .trim();
 
-                                                            if (!isVisible)
-                                                                return null;
+                                                            const findTargetField = (label, allFields) => {
+                                                                const sLabel = slugify(label);
+                                                                if (!sLabel) return null;
+
+                                                                // 1. Check ID first (this is common in template rules)
+                                                                let found = allFields.find(
+                                                                    (f) =>
+                                                                        slugify(f.id?.toString()) === sLabel
+                                                                );
+                                                                if (found) return found;
+
+                                                                // 2. Exact slug match for labels
+                                                                found = allFields.find(
+                                                                    (f) =>
+                                                                        slugify(f.field_label) === sLabel ||
+                                                                        slugify(f.name) === sLabel,
+                                                                );
+                                                                if (found) return found;
+
+                                                                // 3. Prefix match (handles "pitched" vs "pitch")
+                                                                found = allFields.find((f) => {
+                                                                    const sField = slugify(f.field_label || f.name);
+                                                                    return (
+                                                                        sField.substring(0, 15) ===
+                                                                        sLabel.substring(0, 15)
+                                                                    );
+                                                                });
+                                                                if (found) return found;
+
+                                                                // 4. Substring match
+                                                                found = allFields.find((f) => {
+                                                                    const sField = slugify(f.field_label || f.name);
+                                                                    return (
+                                                                        sField.includes(sLabel) ||
+                                                                        sLabel.includes(sField)
+                                                                    );
+                                                                });
+                                                                return found;
+                                                            };
+
+                                                            const evaluateCondition = (condition, responses, allFields) => {
+                                                                if (!condition) return true;
+
+                                                                const parts = condition.split(/\s+(?:AND|and)\s+/);
+                                                                return parts.every((part) => {
+                                                                    const match = part.match(/(.+?)\s*=\s*(.+)/);
+                                                                    if (!match) return true;
+
+                                                                    const label = match[1].trim();
+                                                                    const expectedValue = match[2].trim();
+
+                                                                    const targetField = findTargetField(label, allFields);
+                                                                    // If we can't find the source field, stay visible for safety
+                                                                    if (!targetField) return true;
+
+                                                                    const targetKey = generateFieldKey(targetField);
+                                                                    const actualValue = responses[targetKey];
+
+                                                                    return (
+                                                                        actualValue?.toString().toLowerCase() ===
+                                                                        expectedValue.toLowerCase()
+                                                                    );
+                                                                });
+                                                            };
+
+                                                            const isVisible = (() => {
+                                                                if (fIdx === 0) return true;
+
+                                                                // 1. Check own condition first
+                                                                const conditionMet = evaluateCondition(
+                                                                    fieldItem.required_if,
+                                                                    responses,
+                                                                    auditFields,
+                                                                );
+                                                                if (!conditionMet) return false;
+
+                                                                // 2. Find the last visible field before this one to check waterfall
+                                                                let lastVisibleIdx = -1;
+                                                                for (let i = fIdx - 1; i >= 0; i--) {
+                                                                    if (
+                                                                        evaluateCondition(
+                                                                            auditFields[i].required_if,
+                                                                            responses,
+                                                                            auditFields,
+                                                                        )
+                                                                    ) {
+                                                                        lastVisibleIdx = i;
+                                                                        break;
+                                                                    }
+                                                                }
+
+                                                                if (lastVisibleIdx === -1) return true;
+
+                                                                const lastField = auditFields[lastVisibleIdx];
+                                                                const lastKey = generateFieldKey(lastField);
+                                                                const lastVal = responses[lastKey];
+
+                                                                return (
+                                                                    lastVal !== undefined &&
+                                                                    lastVal !== null &&
+                                                                    lastVal.toString().trim() !== ""
+                                                                );
+                                                            })();
+
+                                                            if (!isVisible) return null;
 
                                                             const isSelect =
-                                                                fieldItem.type ===
-                                                                    "select" ||
+                                                                fieldItem.type === "select" ||
                                                                 fieldItem.options ||
-                                                                (
-                                                                    fieldItem.field_label ||
-                                                                    ""
-                                                                )
+                                                                (fieldItem.field_label || "")
                                                                     .toLowerCase()
-                                                                    .includes(
-                                                                        "subscriber type",
-                                                                    );
+                                                                    .includes("subscriber type");
 
                                                             const hasError =
                                                                 errors.audits?.[
@@ -600,7 +670,7 @@ export default function CreateAudit({ agency, chatters = [], creators = [] }) {
                                                                 >
                                                                     <div className="flex items-start justify-between">
                                                                         <label className="text-sm font-medium text-gray-700">
-                                                                            {fieldItem.field_label ||
+                                                                            {fIdx + 1}. {fieldItem.field_label ||
                                                                                 fieldItem.name}
                                                                             {fieldItem.required && (
                                                                                 <span className="text-red-500 ml-1">
@@ -627,9 +697,7 @@ export default function CreateAudit({ agency, chatters = [], creators = [] }) {
                                                                         (() => {
                                                                             const options =
                                                                                 fieldItem.options
-                                                                                    ?.split(
-                                                                                        ",",
-                                                                                    )
+                                                                                    ?.split(/,(?![^()]*\))/)
                                                                                     .map(
                                                                                         (
                                                                                             o,
@@ -684,29 +752,6 @@ export default function CreateAudit({ agency, chatters = [], creators = [] }) {
                                                                                                                     shouldDirty: true,
                                                                                                                 },
                                                                                                             );
-                                                                                                            auditFields
-                                                                                                                .slice(
-                                                                                                                    fIdx +
-                                                                                                                        1,
-                                                                                                                )
-                                                                                                                .forEach(
-                                                                                                                    (
-                                                                                                                        subField,
-                                                                                                                    ) => {
-                                                                                                                        const subKey =
-                                                                                                                            generateFieldKey(
-                                                                                                                                subField,
-                                                                                                                            );
-                                                                                                                        setValue(
-                                                                                                                            `audits.${index}.responses.${subKey}`,
-                                                                                                                            "",
-                                                                                                                            {
-                                                                                                                                shouldValidate: true,
-                                                                                                                                shouldDirty: true,
-                                                                                                                            },
-                                                                                                                        );
-                                                                                                                    },
-                                                                                                                );
                                                                                                         }}
                                                                                                         className={`flex-1 h-11 rounded-md border-2 flex items-center justify-center gap-2 transition-all ${
                                                                                                             isSelected

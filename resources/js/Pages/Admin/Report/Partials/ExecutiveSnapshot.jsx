@@ -34,9 +34,10 @@ const MetricCard = ({ label, count, formula, theme = "emerald" }) => {
 };
 
 export default function ExecutiveSnapshot({ stats }) {
-    const total_audits = stats?.total_audits || 165;
-    const sellable = stats?.sellable || 100;
-    const non_sellable = stats?.non_sellable || 65;
+    const total_audits = stats?.total_audits || 0;
+    const sellable = stats?.sellable || 0;
+    const non_sellable = stats?.non_sellable || 0;
+    const auditor_stats = stats?.auditor_stats || []; // Dynamically map from DB
 
     return (
         <div className="space-y-10">
@@ -49,10 +50,14 @@ export default function ExecutiveSnapshot({ stats }) {
                         <span className="text-xs font-bold text-slate-400 lowercase first-letter:uppercase">Total audits</span>
                     </div>
 
-                    <div className="flex gap-4">
-                        <AuditorCard name="rosemarie" count={12} />
-                        <AuditorCard name="oscar" count={42} />
-                        <AuditorCard name="ojay" count={111} />
+                    <div className="flex flex-wrap gap-4">
+                        {auditor_stats.length > 0 ? (
+                            auditor_stats.map((auditor, idx) => (
+                                <AuditorCard key={idx} name={auditor.name} count={auditor.count} />
+                            ))
+                        ) : (
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">No auditor data available yet</p>
+                        )}
                     </div>
                 </div>
             </div>

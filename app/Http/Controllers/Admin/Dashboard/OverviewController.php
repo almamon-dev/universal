@@ -15,11 +15,11 @@ class OverviewController extends Controller
 
         // If hitting generic /dashboard, redirect to proper one
         if (request()->routeIs('dashboard')) {
-            if ($user->is_admin) {
-                return redirect()->route('admin.dashboard')->withQueryString();
+            if ($user->is_admin || $user->role === 'admin') {
+                return redirect()->route('admin.dashboard');
             }
             if ($user->role === 'qc') {
-                return redirect()->route('qc.dashboard')->withQueryString();
+                return redirect()->route('qc.dashboard');
             }
         }
 

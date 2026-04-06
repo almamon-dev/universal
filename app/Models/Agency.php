@@ -8,15 +8,31 @@ class Agency extends Model
 {
     protected $guarded = [];
 
+    protected $casts = [
+        // Obsolete JSON fields removed for Professional Relational tables
+    ];
+
+    public function auditFields()
+    {
+        return $this->belongsToMany(AuditField::class, 'agency_audit_field')
+                    ->withPivot('sort_order')
+                    ->orderBy('sort_order');
+    }
+
+    public function protocols()
+    {
+        return $this->hasMany(Protocol::class);
+    }
+
+    public function discoveryProgress()
+    {
+        return $this->hasMany(DiscoveryProgress::class);
+    }
+
     public function qcs()
     {
         return $this->hasMany(User::class)->where('role', 'qc');
     }
-
-    protected $casts = [
-        'audit_fields' => 'array',
-        'discovery_data' => 'array',
-    ];
 
     public function chatters()
     {

@@ -53,14 +53,23 @@ const ChatterModal = ({ chatter, onClose }) => {
         const isYes = value === "Yes";
         const isNo = value === "No";
         
-        let valueClass = "text-slate-400";
-        if (isYes) valueClass = "text-emerald-600";
-        if (colorType === "blue" && isYes) valueClass = "text-blue-600";
+        let valueClass = "bg-slate-50 text-slate-400 border-slate-100";
+        if (isYes) {
+            if (colorType === "blue") valueClass = "bg-blue-50 text-blue-700 border-blue-200";
+            else valueClass = "bg-emerald-50 text-emerald-700 border-emerald-200";
+        } else if (isNo) {
+            valueClass = "bg-rose-50 text-rose-700 border-rose-200";
+        }
 
         return (
-            <div className="flex gap-1.5 items-baseline">
-                <span className="text-[11px] font-medium text-slate-400">{label}:</span>
-                <span className={cn("text-[11px] font-bold", valueClass)}>{value || "No"}</span>
+            <div className="flex items-center justify-between gap-4 py-1 border-b border-slate-50/50 last:border-0">
+                <span className="text-[10px] font-bold text-slate-500/80 uppercase tracking-widest leading-none">{label}</span>
+                <span className={cn(
+                    "px-2 py-0.5 border text-[9px] font-black tracking-[0.1em] uppercase rounded shadow-sm transition-all",
+                    valueClass
+                )}>
+                    {value || "No"}
+                </span>
             </div>
         );
     };
@@ -174,60 +183,10 @@ export default function ChatterAuditReport({ agency, stats }) {
     const [selectedChatter, setSelectedChatter] = useState("all");
     const [selectedChatterData, setSelectedChatterData] = useState(null);
 
-    const chatters = stats?.chatter_stats || [];
-
-    const chatterPerformanceList = [
-        {
-            name: "Alberto",
-            rank: 1,
-            count: 40,
-            conv: "92%",
-            pitch: "83%",
-            sellable: { y: 23, n: 17 },
-            fresh: { y: 0, n: 0 },
-            pitched: { y: 19, n: 4 },
-            sexting: { p: 11, b: 4, nb: 7, c: 0, r: "36%" },
-            pre: { p: 8, b: 5, nb: 3, u: 1, uy: 1, r: "63%" },
-            qc: 3,
-            rules: 1
-        },
-        {
-            name: "Jamie",
-            rank: 2,
-            count: 34,
-            conv: "68%",
-            pitch: "91%",
-            sellable: { y: 22, n: 12 },
-            fresh: { y: 0, n: 0 },
-            pitched: { y: 20, n: 2 },
-            sexting: { p: 11, b: 10, nb: 1, c: 0, r: "77%" },
-            pre: { p: 7, b: 4, nb: 3, u: 2, uy: 0, r: "57%" },
-            qc: 6,
-            rules: 5
-        },
-        {
-            name: "CJ",
-            rank: 3,
-            count: 34,
-            conv: "76%",
-            pitch: "88%",
-            sellable: { y: 26, n: 8 },
-            fresh: { y: 0, n: 0 },
-            pitched: { y: 23, n: 3 },
-            sexting: { p: 17, b: 12, nb: 5, c: 0, r: "71%" },
-            pre: { p: 6, b: 2, nb: 4, u: 1, uy: 1, r: "33%" },
-            qc: 8,
-            rules: 5
-        }
-    ];
-
-    const detailedTableData = [
-        { name: "Alberto", audits: 40, sellable: 23, non_sellable: 17, ppv_sold: 9, upsell_sold: 2, rank: 1 },
-        { name: "Jamie", audits: 34, sellable: 22, non_sellable: 12, ppv_sold: 14, upsell_sold: 3, rank: 2 },
-        { name: "CJ", audits: 34, sellable: 26, non_sellable: 8, ppv_sold: 14, upsell_sold: 1, rank: 3 },
-        { name: "Donn", audits: 34, sellable: 21, non_sellable: 13, ppv_sold: 7, upsell_sold: 1, rank: 4 },
-        { name: "Eliseo", audits: 23, sellable: 8, non_sellable: 15, ppv_sold: 3, upsell_sold: 0, rank: 5 }
-    ];
+    // Map from real DB stats
+    const chatterPerformanceList = stats?.chatter_performance || [];
+    const detailedTableData = stats?.chatter_stats || [];
+    const chatters = stats?.chatter_list || [];
 
     return (
         <div className="px-6 pt-8 pb-6 space-y-12">

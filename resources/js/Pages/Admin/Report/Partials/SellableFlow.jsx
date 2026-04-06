@@ -57,56 +57,30 @@ const TreeNode = ({ label, value, color = "slate", indent = 0, subtext = false, 
     );
 };
 
-const PitchDrillDownModal = ({ type, onClose }) => {
+const PitchDrillDownModal = ({ type, onClose, stats }) => {
     if (!type) return null;
 
     const isNotPossible = type === "notPossible";
+    const audits = isNotPossible
+        ? (stats?.pitch_not_possible_audits || [])
+        : (stats?.pitch_possible_not_executed_audits || []);
+
     const title = isNotPossible ? "Pitch Not Possible" : "Pitch Possible But Not Executed";
     const titleColor = "text-slate-900";
     const subtitleColor = "text-slate-500";
-    const accentColor = "text-rose-600";
-    const accentBg = "bg-rose-50";
 
-    const fakeAuditHistory = [
-        {
-            date: "Feb 17, 2026, 02:44 AM",
-            chatter: "CJ",
-            creator: "Robert Brown",
-            subUid: "SUB_S8K4L1",
-            qc: "-",
-            subType: "Fresh (first interaction or first interaction of the day)",
-            reason: isNotPossible ? "Others" : "Negotiation failed",
-            reasonDetail: isNotPossible ? "Connection dropped mid-conversation" : "Subscriber was too aggressive",
-        },
-        {
-            date: "Feb 10, 05:06 PM",
-            chatter: "Alberto",
-            creator: "Mary Johnson",
-            subUid: "SUB_H6J8P3",
-            qc: "-",
-            subType: "Fresh (first interaction or first interaction of the day)",
-            reason: isNotPossible ? "Sub left mid conversation" : "Chatter missed signal",
-            reasonDetail: "",
-        }
-    ];
+    // Dynamic Summaries
+    const chatterMap = audits.reduce((acc, curr) => {
+        acc[curr.chatter] = (acc[curr.chatter] || 0) + 1;
+        return acc;
+    }, {});
+    const chatterData = Object.entries(chatterMap).map(([name, count]) => ({ name, count }));
 
-    const chatterData = [
-        { name: "CJ", count: 3 },
-        { name: "Alberto", count: 2 },
-        { name: "Donn", count: 2 },
-        { name: "Jamie", count: 1 },
-        { name: "Eliseo", count: 1 },
-    ];
-
-    const reasonData = isNotPossible ? [
-        { name: "Others", count: 4 },
-        { name: "Time constraint stated", count: 4 },
-        { name: "Sub left mid conversation", count: 1 },
-    ] : [
-        { name: "Negotiation failed", count: 4 },
-        { name: "Chatter missed signal", count: 3 },
-        { name: "Sub aggressive", count: 1 },
-    ];
+    const reasonMap = audits.reduce((acc, curr) => {
+        acc[curr.reason] = (acc[curr.reason] || 0) + 1;
+        return acc;
+    }, {});
+    const reasonData = Object.entries(reasonMap).map(([name, count]) => ({ name, count }));
 
     return createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-slate-950/60 backdrop-blur-sm animate-in fade-in duration-300 font-['Inter', 'system-ui', 'sans-serif']">
@@ -116,7 +90,7 @@ const PitchDrillDownModal = ({ type, onClose }) => {
                     <div className="flex justify-between items-center">
                         <div className="space-y-1.5">
                             <h2 className={cn("text-2xl font-black tracking-tight", titleColor)}>
-                                {title} <span className="text-[#2563EB] ml-2">9/83</span>
+                                {title} <span className="text-[#2563EB] ml-2">{audits.length}/{stats?.sellable || 0}</span>
                             </h2>
                             <p className={cn("text-xs font-semibold uppercase tracking-widest", subtitleColor)}>
                                 Sellable conversations where the pitch was {isNotPossible ? "not possible" : "possible but not executed"}
@@ -182,7 +156,7 @@ const PitchDrillDownModal = ({ type, onClose }) => {
                         </div>
 
                         <div className="grid gap-4">
-                            {fakeAuditHistory.map((audit, i) => (
+                            {audits.map((audit, i) => (
                                 <div key={i} className="group border border-slate-100 bg-[#FCFDFF] rounded-xl p-6 transition-all hover:border-[#2563EB]/20 hover:shadow-sm">
                                     <div className="grid grid-cols-2 gap-y-6 gap-x-16">
                                         <div className="space-y-4">
@@ -254,35 +228,58 @@ const PitchDrillDownModal = ({ type, onClose }) => {
 export default function SellableFlow({ stats }) {
     const [activeModal, setActiveModal] = useState(null);
 
+    // Dynamic data mapping from stats prop
+    const sellable_count = stats?.sellable || 0;
+    const pitched_count = stats?.pitched || 0;
+    const not_pitched_count = Math.max(0, sellable_count - pitched_count);
+
+    // Not Pitched breakdown
+    const pitch_not_possible = stats?.pitch_not_possible || 0;
+    const pitch_possible_not_executed = Math.max(0, not_pitched_count - pitch_not_possible);
+
+    // Pitched breakdown
+    const sexting_pitched = stats?.sexting_pitched || 0;
+    const sexting_sale_yes = stats?.sexting_sale_yes || 0;
+    const sexting_sale_no = Math.max(0, sexting_pitched - sexting_sale_yes);
+    const sexting_sub_continued = stats?.sexting_sub_continued || 0;
+    const sexting_sub_abandoned = Math.max(0, sexting_sale_yes - sexting_sub_continued);
+
+    const prerecorded_pitched = stats?.prerecorded_pitched || 0;
+    const prerecorded_sale_yes = stats?.prerecorded_sale_yes || 0;
+    const prerecorded_sale_no = Math.max(0, prerecorded_pitched - prerecorded_sale_yes);
+    const upsell_attempted = stats?.upsell_attempted || 0;
+    const upsell_purchased = stats?.upsell_purchased || 0;
+
     return (
         <Card className="border-slate-200 shadow-sm bg-white overflow-hidden">
             <PitchDrillDownModal
                 type={activeModal}
                 onClose={() => setActiveModal(null)}
+                stats={stats}
             />
 
             <CardHeader className="p-8 pb-3 flex border-b border-slate-200 pb-10 flex-row items-end justify-between space-y-0">
                 <div className="space-y-1">
                     <h5 className="text-xl font-black text-slate-900 tracking-tight leading-none">Sellable conversations</h5>
                 </div>
-                <span className="text-[44px] font-black text-[#2563EB] tracking-tighter leading-none h-[38px] flex items-end">100</span>
+                <span className="text-[44px] font-black text-[#2563EB] tracking-tighter leading-none h-[38px] flex items-end">{sellable_count}</span>
             </CardHeader>
 
             <CardContent className="px-8 pb-8 pt-4 space-y-1">
                 {/* NOT PITCHED BRANCH */}
                 <div className="space-y-0.5">
-                    <TreeNode label="Not Pitched" value="17" color="red" indent={0} />
+                    <TreeNode label="Not Pitched" value={not_pitched_count} color="red" indent={0} />
                     <div className="relative border-l-2 border-slate-100 ml-[7px] pl-6 pb-4 space-y-0.5">
                         <TreeNode
                             label="Pitch not possible"
-                            value="9"
+                            value={pitch_not_possible}
                             color="red"
                             subtext
                             onClick={() => setActiveModal("notPossible")}
                         />
                         <TreeNode
                             label="Pitch possible but not executed"
-                            value="8"
+                            value={pitch_possible_not_executed}
                             color="red"
                             subtext
                             onClick={() => setActiveModal("possibleNotExecuted")}
@@ -292,26 +289,26 @@ export default function SellableFlow({ stats }) {
 
                 {/* PITCHED BRANCH */}
                 <div className="space-y-1 pt-2">
-                    <TreeNode label="Pitched" value="83" color="blue" indent={0} />
+                    <TreeNode label="Pitched" value={pitched_count} color="blue" indent={0} />
                     <div className="ml-[7px] border-l-2 border-slate-100 pl-6 space-y-0.5 pt-1">
-                        <TreeNode label="Sexting pitched" value="53" color="slate" indent={0} />
+                        <TreeNode label="Sexting pitched" value={sexting_pitched} color="slate" indent={0} />
                         <div className="ml-6 space-y-0.5 border-l border-slate-100 pl-4 pb-2">
-                            <TreeNode label="Sale: No" value="21" color="red" onClick={() => { }} />
-                            <TreeNode label="Sale: Yes" value="32" color="green" />
+                            <TreeNode label="Sale: No" value={sexting_sale_no} color="red" onClick={() => { }} />
+                            <TreeNode label="Sale: Yes" value={sexting_sale_yes} color="green" />
                             <div className="ml-6 border-l border-slate-100 pl-4">
-                                <TreeNode label="Sub continued: Yes" value="14" color="green" />
-                                <TreeNode label="Sub continued: No" value="18" color="red" onClick={() => { }} />
+                                <TreeNode label="Sub continued: Yes" value={sexting_sub_continued} color="green" />
+                                <TreeNode label="Sub continued: No" value={sexting_sub_abandoned} color="red" onClick={() => { }} />
                             </div>
                         </div>
 
-                        <TreeNode label="Pre-recorded pitched" value="30" color="slate" indent={0} />
+                        <TreeNode label="Pre-recorded pitched" value={prerecorded_pitched} color="slate" indent={0} />
                         <div className="ml-6 space-y-0.5 border-l border-slate-100 pl-4 pb-2">
-                            <TreeNode label="Sale: No" value="15" color="red" onClick={() => { }} />
-                            <TreeNode label="Sale: Yes" value="47" color="green" />
+                            <TreeNode label="Sale: No" value={prerecorded_sale_no} color="red" onClick={() => { }} />
+                            <TreeNode label="Sale: Yes" value={prerecorded_sale_yes} color="green" />
                             <div className="ml-8 border-l border-slate-100 pl-4">
-                                <TreeNode label="Upsell attempted" value="17" color="blue" />
+                                <TreeNode label="Upsell attempted" value={upsell_attempted} color="blue" />
                                 <div className="ml-6 border-l border-slate-100 pl-4">
-                                    <TreeNode label="Purchased: Yes" value="6" color="green" />
+                                    <TreeNode label="Purchased: Yes" value={upsell_purchased} color="green" />
                                 </div>
                             </div>
                         </div>

@@ -41,36 +41,55 @@ const SectionRow = ({ title, children }) => (
 );
 
 export default function UnitVolume({ stats }) {
+    // Dynamic mapping from stats prop
+    const fresh_subs = stats?.fresh_subs || 0;
+    const old_subs = stats?.old_subs || 0;
+    
+    const transition_yes = stats?.transition_yes || 0;
+    const transition_no = stats?.transition_no || 0;
+    
+    const negotiation_yes = stats?.negotiation_yes || 0;
+    const negotiation_no = stats?.negotiation_no || 0;
+    
+    const aftercare_yes = stats?.aftercare_yes || 0;
+    const aftercare_no = stats?.aftercare_no || 0;
+    
+    const help_requested_yes = stats?.help_requested_yes || 0;
+    const help_requested_no = stats?.help_requested_no || 0;
+    
+    const rule_violations_yes = stats?.rule_violations_yes || 0;
+    const rule_violations_no = stats?.rule_violations_no || 0;
+
     return (
         <div className="space-y-10">
             <SectionRow title="Subscriber type">
-                <ClassificationCard label="New sub (1 day)" count={105} theme="cyan" />
-                <ClassificationCard label="Old sub (2 days +)" count={60} theme="indigo" />
+                <ClassificationCard label="New sub (1 day)" count={fresh_subs} theme="cyan" />
+                <ClassificationCard label="Old sub (2 days +)" count={old_subs} theme="indigo" />
             </SectionRow>
 
             <SectionRow title="Casual to sexual transition (sellable conversations)">
-                <ClassificationCard label="Yes" count={79} theme="emerald" />
-                <ClassificationCard label="No (click for details)" count={21} theme="rose" />
+                <ClassificationCard label="Yes" count={transition_yes} theme="emerald" />
+                <ClassificationCard label="No (click for details)" count={transition_no} theme="rose" />
             </SectionRow>
 
             <SectionRow title="Negotiation discipline (sellable conversations)">
-                <ClassificationCard label="Yes" count={47} theme="emerald" />
-                <ClassificationCard label="No" count={53} theme="rose" />
+                <ClassificationCard label="Yes" count={negotiation_yes} theme="emerald" />
+                <ClassificationCard label="No" count={negotiation_no} theme="rose" />
             </SectionRow>
 
             <SectionRow title="Aftercare provided (pillow talk)">
-                <ClassificationCard label="Yes" count={25} theme="emerald" />
-                <ClassificationCard label="No" count={4} theme="rose" />
+                <ClassificationCard label="Yes" count={aftercare_yes} theme="emerald" />
+                <ClassificationCard label="No" count={aftercare_no} theme="rose" />
             </SectionRow>
 
             <SectionRow title="Chatter requested help (sellable conversations)">
-                <ClassificationCard label="Yes" count={24} theme="amber" />
-                <ClassificationCard label="No" count={76} theme="slate" />
+                <ClassificationCard label="Yes" count={help_requested_yes} theme="amber" />
+                <ClassificationCard label="No" count={help_requested_no} theme="slate" />
             </SectionRow>
 
             <SectionRow title="Rule violations (sellable conversations)">
-                <ClassificationCard label="Yes" count={17} theme="rose" action="Click to view details" />
-                <ClassificationCard label="No" count={83} theme="emerald" />
+                <ClassificationCard label="Yes" count={rule_violations_yes} theme="rose" action="Click to view details" />
+                <ClassificationCard label="No" count={rule_violations_no} theme="emerald" />
             </SectionRow>
         </div>
     );

@@ -2,20 +2,18 @@ import React from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LabelList } from "recharts";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/Components/ui/card";
 
-const data = [
-    { name: "Apr 01", audits: 85 }, { name: "Apr 02", audits: 62 }, { name: "Apr 03", audits: 94 },
-    { name: "Apr 04", audits: 110 }, { name: "Apr 05", audits: 45 }, { name: "Apr 06", audits: 78 },
-    { name: "Apr 07", audits: 64 }, { name: "Apr 08", audits: 92 }, { name: "Apr 09", audits: 88 },
-    { name: "Apr 10", audits: 105 }, { name: "Apr 11", audits: 56 }, { name: "Apr 12", audits: 42 },
-    { name: "Apr 13", audits: 88 }, { name: "Apr 14", audits: 95 }, { name: "Apr 15", audits: 112 },
-    { name: "Apr 16", audits: 84 }, { name: "Apr 17", audits: 76 }, { name: "Apr 18", audits: 65 },
-    { name: "Apr 19", audits: 52 }, { name: "Apr 20", audits: 91 }, { name: "Apr 21", audits: 87 },
-    { name: "Apr 22", audits: 104 }, { name: "Apr 23", audits: 96 }, { name: "Apr 24", audits: 115 },
-    { name: "Apr 25", audits: 62 }, { name: "Apr 26", audits: 48 }, { name: "Apr 27", audits: 89 },
-    { name: "Apr 28", audits: 97 }, { name: "Apr 29", audits: 108 }, { name: "Apr 30", audits: 125 },
-];
-
 export default function DailyAuditCoverage({ stats }) {
+    // Generate a default structure if data is empty (Apr 01 - Apr 30)
+    const generateEmptyData = () => {
+        const days = [];
+        for (let i = 1; i <= 30; i++) {
+            days.push({ name: `Apr ${i < 10 ? '0' + i : i}`, audits: 0 });
+        }
+        return days;
+    };
+
+    const data = stats?.daily_stats?.length > 0 ? stats.daily_stats : generateEmptyData();
+
     return (
         <Card className="border-slate-200 shadow-sm overflow-hidden">
             <CardHeader className="p-8 pb-4">

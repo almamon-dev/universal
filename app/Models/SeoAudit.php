@@ -6,20 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class SeoAudit extends Model
 {
-    protected $fillable = [
-        'user_id',
-        'chatter_id',
-        'creator_id',
-        'subscriber_uid',
-        'email',
-        'url',
-        'status',
-        'response_data',
-    ];
-
-    protected $casts = [
-        'response_data' => 'array',
-    ];
+    protected $guarded = [];
 
     public function user()
     {
@@ -34,5 +21,15 @@ class SeoAudit extends Model
     public function creator()
     {
         return $this->belongsTo(Creator::class);
+    }
+
+    public function agency()
+    {
+        return $this->belongsTo(Agency::class);
+    }
+
+    public function responses()
+    {
+        return $this->hasMany(AuditResponse::class, 'audit_id');
     }
 }

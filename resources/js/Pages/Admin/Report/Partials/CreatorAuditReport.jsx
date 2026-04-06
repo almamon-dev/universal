@@ -71,14 +71,23 @@ const CreatorModal = ({ creator, onClose }) => {
         const isYes = value === "Yes";
         const isNo = value === "No";
         
-        let valueClass = "text-slate-400";
-        if (isYes) valueClass = "text-emerald-600";
-        if (colorType === "blue" && isYes) valueClass = "text-blue-600";
+        let valueClass = "bg-slate-50 text-slate-400 border-slate-100";
+        if (isYes) {
+            if (colorType === "blue") valueClass = "bg-blue-50 text-blue-700 border-blue-200";
+            else valueClass = "bg-emerald-50 text-emerald-700 border-emerald-200";
+        } else if (isNo) {
+            valueClass = "bg-rose-50 text-rose-700 border-rose-200";
+        }
 
         return (
-            <div className="flex gap-1.5 items-baseline">
-                <span className="text-[11px] font-medium text-slate-400">{label}:</span>
-                <span className={cn("text-[11px] font-bold", valueClass)}>{value || "No"}</span>
+            <div className="flex items-center justify-between gap-4 py-1 border-b border-slate-50/50 last:border-0">
+                <span className="text-[10px] font-bold text-slate-500/80 uppercase tracking-widest leading-none">{label}</span>
+                <span className={cn(
+                    "px-2 py-0.5 border text-[9px] font-black tracking-[0.1em] uppercase rounded shadow-sm transition-all",
+                    valueClass
+                )}>
+                    {value || "No"}
+                </span>
             </div>
         );
     };
@@ -181,47 +190,8 @@ export default function CreatorAuditReport({ agency, stats }) {
     const [isComparisonOpen, setIsComparisonOpen] = useState(false);
     const [selectedCreator, setSelectedCreator] = useState(null);
 
-    const creators = [
-        {
-            name: "John Smith",
-            rank: 1,
-            count: 57,
-            share: "35%",
-            conv: "67%",
-            sales: "53%",
-            pitch: "89%",
-            sellable: { y: 38, n: 19 },
-            fresh: { y: 0, n: 0 },
-            qc: 12,
-            rules: 9
-        },
-        {
-            name: "Mary Johnson",
-            rank: 2,
-            count: 56,
-            share: "34%",
-            conv: "55%",
-            sales: "39%",
-            pitch: "77%",
-            sellable: { y: 31, n: 25 },
-            fresh: { y: 0, n: 0 },
-            qc: 11,
-            rules: 11
-        },
-        {
-            name: "Robert Brown",
-            rank: 3,
-            count: 52,
-            share: "32%",
-            conv: "60%",
-            sales: "48%",
-            pitch: "81%",
-            sellable: { y: 31, n: 21 },
-            fresh: { y: 0, n: 0 },
-            qc: 12,
-            rules: 10
-        }
-    ];
+    // Map from real DB stats
+    const creators = stats?.creator_performance || [];
 
     return (
         <div className="px-6 pt-8 pb-6 space-y-12">

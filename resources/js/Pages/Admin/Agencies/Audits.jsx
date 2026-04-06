@@ -25,8 +25,7 @@ const TEMPLATES = [
         field_label: "Subscriber Type",
         type: "select",
         required: true,
-        options: "New Sub (1 Day),Old Sub (2 days +)",
-        help_text: "This is the spine of the system. No skipping allowed.",
+        options: "New Sub (1 day), Old Sub (2 days +)",
         is_locked: true,
     },
     {
@@ -36,30 +35,25 @@ const TEMPLATES = [
         type: "select",
         required: true,
         options:
-            "Fresh (First Interaction or first Interaction of the day),Continuing (Subscriber previously engaged and returned)",
-        help_text:
-            "Tracks whether this is a new interaction or a continuing conversation.",
+            "Fresh (first interaction or first interaction of the day), Continuing (subscriber previously engaged and returned)",
         is_locked: true,
     },
     {
         id: "conv_classification",
-        name: "Conversation Classification",
+        name: "Conversation State",
         field_label: "Conversation State",
         type: "select",
         required: true,
-        options: "SELLABLE,NON-SELLABLE",
-        help_text: "This is the spine of the system. No skipping allowed.",
+        options: "SELLABLE, NON-SELLABLE",
         is_locked: true,
     },
     {
         id: "non_sellable_reason",
         name: "Non-Sellable Reason",
-        field_label: "Non-Sellable Reasoning",
+        field_label: "already in the notes",
         type: "select",
-        required: false,
+        required: true,
         options: "already in the notes",
-        help_text:
-            "This means the previous chatter already spoke to this subscriber and already tried selling but to no avail, so the current chatter doesn't need to continue the conversation anymore because the account is already notated.",
         is_conditional: true,
         required_if: "Conversation State = NON-SELLABLE",
         is_locked: true,
@@ -67,212 +61,195 @@ const TEMPLATES = [
     {
         id: "casual_conv",
         name: "Did the chatter have a casual conversation before transitioning into a sexual conversation?",
+        field_label: "Did the chatter have a casual conversation before transitioning into a sexual conversation?",
         type: "select",
-        required: false,
-        options: "Yes,No",
+        required: true,
+        options: "Yes, No",
+        is_conditional: true,
+        required_if: "Conversation State = SELLABLE",
         is_locked: true,
     },
     {
-        id: "pitched_content",
+        id: "template-first-offer-timing",
         name: "Did the chatter pitched a content?",
         field_label: "Did the chatter pitched a content?",
         type: "select",
-        required: false,
-        options: "Yes,No",
-        is_locked: true,
+        required: true,
+        options: "Yes, No",
         is_conditional: true,
-        special_banner:
-            'Conditional: Shows only when "Conversation State" = SELLABLE',
+        required_if: "Conversation State = SELLABLE",
+        is_locked: true,
     },
     {
-        id: "no_pitch_reason",
+        id: "template-no-pitch-reason-category",
         name: "Why was there no pitch?",
+        field_label: "Why was there no pitch?",
         type: "select",
-        required: false,
-        options: "PITCH NOT POSSIBLE,Pitch POSSIBLE but NOT EXECUTED",
-        is_locked: true,
+        required: true,
+        options: "PITCH NOT POSSIBLE, Pitch POSSIBLE but NOT EXECUTED",
         is_conditional: true,
-        required_if: "Did the chatter pitch a content? = No",
+        required_if: "template-first-offer-timing = No",
+        is_locked: true,
     },
     {
-        id: "pitch_not_possible",
+        id: "template-pitch-not-possible-reason",
         name: "PITCH NOT POSSIBLE",
+        field_label: "PITCH NOT POSSIBLE",
         type: "select",
-        required: false,
-        options:
-            "1. Sub left mid conversation,2. Time constraint stated (sub is about to leave; go to work; etc),3. Other (shows text field)",
-        is_locked: true,
+        required: true,
+        options: "Sub left mid conversation, Time constraint stated (sub is about to leave, go to work, etc), Other",
         is_conditional: true,
-        required_if: "Why was there no pitch? = PITCH NOT POSSIBLE",
+        required_if: "template-no-pitch-reason-category = PITCH NOT POSSIBLE",
+        is_locked: true,
     },
     {
-        id: "pitch_possible_not_executed",
+        id: "template-pitch-possible-no-execute-reason",
         name: "Pitch POSSIBLE but NOT EXECUTED",
+        field_label: "Pitch POSSIBLE but NOT EXECUTED",
         type: "textarea",
-        required: false,
-        help_text:
-            "QC can provide their own judgment/analysis for why the pitch was possible but not executed.",
-        is_locked: true,
+        required: true,
         is_conditional: true,
-        required_if:
-            "Why was there no pitch? = Pitch POSSIBLE but NOT EXECUTED",
+        required_if: "template-no-pitch-reason-category = Pitch POSSIBLE but NOT EXECUTED",
+        is_locked: true,
     },
     {
-        id: "content_pitched_type",
+        id: "template-pitched-content-type",
         name: "What type of content was pitched?",
         field_label: "What type of content was pitched?",
         type: "select",
-        required: false,
-        options: "Sexting,Pre-recorded",
-        is_locked: true,
+        required: true,
+        options: "Sexting, Pre-recorded",
         is_conditional: true,
-        required_if: "Did the chatter pitch a content? = Yes",
+        required_if: "template-first-offer-timing = Yes",
+        is_locked: true,
     },
     {
-        id: "negotiated",
-        name: "Negotiation",
-        field_label: "Did the chatter negotiate?",
+        id: "template-did-chatter-negotiate",
+        name: "Did the chatter negotiated?",
+        field_label: "Did the chatter negotiated?",
         type: "select",
-        required: false,
-        options: "Yes,No",
-        is_locked: true,
+        required: true,
+        options: "Yes, No",
         is_conditional: true,
-        required_if: "Did the chatter pitch a content? = Yes",
+        required_if: "template-first-offer-timing = Yes",
+        is_locked: true,
     },
     {
-        id: "made_sale",
-        name: "Sale Success",
+        id: "template-did-chatter-make-sale",
+        name: "Did the chatter make a sale?",
         field_label: "Did the chatter make a sale?",
         type: "select",
-        required: false,
-        options: "Yes,No",
-        is_locked: true,
+        required: true,
+        options: "Yes, No",
         is_conditional: true,
-        required_if: "Did the chatter pitch a content? = Yes",
+        required_if: "template-first-offer-timing = Yes",
+        is_locked: true,
     },
     {
-        id: "no_sale_reason",
+        id: "template-no-sale-reason",
         name: "Why did the sale not happen?",
+        field_label: "Why did the sale not happen?",
         type: "select",
-        required: false,
-        options:
-            "1. No Buying Power - Sub wants it but has no funds.,2. Free-Only / Timewaster - Sub avoids spending beyond subscription fee,3. Development Required - Sub needs more rapport / trust,4. Timing issue - Wrong moment; busy; distracted,5. Execution Breakdown - Chatter mishandled pacing/paywall transitioning,6. Other (with text field for short note)",
-        help_text:
-            "This protects against ignoring real operator faults and helps identify patterns in failed sales.",
+        required: true,
+        options: "1 No Buying Power (Financial Constraint) - Sub wants it but has no funds, 2 Free-Only / Timewaster - Sub avoids spending beyond subscription fee, 3 Development Required - Sub needs more rapport / emotional build / trust, 4 Timing Issue - Wrong moment / work / not alone / busy / distracted, 5 Execution Breakdown - Chatter mishandled pacing / paywall transitioning, 6 Other",
+        is_conditional: false,
         is_locked: true,
-        is_conditional: true,
-        required_if:
-            "Did the chatter pitch a content? = Yes AND Did the chatter make a sale? = No",
     },
     {
-        id: "upselling_attempt",
-        name: "Upselling Attempt",
-        field_label: "Did the chatter try upselling after the first PPV?",
+        id: "template-sexting-continue",
+        name: "Did the sub continue the sexting sequence?",
+        field_label: "Did the sub continue the sexting sequence?",
         type: "select",
-        required: false,
-        options: "Yes,No",
+        required: true,
+        options: "Yes, No",
+        is_conditional: false,
         is_locked: true,
-        is_conditional: true,
-        required_if: "Did the chatter make a sale? = Yes",
-        special_banner:
-            'Conditional: Shows only when "Content Type Pitched" = Pre-recorded',
     },
     {
-        id: "upsell_bought",
-        name: "Upsell Success",
+        id: "template-no-sexting-continue-reason",
+        name: "Why did the sub not continue?",
+        field_label: "Why did the sub not continue?",
+        type: "select",
+        required: true,
+        options: "1. Financial Constraint - Sub wants it but has no more funds, 2. Sub climaxed, 3. Other",
+        is_conditional: false,
+        is_locked: true,
+    },
+    {
+        id: "template-upsell-attempt",
+        name: "Did the chatter tried upselling after the first PPV?",
+        field_label: "Did the chatter tried upselling after the first PPV?",
+        type: "select",
+        required: false,
+        options: "Yes, No",
+        is_locked: true,
+    },
+    {
+        id: "template-upsell-purchase",
+        name: "Did the subscriber buy the upsell?",
         field_label: "Did the subscriber buy the upsell?",
         type: "select",
         required: false,
-        options: "Yes,No",
-        is_locked: true,
+        options: "Yes, No",
         is_conditional: true,
-        required_if: "Did the chatter try upselling after the first PPV? = Yes",
+        required_if: "template-upsell-attempt = Yes",
+        is_locked: true,
     },
     {
-        id: "no_upsell_reason",
+        id: "template-no-upsell-reason",
         name: "Why did the sub not buy the upsell?",
+        field_label: "Why did the sub not buy the upsell?",
+        type: "select",
+        required: true,
+        options: "1. Financial Constraint - Sub wants it but has no more funds, 2. Sub climaxed, 3. Other",
+        is_locked: true,
+    },
+    {
+        id: "template-aftercare",
+        name: "Did the chatter provide aftercare/pillow talk after the sub finishes?",
+        field_label: "Did the chatter provide aftercare/pillow talk after the sub finishes?",
         type: "select",
         required: false,
-        options:
-            "1. Financial Constraint - Sub wants it but has no more funds,2. Sub climaxed,3. Other (with text field)",
-        is_locked: true,
+        options: "Yes, No",
         is_conditional: true,
-        required_if:
-            "Did the chatter try upselling after the first PPV? = Yes AND Did the subscriber buy the upsell? = No",
-    },
-    {
-        id: "sexting_continued",
-        name: "Sexting Continuity",
-        field_label: "Did the sub continue the sexting sequence?",
-        type: "select",
-        required: false,
-        options: "Yes,No",
-        is_locked: true,
-        is_conditional: true,
-        required_if: "Content Type Pitched = Sexting",
-        special_banner:
-            'Conditional: Shows only when "Did the chatter make a sale?" = Yes',
-    },
-    {
-        id: "no_sexting_continue_reason",
-        name: "Why did the sub not continue?",
-        type: "select",
-        required: false,
-        options:
-            "1. Financial Constraint - Sub wants it but has no more funds,2. Sub climaxed,3. Other (with text field)",
-        is_locked: true,
-        is_conditional: true,
-        required_if:
-            "Content Type Pitched = Sexting AND Did the chatter make a sale? = Yes AND Did the sub continue the sexting sequence? = No",
-    },
-    {
-        id: "aftercare",
-        name: "Aftercare",
-        field_label:
-            "Did the chatter provide aftercare/pillow talk after the sub finishes?",
-        type: "select",
-        required: false,
-        options: "Yes,No",
-        is_locked: true,
-        is_conditional: true,
-        required_if: "Did the chatter make a sale? = Yes",
-    },
-    {
-        id: "qc_help_request",
-        name: "QC Help Request",
-        field_label:
-            "Did the chatter request for a QCs help? (Script, how to handle, etc.)",
-        type: "select",
-        required: false,
-        options: "Yes,No",
+        required_if: "template-did-chatter-make-sale = Yes",
         is_locked: true,
     },
     {
-        id: "qc_intervene",
-        name: "QC Intervention",
+        id: "template-qc-help-request",
+        name: "Did the chatter request for a QCs help? (Script, how to handle, etc.)",
+        field_label: "Did the chatter request for a QCs help? (Script, how to handle, etc.)",
+        type: "select",
+        required: true,
+        options: "Yes, No",
+        is_locked: true,
+    },
+    {
+        id: "template-qc-intervention",
+        name: "Did QC intervene during this conversation?",
         field_label: "Did QC intervene during this conversation?",
         type: "select",
-        required: false,
-        options: "Yes,No",
+        required: true,
+        options: "Yes, No",
         is_locked: true,
     },
     {
-        id: "rule_violation",
+        id: "template-rule-violation",
         name: "Rule Violation Observed",
+        field_label: "Rule Violation Observed",
         type: "select",
-        required: false,
-        options: "Yes,No",
+        required: true,
+        options: "Yes, No",
         is_locked: true,
     },
     {
-        id: "rule_violated_detail",
+        id: "template-rule-violation-detail",
         name: "Which rule did the chatter violate?",
         field_label: "Which rule did the chatter violate?",
         type: "textarea",
         required: false,
-        help_text: "QC can type in which specific rule was violated",
         is_conditional: true,
-        required_if: "Rule Violation Observed = Yes",
+        required_if: "template-rule-violation = Yes",
         is_locked: true,
     },
 ];
@@ -508,7 +485,7 @@ export default function Audits({ auth, agency, audits, audit_fields }) {
                         </div>
 
                         <div className="space-y-4">
-                            {TEMPLATES.map((field) => {
+                            {TEMPLATES.map((field, idx) => {
                                 const isAlreadyAdded = data.fields.some(
                                     (f) => f.id === field.id,
                                 );
@@ -557,22 +534,27 @@ export default function Audits({ auth, agency, audits, audit_fields }) {
                                             <div className="flex-1 space-y-4">
                                                 <div className="flex items-center gap-3 flex-wrap">
                                                     <h3 className="text-lg font-bold text-gray-900 leading-tight">
-                                                        {field.name}
+                                                        {idx + 1}. {field.name}
                                                     </h3>
                                                     <div className="flex items-center gap-2">
+                                                        {field.required && (
+                                                            <span className="px-2.5 py-1 bg-red-100 text-red-700 border border-red-200 text-[10px] font-black tracking-widest rounded shadow-sm">
+                                                                Required
+                                                            </span>
+                                                        )}
                                                         {field.is_locked && (
-                                                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#8B5CF6] text-white text-[10px] font-black  tracking-widest rounded shadow-sm">
+                                                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-purple-100 text-purple-700 border border-purple-200 text-[10px] font-black tracking-widest rounded shadow-sm">
                                                                 <Lock size={12} />
-                                                                LOCKED
+                                                                Locked Template
                                                             </span>
                                                         )}
                                                         {field.is_conditional && (
-                                                            <span className="px-2.5 py-1 bg-[#2563EB] text-white text-[10px] font-black  tracking-widest rounded shadow-sm">
+                                                            <span className="px-2.5 py-1 bg-blue-100 text-blue-700 border border-blue-200 text-[10px] font-black tracking-widest rounded shadow-sm">
                                                                 Conditional
                                                             </span>
                                                         )}
                                                         {isAlreadyAdded && (
-                                                            <span className="px-2.5 py-1 bg-emerald-500 text-white text-[10px] font-black  tracking-widest rounded shadow-sm">
+                                                            <span className="px-2.5 py-1 bg-emerald-100 text-emerald-700 border border-emerald-200 text-[10px] font-black tracking-widest rounded shadow-sm">
                                                                 ALREADY ADDED
                                                             </span>
                                                         )}
@@ -614,11 +596,22 @@ export default function Audits({ auth, agency, audits, audit_fields }) {
                                                     <div className="pt-2">
                                                         <p className="text-[10px] font-black text-gray-400  tracking-widest mb-2">Available Options:</p>
                                                         <div className="flex flex-wrap gap-1.5">
-                                                            {field.options.split(',').map((opt, i) => (
-                                                                <span key={i} className="px-2.5 py-1 bg-white border border-gray-200 text-gray-600 text-[11px] font-bold rounded shadow-sm">
-                                                                    {opt.trim()}
-                                                                </span>
-                                                            ))}
+                                                            {field.options.split(/,(?![^()]*\))/).map((opt, i) => {
+                                                                const trimmed = opt.trim();
+                                                                const match = trimmed.match(/^(\d+)[\.\s]+(.*)/);
+                                                                return (
+                                                                    <span key={i} className="px-2.5 py-1 bg-white border border-gray-200 text-gray-600 text-[11px] font-bold rounded shadow-sm flex items-center gap-1.5 transition-all hover:border-indigo-300">
+                                                                        {match ? (
+                                                                            <>
+                                                                                <span className="w-4 h-4 flex items-center justify-center bg-indigo-600 text-white text-[9px] rounded-sm shadow-sm shrink-0 font-black">
+                                                                                    {match[1]}
+                                                                                </span>
+                                                                                <span>{match[2]}</span>
+                                                                            </>
+                                                                        ) : trimmed}
+                                                                    </span>
+                                                                );
+                                                            })}
                                                         </div>
                                                     </div>
                                                 )}
@@ -924,18 +917,18 @@ export default function Audits({ auth, agency, audits, audit_fields }) {
                                                                         </h3>
                                                                         <div className="flex items-center gap-1.5">
                                                                             {field.required && (
-                                                                                <span className="px-1.5 py-0.5 bg-zinc-900 text-white text-[9px] font-black  tracking-tighter rounded">
+                                                                                <span className="px-1.5 py-0.5 bg-red-100 text-red-700 border border-red-200 text-[9px] font-black tracking-tighter rounded">
                                                                                     Required
                                                                                 </span>
                                                                             )}
                                                                             {field.is_locked && (
-                                                                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-zinc-100 text-zinc-600 border border-zinc-200 text-[9px] font-black  tracking-tighter rounded">
+                                                                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-purple-100 text-purple-700 border border-purple-200 text-[9px] font-black tracking-tighter rounded">
                                                                                     <Lock size={10} />
-                                                                                    System
+                                                                                    Locked Template
                                                                                 </span>
                                                                             )}
-                                                                            {field.is_conditional && (
-                                                                                <span className="px-1.5 py-0.5 bg-zinc-50 text-zinc-500 border border-zinc-200 text-[9px] font-black  tracking-tighter rounded">
+                                                                            {(field.is_conditional || field.required_if) && (
+                                                                                <span className="px-1.5 py-0.5 bg-blue-100 text-blue-700 border border-blue-200 text-[9px] font-black tracking-tighter rounded">
                                                                                     Conditional
                                                                                 </span>
                                                                             )}

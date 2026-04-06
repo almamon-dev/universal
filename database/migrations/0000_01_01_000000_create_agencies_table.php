@@ -23,10 +23,6 @@ return new class extends Migration
 
             $table->string('status')->default('active'); // active, inactive
             $table->integer('total_audits')->default(0);
-            
-            // Newly added fields consolidated here
-            $table->json('audit_fields')->nullable();
-            $table->text('protocols')->nullable();
 
             $table->timestamps();
         });

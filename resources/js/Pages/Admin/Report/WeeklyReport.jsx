@@ -175,7 +175,7 @@ export default function WeeklyReport({ agency, stats }) {
                                     </ReportSection>
 
                                     <ReportSection title="Phase II — Revenue Fault Mapping" label="Diagnostic fault matrix">
-                                        <RevenueFaultMapping isComparisonOpen={false} />
+                                        <RevenueFaultMapping stats={stats} isComparisonOpen={false} />
                                     </ReportSection>
 
                                     <ReportSection
@@ -191,7 +191,7 @@ export default function WeeklyReport({ agency, stats }) {
                                             </button>
                                         }
                                     >
-                                        {isComparisonOpen && <RevenueFaultMapping isComparisonOpen={true} />}
+                                        {isComparisonOpen && <RevenueFaultMapping stats={stats} isComparisonOpen={true} />}
                                     </ReportSection>
 
                                     <ReportSection>

@@ -14,13 +14,11 @@ return new class extends Migration
         Schema::create('seo_audits', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('chatter_id')->nullable()->constrained()->onDelete('set null');
-            $table->foreignId('creator_id')->nullable()->constrained()->onDelete('set null');
-            $table->string('subscriber_uid')->nullable();
-            $table->string('email')->nullable();
-            $table->string('url')->nullable();
+            $table->foreignId('agency_id')->nullable()->constrained()->onDelete('cascade');
+            $table->foreignId('chatter_id')->constrained()->onDelete('cascade');
+            $table->foreignId('creator_id')->constrained()->onDelete('cascade');
+            $table->string('subscriber_uid');
             $table->string('status')->default('completed');
-            $table->json('response_data');
             $table->timestamps();
         });
     }

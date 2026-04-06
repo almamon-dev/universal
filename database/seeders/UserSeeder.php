@@ -33,6 +33,16 @@ class UserSeeder extends Seeder
             ]
         );
 
+        // Professional Synchronization: Link all 23 master questions to the Demo Agency via the pivot table
+        $allFields = \App\Models\AuditField::all();
+        $agency->auditFields()->sync($allFields->pluck('id'));
+
+        // PROFESSIONAL ONBOARDING SEED: Generate 5 Chatters and 5 Creators for the Demo Agency
+        for ($i = 1; $i <= 5; $i++) {
+            $agency->chatters()->create(['name' => "Chatter {$i}"]);
+            $agency->creators()->create(['name' => "Creator {$i}"]);
+        }
+
         // QC User for the agency
         \App\Models\User::firstOrCreate(
             ['email' => 'qc@demo.com'],

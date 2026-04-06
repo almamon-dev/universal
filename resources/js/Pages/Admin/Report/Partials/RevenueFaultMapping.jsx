@@ -80,40 +80,98 @@ const FaultCard = ({ label, value, sublabel, action, theme = "blue", formula }) 
     );
 };
 
-export default function RevenueFaultMapping({ isComparisonOpen = false }) {
+export default function RevenueFaultMapping({ stats, isComparisonOpen = false }) {
     const [comparisonMode, setComparisonMode] = useState("sequential");
     const [baselineWeek, setBaselineWeek] = useState("week1");
 
-    const week1Data = [
-        { label: "CONVERSION RATE", value: "72.0%", sublabel: "Sellable / Total Conversations", theme: "blue", formula: "(84 Sellable ÷ 117 Total) × 100" },
-        { label: "PITCH RATE", value: "80.0%", sublabel: "Pitched / Sellable Conversations", action: "Click to view 17 not pitched", theme: "purple", formula: "(67 Pitched ÷ 84 Sellable) × 100" },
-        { label: "SEXTING SALES", value: "72.0%", sublabel: "Sexting Sales / Sexting Pitched", action: "Click to view 12 failed sales", theme: "green", formula: "(31 Sold ÷ 43 Pitched) × 100" },
-        { label: "PRE-RECORDED SALES", value: "50.0%", sublabel: "PPV Sales / PPV Pitched", action: "Click to view 12 failed sales", theme: "lime", formula: "(12 Sales ÷ 24 Pitched) × 100" },
-        { label: "SEXTING CONTINUATION", value: "68.0%", sublabel: "Continued / Sexting Sales", action: "Click to view 10 not continued", theme: "orange", formula: "(21 Continued ÷ 31 Sold) × 100" },
-        { label: "UPSELL ATTEMPT", value: "21.0%", sublabel: "Upsell Attempts / First PPV Sales", action: "Click to view 34 not attempted", theme: "cyan", formula: "(9 Attempts ÷ 43 First PPV Sales) × 100" },
-        { label: "UPSELL CONVERSION", value: "67.0%", sublabel: "Upsell Purchased / Upsell Attempted", action: "Click to view 3 failed attempts", theme: "yellow", formula: "(6 Purchased ÷ 9 Attempted) × 100" },
-        { label: "CASUAL TO SEXUAL", value: "0.0%", sublabel: "Casual Conversation: Yes / Total Sellable", theme: "rose", formula: "(0 Yes ÷ 84 Sellable) × 100" },
-        { label: "QC INTERVENTIONS", value: "19", sublabel: "", theme: "indigo" },
+    // Dynamic Calculations based on your Math Logic
+    const total_audits = stats?.total_audits || 0;
+    const sellable = stats?.sellable || 0;
+    const pitched = stats?.pitched || 0;
+    const sexting_pitched = stats?.sexting_pitched || 0;
+    const sexting_sale_yes = stats?.sexting_sale_yes || 0;
+    const prerecorded_pitched = stats?.prerecorded_pitched || 0;
+    const prerecorded_sale_yes = stats?.prerecorded_sale_yes || 0;
+    const sexting_sub_continued = stats?.sexting_sub_continued || 0;
+    const upsell_attempted = stats?.upsell_attempted || 0;
+    const upsell_purchased = stats?.upsell_purchased || 0;
+    const transition_yes = stats?.transition_yes || 0;
+    const total_interventions = stats?.total_interventions || 0;
+
+    const calcRate = (part, total) => {
+        if (!total || total === 0) return "0.0%";
+        return ((part / total) * 100).toFixed(1) + "%";
+    };
+
+    const currentStats = [
+        { 
+            label: "CONVERSION RATE", 
+            value: calcRate(sellable, total_audits), 
+            sublabel: "Sellable / Total Conversations", 
+            theme: "blue", 
+            formula: `(${sellable} Sellable ÷ ${total_audits} Total) × 100` 
+        },
+        { 
+            label: "PITCH RATE", 
+            value: calcRate(pitched, sellable), 
+            sublabel: "Pitched / Sellable Conversations", 
+            theme: "purple", 
+            formula: `(${pitched} Pitched ÷ ${sellable} Sellable) × 100` 
+        },
+        { 
+            label: "SEXTING SALES", 
+            value: calcRate(sexting_sale_yes, sexting_pitched), 
+            sublabel: "Sexting Sales / Sexting Pitched", 
+            theme: "green", 
+            formula: `(${sexting_sale_yes} Sold ÷ ${sexting_pitched} Pitched) × 100` 
+        },
+        { 
+            label: "PRE-RECORDED SALES", 
+            value: calcRate(prerecorded_sale_yes, prerecorded_pitched), 
+            sublabel: "PPV Sales / PPV Pitched", 
+            theme: "lime", 
+            formula: `(${prerecorded_sale_yes} Sales ÷ ${prerecorded_pitched} Pitched) × 100` 
+        },
+        { 
+            label: "SEXTING CONTINUATION", 
+            value: calcRate(sexting_sub_continued, sexting_sale_yes), 
+            sublabel: "Continued / Sexting Sales", 
+            theme: "orange", 
+            formula: `(${sexting_sub_continued} Continued ÷ ${sexting_sale_yes} Sold) × 100` 
+        },
+        { 
+            label: "UPSELL ATTEMPT", 
+            value: calcRate(upsell_attempted, prerecorded_pitched), 
+            sublabel: "Upsell Attempts / First PPV Sales", 
+            theme: "cyan", 
+            formula: `(${upsell_attempted} Attempts ÷ ${prerecorded_pitched} First PPV Sales) × 100` 
+        },
+        { 
+            label: "UPSELL CONVERSION", 
+            value: calcRate(upsell_purchased, upsell_attempted), 
+            sublabel: "Upsell Purchased / Upsell Attempted", 
+            theme: "yellow", 
+            formula: `(${upsell_purchased} Purchased ÷ ${upsell_attempted} Attempted) × 100` 
+        },
+        { 
+            label: "CASUAL TO SEXUAL", 
+            value: calcRate(transition_yes, sellable), 
+            sublabel: "Casual Conversation: Yes / Total Sellable", 
+            theme: "rose", 
+            formula: `(${transition_yes} Yes ÷ ${sellable} Sellable) × 100` 
+        },
+        { label: "QC INTERVENTIONS", value: total_interventions.toString(), sublabel: "Total interventions tracked", theme: "indigo" },
     ];
 
-    const week2Data = [
-        { label: "CONVERSION RATE", value: "60.4%", sublabel: "Sellable / Total Conversations", theme: "blue", formula: "(43 Sellable ÷ 71 Total) × 100" },
-        { label: "PITCH RATE", value: "78.0%", sublabel: "Pitched / Sellable Conversations", theme: "purple", formula: "(34 Pitched ÷ 43 Sellable) × 100" },
-        { label: "SEXTING SALES", value: "65.0%", sublabel: "Sexting Sales / Sexting Pitched", theme: "green", formula: "(13 Sales ÷ 20 Pitched) × 100" },
-        { label: "PRE-RECORDED SALES", value: "48.0%", sublabel: "PPV Sales / PPV Pitched", theme: "lime", formula: "(11 Sales ÷ 23 Pitched) × 100" },
-        { label: "SEXTING CONTINUATION", value: "62.0%", sublabel: "Continued / Sexting Sales", theme: "orange", formula: "(8 Continued ÷ 13 Sales) × 100" },
-        { label: "UPSELL ATTEMPT", value: "18.0%", sublabel: "Upsell Attempts / First PPV Sales", theme: "cyan", formula: "(4 Attempts ÷ 22 First PPV Sales) × 100" },
-        { label: "UPSELL CONVERSION", value: "55.0%", sublabel: "Upsell Purchased / Upsell Attempted", theme: "yellow", formula: "(2 Purchases ÷ 4 Attempts) × 100" },
-        { label: "CASUAL TO SEXUAL", value: "5.0%", sublabel: "Casual Conversation: Yes / Total Sellable", theme: "rose", formula: "(2 Yes ÷ 43 Total Sellable) × 100" },
-        { label: "QC INTERVENTIONS", value: "14", sublabel: "", theme: "indigo" },
-    ];
+    // Placeholder for comparison weeks (can be dynamic if backend provides history)
+    const week2Data = currentStats.map(s => ({ ...s, value: "0.0%" }));
 
-    const renderWeekCards = (weekLabel, dateRange, stats, data, isBaseline = false) => (
+    const renderWeekCards = (weekLabel, dateRange, statsLabel, data, isBaseline = false) => (
         <div className="space-y-6">
             <div className="bg-white border-b border-slate-100/50 p-6 flex items-center justify-between">
                 <div className="space-y-1">
                     <h3 className="text-base font-bold text-slate-900">{weekLabel}: {dateRange}</h3>
-                    <p className="text-[11px] font-medium text-slate-400">{stats}</p>
+                    <p className="text-[11px] font-medium text-slate-400">{statsLabel}</p>
                 </div>
                 {isBaseline && (
                     <span className="px-3 py-1 bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-blue-100 shadow-sm">
@@ -190,8 +248,8 @@ export default function RevenueFaultMapping({ isComparisonOpen = false }) {
                             {renderWeekCards(
                                 "Week 1",
                                 "2/7/2026 - 2/13/2026",
-                                "117 total audits • 84 sellable conversations",
-                                week1Data,
+                                `${total_audits} total audits • ${sellable} sellable conversations`,
+                                currentStats,
                                 baselineWeek === "week1"
                             )}
                         </Card>
@@ -209,7 +267,7 @@ export default function RevenueFaultMapping({ isComparisonOpen = false }) {
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-in fade-in duration-500">
-                    {week1Data.map((item, idx) => (
+                    {currentStats.map((item, idx) => (
                         <FaultCard
                             key={idx}
                             label={item.label}

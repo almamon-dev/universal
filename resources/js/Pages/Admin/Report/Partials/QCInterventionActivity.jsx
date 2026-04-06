@@ -10,20 +10,27 @@ const AuditorCard = ({ name, count }) => (
 );
 
 export default function QCInterventionActivity({ stats }) {
+    const total_interventions = stats?.total_interventions || 0;
+    const auditor_qc_stats = stats?.auditor_qc_stats || [];
+
     return (
         <div className="space-y-3">
             <p className="text-xs font-bold text-slate-700">QC intervention activity</p>
             
             <div className="bg-white border border-slate-100 rounded-xl p-8 space-y-8 shadow-sm">
                 <div className="flex items-baseline gap-3">
-                    <span className="text-5xl font-black text-slate-900 tracking-tighter leading-none">35</span>
+                    <span className="text-5xl font-black text-slate-900 tracking-tighter leading-none">{total_interventions}</span>
                     <span className="text-xs font-bold text-slate-400 lowercase first-letter:uppercase">Total interventions</span>
                 </div>
 
-                <div className="flex gap-4">
-                    <AuditorCard name="rosemarie" count={0} />
-                    <AuditorCard name="oscar" count={0} />
-                    <AuditorCard name="ojay" count={0} />
+                <div className="flex flex-wrap gap-4">
+                    {auditor_qc_stats.length > 0 ? (
+                        auditor_qc_stats.map((auditor, idx) => (
+                            <AuditorCard key={idx} name={auditor.name} count={auditor.count} />
+                        ))
+                    ) : (
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">No intervention records available</p>
+                    )}
                 </div>
             </div>
         </div>
