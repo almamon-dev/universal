@@ -4,17 +4,11 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Agency;
-use App\Models\Chatter;
-use App\Models\Creator;
-use App\Models\User;
 use App\Models\AuditField;
-use App\Models\Protocol;
-use App\Models\DiscoveryProgress;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class AgencyController extends Controller
@@ -62,6 +56,17 @@ class AgencyController extends Controller
 
     public function edit(Agency $agency)
     {
+        // Professional: Enforce discovery steps before allowing access to the Hub
+        $completedSteps = $agency->discoveryProgress()->pluck('type')->unique();
+        $requiredSteps = ['chatter', 'qc', 'owner'];
+        
+        $missingSteps = array_diff($requiredSteps, $completedSteps->toArray());
+        
+        if (!empty($missingSteps)) {
+            return redirect()->route('admin.agencies.discovery', $agency->id)
+                ->with('error', 'Please complete all discovery steps (Chatter, QC, and Owner) before accessing the Agency Hub.');
+        }
+
         return Inertia::render('Admin/Agencies/Edit', [
             'agency' => $agency->load('qcs'),
             'stats' => [
@@ -167,9 +172,51 @@ class AgencyController extends Controller
 
     public function chatterDiscovery(Agency $agency)
     {
-        $discovery = $agency->discoveryProgress()->where('type', 'chatter')->pluck('field_value', 'field_key');
+        $discovery = $agency->discoveryProgress()
+            ->where('type', 'chatter')
+            ->get()
+            ->mapWithKeys(function ($item) {
+                // Try to decode if it's a JSON array/object
+                $value = $item->field_value;
+                $decoded = json_decode($value, true);
+                return [$item->field_key => (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) ? $decoded : $value];
+            });
 
         return Inertia::render('Admin/Agencies/ChatterDiscovery', [
+            'agency' => $agency,
+            'discovery' => (object) $discovery->toArray(),
+        ]);
+    }
+
+    public function qcDiscovery(Agency $agency)
+    {
+        $discovery = $agency->discoveryProgress()
+            ->where('type', 'qc')
+            ->get()
+            ->mapWithKeys(function ($item) {
+                $value = $item->field_value;
+                $decoded = json_decode($value, true);
+                return [$item->field_key => (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) ? $decoded : $value];
+            });
+
+        return Inertia::render('Admin/Agencies/QCDiscovery', [
+            'agency' => $agency,
+            'discovery' => (object) $discovery->toArray(),
+        ]);
+    }
+
+    public function ownerDiscovery(Agency $agency)
+    {
+        $discovery = $agency->discoveryProgress()
+            ->where('type', 'owner')
+            ->get()
+            ->mapWithKeys(function ($item) {
+                $value = $item->field_value;
+                $decoded = json_decode($value, true);
+                return [$item->field_key => (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) ? $decoded : $value];
+            });
+
+        return Inertia::render('Admin/Agencies/OwnerDiscovery', [
             'agency' => $agency,
             'discovery' => (object) $discovery->toArray(),
         ]);
@@ -179,9 +226,12 @@ class AgencyController extends Controller
     {
         $data = $request->input('data', []);
         foreach ($data as $key => $value) {
+            // Fix Array to string conversion error
+            $dbValue = is_array($value) ? json_encode($value) : $value;
+
             $agency->discoveryProgress()->updateOrCreate(
                 ['type' => $type, 'field_key' => $key],
-                ['field_value' => $value, 'is_completed' => ($value === true || $value === '1')]
+                ['field_value' => $dbValue, 'is_completed' => ($value === true || $value === '1' || !empty($value))]
             );
         }
 
@@ -230,6 +280,37 @@ class AgencyController extends Controller
         return redirect()->route('dashboard')->with('success', 'Audits submitted successfully.');
     }
 
+    public function storeQC(Request $request, Agency $agency)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'username' => 'required|string|max:255|unique:users,username',
+            'password' => 'required|string|min:6',
+        ]);
+
+        \App\Models\User::create([
+            'name' => $validated['name'],
+            'username' => $validated['username'],
+            'email' => $validated['username'] . '@qc.system', // Fallback for email field
+            'password' => \Illuminate\Support\Facades\Hash::make($validated['password']),
+            'agency_id' => $agency->id,
+            'role' => 'qc',
+        ]);
+
+        return back()->with('success', 'QC member added successfully.');
+    }
+
+    public function updateQC(Request $request, \App\Models\User $user)
+    {
+        return back();
+    }
+
+    public function destroyQC(\App\Models\User $user)
+    {
+        $user->update(['agency_id' => null]);
+        return back()->with('success', 'QC member removed successfully.');
+    }
+
     // Standard CRUD methods like registry, storeChatter etc follow same pattern...
     public function registry(Agency $agency)
     {
@@ -238,5 +319,17 @@ class AgencyController extends Controller
             'chatters' => $agency->chatters()->latest()->get(),
             'creators' => $agency->creators()->latest()->get(),
         ]);
+    }
+
+    public function updateStatus(Request $request, Agency $agency)
+    {
+
+        $validated = $request->validate([
+            'status' => 'required|string|in:active,inactive',
+        ]);
+
+        $agency->update($validated);
+
+        return back()->with('success', 'Agency status updated successfully.');
     }
 }

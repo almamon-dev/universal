@@ -222,9 +222,6 @@ export default function OwnerDiscovery({ agency, discovery }) {
     const handleSave = () => {
         post(route("admin.agencies.discovery.update", [agency.id, "owner"]), {
             preserveScroll: true,
-            onSuccess: () => {
-                toast.success("Progress saved successfully!");
-            },
         });
     };
 
@@ -318,7 +315,7 @@ export default function OwnerDiscovery({ agency, discovery }) {
                         <button
                             onClick={handleSave}
                             disabled={processing}
-                            className="px-8 py-3 bg-black text-white text-[13px] font-black  tracking-widest rounded-xl hover:bg-zinc-800 transition-all shadow-xl shadow-black/10 disabled:opacity-50 active:scale-95"
+                            className="px-8 py-3 bg-black text-white text-[13px] font-black  tracking-widest rounded-sm hover:bg-zinc-800 transition-all shadow-xl shadow-black/10 disabled:opacity-50 active:scale-95"
                         >
                             {processing ? "Saving..." : "Save Progress"}
                         </button>

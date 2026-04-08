@@ -178,14 +178,18 @@ export default function Dashboard({ auth, stats, agencies }) {
                                                 <div className="flex items-center gap-3">
                                                     <Switch
                                                         checked={agency.status === "active"}
-                                                        onCheckedChange={(checked) => {
+                                                        onChange={(checked) => {
                                                             router.patch(
                                                                 route(
                                                                     "admin.agencies.status",
                                                                     agency.id,
                                                                 ),
                                                                 { status: checked ? "active" : "inactive" },
-                                                                { preserveScroll: true }
+                                                                {
+                                                                    preserveScroll: true,
+                                                                    preserveState: true,
+                                                                    only: ['agencies', 'stats']
+                                                                }
                                                             );
                                                         }}
                                                         className="data-[state=checked]:bg-indigo-600"
@@ -217,7 +221,7 @@ export default function Dashboard({ auth, stats, agencies }) {
                                                 <div className="flex items-center justify-end">
                                                     <Link
                                                         href={route("admin.agencies.edit", agency.id)}
-                                                        className="bg-zinc-900 hover:bg-zinc-800 text-white px-5 py-2 rounded-lg text-xs font-bold transition-all shadow-md shadow-zinc-100 flex items-center gap-2"
+                                                        className="bg-zinc-900 hover:bg-zinc-800 text-white px-5 py-2 rounded-sm text-xs font-bold transition-all shadow-md shadow-zinc-100 flex items-center gap-2"
                                                     >
                                                         Manage Agency
                                                         <ArrowUpRight size={14} className="opacity-60" />

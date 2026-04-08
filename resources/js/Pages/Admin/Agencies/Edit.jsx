@@ -166,6 +166,11 @@ export default function Edit({
     }, [agency?.qcs]);
 
     const handleAddQC = () => {
+        if (!agency?.id) {
+            toast.error("Please save the agency first before adding QC members.");
+            return;
+        }
+
         if (!qcFields.name || !qcFields.username || !qcFields.password) {
             toast.error("Please fill in all QC details");
             return;
@@ -176,11 +181,8 @@ export default function Edit({
             preserveState: true,
             onSuccess: () => {
                 setQCFields({ name: "", username: "", password: "" });
-                toast.success("QC member added and saved successfully");
-                // Modal stays open so they can see the new member in the list instantly
             },
             onError: (err) => {
-                // Show each validation error in a separate toast
                 Object.values(err).forEach((msg) => toast.error(msg));
             },
         });
@@ -651,91 +653,93 @@ export default function Edit({
                                         </div>
                                     </div>
                                 </div>
-                            </div>                            {/* QC Management */}
-                            <div className="bg-white border border-gray-200 rounded-xl shadow-[0_1px_3px_0_rgba(0,0,0,0.02)] overflow-hidden">
-                                <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-                                    <div>
-                                        <h2 className="text-sm font-semibold text-gray-900">
-                                            Quality Control Team
-                                        </h2>
-                                        <p className="text-xs text-gray-400">Manage specialized members for this agency</p>
-                                    </div>
-                                    {canEdit && (
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowQCForm(true)}
-                                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 text-gray-900 text-xs font-semibold rounded-md hover:bg-gray-50 transition-all shadow-sm active:scale-95"
-                                        >
-                                            <Plus size={14} />
-                                            Add Member
-                                        </button>
-                                    )}
-                                </div>
-                                <div className="p-6">
-
-                                    {data.qcs.length > 0 ? (
-                                        <div className="space-y-2">
-                                            {data.qcs.map((qc, index) => (
-                                                <div
-                                                    key={qc.id}
-                                                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-                                                >
-                                                    <span className="text-sm font-medium text-gray-900">
-                                                        {index + 1}. {qc.name}
-                                                    </span>
-                                                    <div className="flex items-center gap-2">
-                                                        {canEdit && (
-                                                            <>
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() =>
-                                                                        handleEditQC(
-                                                                            qc,
-                                                                        )
-                                                                    }
-                                                                    className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
-                                                                >
-                                                                    <Settings
-                                                                        size={16}
-                                                                    />
-                                                                </button>
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() =>
-                                                                        handleRemoveQC(
-                                                                            qc.id,
-                                                                        )
-                                                                    }
-                                                                    className="p-1 text-gray-400 hover:text-red-500 transition-colors"
-                                                                >
-                                                                    <Trash2
-                                                                        size={16}
-                                                                    />
-                                                                </button>
-                                                            </>
-                                                        )}
-                                                        {!canEdit && (
-                                                            <span className="text-[10px] font-bold text-gray-400  tracking-tight">
-                                                                Active Member
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            ))}
+                            </div>                            {/* QC Management - Only show when editing an existing agency */}
+                            {isEditing && (
+                                <div className="bg-white border border-gray-200 rounded-xl shadow-[0_1px_3px_0_rgba(0,0,0,0.02)] overflow-hidden">
+                                    <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                                        <div>
+                                            <h2 className="text-sm font-semibold text-gray-900">
+                                                Quality Control Team
+                                            </h2>
+                                            <p className="text-xs text-gray-400">Manage specialized members for this agency</p>
                                         </div>
-                                    ) : (
-                                        <p className="text-sm text-gray-500 text-center py-6 border border-dashed border-gray-200 rounded-lg">
-                                            No QC members added yet
-                                        </p>
-                                    )}
+                                        {canEdit && (
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowQCForm(true)}
+                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 text-gray-900 text-xs font-semibold rounded-md hover:bg-gray-50 transition-all shadow-sm active:scale-95"
+                                            >
+                                                <Plus size={14} />
+                                                Add Member
+                                            </button>
+                                        )}
+                                    </div>
+                                    <div className="p-6">
+
+                                        {data.qcs.length > 0 ? (
+                                            <div className="space-y-2">
+                                                {data.qcs.map((qc, index) => (
+                                                    <div
+                                                        key={qc.id}
+                                                        className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                                                    >
+                                                        <span className="text-sm font-medium text-gray-900">
+                                                            {index + 1}. {qc.name}
+                                                        </span>
+                                                        <div className="flex items-center gap-2">
+                                                            {canEdit && (
+                                                                <>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() =>
+                                                                            handleEditQC(
+                                                                                qc,
+                                                                            )
+                                                                        }
+                                                                        className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                                                                    >
+                                                                        <Settings
+                                                                            size={16}
+                                                                        />
+                                                                    </button>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() =>
+                                                                            handleRemoveQC(
+                                                                                qc.id,
+                                                                            )
+                                                                        }
+                                                                        className="p-1 text-gray-400 hover:text-red-500 transition-colors"
+                                                                    >
+                                                                        <Trash2
+                                                                            size={16}
+                                                                        />
+                                                                    </button>
+                                                                </>
+                                                            )}
+                                                            {!canEdit && (
+                                                                <span className="text-[10px] font-bold text-gray-400  tracking-tight">
+                                                                    Active Member
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <p className="text-sm text-gray-500 text-center py-6 border border-dashed border-gray-200 rounded-lg">
+                                                No QC members added yet
+                                            </p>
+                                        )}
+                                    </div>
                                 </div>
-                            </div>
+                            )}
 
                             {/* Form Actions */}
                             <div className="flex justify-end gap-3">
                                 <Link
                                     href="/dashboard"
-                                    className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
+                                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 hover:text-gray-900"
                                 >
                                     Cancel
                                 </Link>
@@ -743,7 +747,7 @@ export default function Edit({
                                     <button
                                         type="submit"
                                         disabled={processing}
-                                        className="px-8 py-2 bg-indigo-600 text-white text-sm font-bold rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-900/10 disabled:opacity-50 transition-all active:scale-95"
+                                        className="px-8 py-2 bg-indigo-600 text-white text-sm font-bold rounded-sm hover:bg-indigo-700 shadow-lg shadow-indigo-900/10 disabled:opacity-50 transition-all active:scale-95"
                                     >
                                         {processing
                                             ? "Saving..."
@@ -779,8 +783,8 @@ export default function Edit({
                                 </h1>
                                 <span
                                     className={`inline-flex px-2 py-0.5 text-[10px] font-bold rounded-full border ${agency.status === "active"
-                                            ? "bg-emerald-50 text-emerald-700 border-emerald-100"
-                                            : "bg-gray-50 text-gray-500 border-gray-200"
+                                        ? "bg-emerald-50 text-emerald-700 border-emerald-100"
+                                        : "bg-gray-50 text-gray-500 border-gray-200"
                                         }`}
                                 >
                                     {agency.status === "active" ? "Operational" : "Paused"}
