@@ -63,6 +63,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         // Admin Routes
         Route::get('agencies/{agency}/view-system/discovery', [AgencyController::class, 'viewSystemDiscovery'])->name('agencies.view-system-discovery');
+        Route::post('agencies/{agency}/update-metrics', [AgencyController::class, 'updateMetrics'])->name('agencies.update-metrics');
         Route::post('agencies/{agency}/protocols', [AgencyController::class, 'updateProtocols'])->name('agencies.protocols.update');
 
         // Maintain Admin's ability to view/edit protocols if needed

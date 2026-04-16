@@ -8,6 +8,13 @@ use App\Models\User;
 
 class ReportService
 {
+    protected $leakageService;
+
+    public function __construct(RevenueLeakageService $leakageService)
+    {
+        $this->leakageService = $leakageService;
+    }
+
     public function getWeeklyStats(Agency $agency)
     {
         $audits = SeoAudit::join('users', 'users.id', '=', 'seo_audits.user_id')
@@ -77,10 +84,8 @@ class ReportService
         $pitchPossibleNotExecuted = $sellableAudits->filter(fn ($a) => str_contains(strtoupper($findValue($a, 'reason')), 'NOT EXECUTED')
         );
 
-        // Final Pitched list: Must NOT have a "Not Pitched" reason
-        $pitchedContent = $sellableAudits->filter(fn ($a) => str_contains(strtoupper($findValue($a, 'pitched')), 'YES') &&
-            ! str_contains(strtoupper($findValue($a, 'reason')), 'NOT')
-        );
+        // Final Pitched list: If the auditor said "Yes" it was pitched, we count it.
+        $pitchedContent = $sellableAudits->filter(fn ($a) => str_contains(strtoupper($findValue($a, 'pitched')), 'YES'));
 
         // Content Type Detection
         $sextingPitched = $pitchedContent->filter(fn ($a) => str_contains(strtoupper($findValue($a, 'type')), 'SEXTING'));
@@ -131,13 +136,8 @@ class ReportService
             'transition_yes' => $sellableAudits->filter(fn ($a) => str_contains(strtoupper($findValue($a, 'transition')), 'YES'))->count(),
             'total_interventions' => $audits->filter(fn ($a) => str_contains(strtoupper($findValue($a, 'intervene')), 'YES'))->count(),
 
-            // Red Cards
-            'sexting_no_sale' => $sextingPitched->filter(fn ($a) => str_contains(strtoupper($findValue($a, 'sale')), 'NO'))->count(),
-            'sexting_abandoned' => $sextingPitched->filter(fn ($a) => strtoupper($findValue($a, 'sale')) === 'YES' && strtoupper($findValue($a, 'sexting')) === 'NO')->count(),
-            'ppv_no_sale' => $preRecorded->filter(fn ($a) => str_contains(strtoupper($findValue($a, 'sale')), 'NO'))->count(),
-            'upsell_lost' => $preRecorded->filter(fn ($a) => strtoupper($findValue($a, 'sale')) === 'YES' && strtoupper($findValue($a, 'upsell')) === 'NO')->count(),
-            'upsell_failed' => $preRecorded->filter(fn ($a) => strtoupper($findValue($a, 'upsell')) === 'YES' && (strtoupper($findValue($a, 'buy')) === 'NO' || strtoupper($findValue($a, 'purchase')) === 'NO'))->count(),
-            'aftercare_missed' => $sellableAudits->filter(fn ($a) => str_contains(strtoupper($findValue($a, 'aftercare')), 'NO'))->count(),
+            // Core Red Card Metrics (Calculated via separate RevenueLeakageService)
+            ...$this->leakageService->calculateAll($audits),
 
             'auditor_stats' => User::where('agency_id', $agency->id)->get()->map(fn ($u) => [
                 'name' => $u->name,

@@ -15,10 +15,104 @@ import {
     FileText,
     CheckCircle,
     AlertCircle,
+    ClipboardCheck,
 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import toast from "react-hot-toast";
+
+// Helper Functions outside component
+const slugify = (str) =>
+    (str || "").toString().toLowerCase().replace(/[^a-z0-9]+/g, "").trim();
+
+const findTargetField = (label, allFields) => {
+    const sLabel = slugify(label);
+    if (!sLabel) return null;
+
+    // Search in all provided fields
+    let found = allFields.find(f => slugify(f.id) === sLabel || slugify(f.name) === sLabel || slugify(f.field_label) === sLabel);
+    if (found) return found;
+
+    const targetId = (label || "").trim().toLowerCase();
+    found = allFields.find(f => f.id?.toString().toLowerCase() === targetId);
+    if (found) return found;
+
+    return allFields.find(f => slugify(f.name).includes(sLabel) || slugify(f.field_label).includes(sLabel));
+};
+
+const generateFieldKey = (field) => {
+    return field?.field_key || field?.id || slugify(field?.name || field?.field_label || "");
+};
+
+const evaluateCondition = (condition, responses, allFields) => {
+    // If no condition, it's visible by default
+    if (!condition || typeof condition !== 'string' || !condition.trim() || condition === 'null') return true;
+
+    const parts = condition.split(/\s+(?:AND|and)\s+/);
+    return parts.every((part) => {
+        const match = part.match(/(.+?)\s*(!=|==|=)\s*(.+)/);
+        if (!match) return true;
+
+        const label = match[1].trim();
+        const operator = match[2].trim();
+        const expectedValue = match[3].trim();
+
+        const targetField = findTargetField(label, allFields);
+
+        const potentialKeys = [
+            targetField ? generateFieldKey(targetField) : null,
+            targetField?.id,
+            slugify(label),
+            label
+        ].filter(Boolean);
+
+        let actualValue = null;
+        for (const key of potentialKeys) {
+            if (responses[key] !== undefined && responses[key] !== null) {
+                actualValue = responses[key];
+                break;
+            }
+        }
+
+        // If no value found, condition is false
+        if (actualValue === null || actualValue === undefined) return false;
+
+        const sActual = slugify(actualValue.toString());
+        const sExpected = slugify(expectedValue.toString());
+
+        const isMatch = sActual === sExpected;
+        return operator === "!=" ? !isMatch : isMatch;
+    });
+};
+
+const isVisibleDeep = (field, fIdx, allFields, responses) => {
+    if (fIdx === 0) return true;
+    return evaluateCondition(field.required_if, responses, allFields);
+};
+
+const isVisible = (field, fIdx, allFields, responses) => {
+    // 1. Primary Condition Check (required_if)
+    if (!isVisibleDeep(field, fIdx, allFields, responses)) return false;
+
+    // 2. Step-by-Step Waterfall:
+    // A field only becomes visible if the immediately preceding "visible-by-condition" field has an answer.
+    let lastVisibleIdx = -1;
+    for (let i = fIdx - 1; i >= 0; i--) {
+        if (isVisibleDeep(allFields[i], i, allFields, responses)) {
+            lastVisibleIdx = i;
+            break;
+        }
+    }
+
+    if (lastVisibleIdx !== -1) {
+        const lastField = allFields[lastVisibleIdx];
+        const lastKey = generateFieldKey(lastField);
+        const lastVal = responses[lastKey];
+        if (lastVal === undefined || lastVal === null || lastVal.toString().trim() === "") return false;
+    }
+
+    return true;
+};
 
 export default function CreateAudit({ agency, chatters = [], creators = [], audit_templates }) {
     const { auth } = usePage().props;
@@ -29,10 +123,7 @@ export default function CreateAudit({ agency, chatters = [], creators = [], audi
     const tabContainerRef = useRef(null);
     const [showScrollButtons, setShowScrollButtons] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
-    
-    const generateFieldKey = (field) => {
-        return field.field_key || field.id;
-    };
+
 
     const emptyAudit = {
         chatter_id: "",
@@ -54,6 +145,8 @@ export default function CreateAudit({ agency, chatters = [], creators = [], audi
             audits: [emptyAudit],
         },
     });
+
+    const hasErrors = Object.keys(errors).length > 0;
 
     const { fields, append, remove } = useFieldArray({
         control,
@@ -219,22 +312,20 @@ export default function CreateAudit({ agency, chatters = [], creators = [], audi
                                         key={field.id}
                                         onClick={() => setActiveTabIndex(index)}
                                         type="button"
-                                        className={`relative flex-shrink-0 flex items-center gap-2 px-4 py-2.5 text-sm font-bold rounded-md transition-all ${
-                                            isActive
-                                                ? "bg-black text-white shadow-lg shadow-black/10"
-                                                : "text-gray-500 hover:text-black hover:bg-gray-100"
-                                        }`}
+                                        className={`relative flex-shrink-0 flex items-center gap-2 px-4 py-2.5 text-sm font-bold rounded-md transition-all ${isActive
+                                            ? "bg-black text-white shadow-lg shadow-black/10"
+                                            : "text-gray-500 hover:text-black hover:bg-gray-100"
+                                            }`}
                                     >
                                         <div
-                                            className={`w-2 h-2 rounded-full ${
-                                                isActive
-                                                    ? "bg-white"
-                                                    : hasErrors
-                                                      ? "bg-red-500"
-                                                      : completion === 100
+                                            className={`w-2 h-2 rounded-full ${isActive
+                                                ? "bg-white"
+                                                : hasErrors
+                                                    ? "bg-red-500"
+                                                    : completion === 100
                                                         ? "bg-emerald-500"
                                                         : "bg-gray-300"
-                                            }`}
+                                                }`}
                                         />
                                         <span className="truncate max-w-[120px]">
                                             {tabLabel}
@@ -252,11 +343,10 @@ export default function CreateAudit({ agency, chatters = [], creators = [], audi
                                                 onClick={(e) =>
                                                     removeAuditItem(e, index)
                                                 }
-                                                className={`p-1 rounded-full transition-all ${
-                                                    isActive
-                                                        ? "hover:bg-white/20 text-white/80 hover:text-white"
-                                                        : "hover:bg-gray-200 text-gray-400 hover:text-gray-600"
-                                                }`}
+                                                className={`p-1 rounded-full transition-all ${isActive
+                                                    ? "hover:bg-white/20 text-white/80 hover:text-white"
+                                                    : "hover:bg-gray-200 text-gray-400 hover:text-gray-600"
+                                                    }`}
                                             >
                                                 <X size={12} />
                                             </button>
@@ -318,11 +408,10 @@ export default function CreateAudit({ agency, chatters = [], creators = [], audi
                                                 style={{
                                                     width: `${completion}%`,
                                                 }}
-                                                className={`h-full rounded-full transition-all duration-500 ${
-                                                    completion === 100
-                                                        ? "bg-emerald-500"
-                                                        : "bg-gradient-to-r from-indigo-500 to-indigo-600"
-                                                }`}
+                                                className={`h-full rounded-full transition-all duration-500 ${completion === 100
+                                                    ? "bg-emerald-500"
+                                                    : "bg-gradient-to-r from-indigo-500 to-indigo-600"
+                                                    }`}
                                             />
                                         </div>
                                     </div>
@@ -398,13 +487,12 @@ export default function CreateAudit({ agency, chatters = [], creators = [], audi
                                                                 required: true,
                                                             },
                                                         )}
-                                                        className={`w-full bg-white border rounded-md px-4 py-3 text-sm focus:outline-none transition-all ${
-                                                            errors.audits?.[
-                                                                index
-                                                            ]?.chatter_id
-                                                                ? "border-red-500 ring-2 ring-red-500/20"
-                                                                : "border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
-                                                        }`}
+                                                        className={`w-full bg-white border rounded-md px-4 py-3 text-sm focus:outline-none transition-all ${errors.audits?.[
+                                                            index
+                                                        ]?.chatter_id
+                                                            ? "border-red-500 ring-2 ring-red-500/20"
+                                                            : "border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+                                                            }`}
                                                     >
                                                         <option value="">
                                                             Select Chatter
@@ -433,13 +521,12 @@ export default function CreateAudit({ agency, chatters = [], creators = [], audi
                                                                 required: true,
                                                             },
                                                         )}
-                                                        className={`w-full bg-white border rounded-md px-4 py-3 text-sm focus:outline-none transition-all ${
-                                                            errors.audits?.[
-                                                                index
-                                                            ]?.creator_id
-                                                                ? "border-red-500 ring-2 ring-red-500/20"
-                                                                : "border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
-                                                        }`}
+                                                        className={`w-full bg-white border rounded-md px-4 py-3 text-sm focus:outline-none transition-all ${errors.audits?.[
+                                                            index
+                                                        ]?.creator_id
+                                                            ? "border-red-500 ring-2 ring-red-500/20"
+                                                            : "border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+                                                            }`}
                                                     >
                                                         <option value="">
                                                             Select Creator
@@ -472,13 +559,12 @@ export default function CreateAudit({ agency, chatters = [], creators = [], audi
                                                             },
                                                         )}
                                                         placeholder="Enter Subscriber UID"
-                                                        className={`w-full bg-white border rounded-md px-4 py-3 text-sm pl-10 focus:outline-none transition-all ${
-                                                            errors.audits?.[
-                                                                index
-                                                            ]?.subscriber_uid
-                                                                ? "border-red-500 ring-2 ring-red-500/20"
-                                                                : "border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
-                                                        }`}
+                                                        className={`w-full bg-white border rounded-md px-4 py-3 text-sm pl-10 focus:outline-none transition-all ${errors.audits?.[
+                                                            index
+                                                        ]?.subscriber_uid
+                                                            ? "border-red-500 ring-2 ring-red-500/20"
+                                                            : "border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+                                                            }`}
                                                     />
                                                     <Hash
                                                         size={16}
@@ -489,486 +575,165 @@ export default function CreateAudit({ agency, chatters = [], creators = [], audi
                                         </div>
                                     </div>
 
-                                    {/* Audit Fields Card */}
-                                    <div className="bg-white border border-gray-200 rounded-md shadow-sm overflow-hidden">
-                                        <div className="px-6 py-3 bg-gradient-to-r from-emerald-50 via-white to-white border-b border-gray-200">
+                                    {/* Audit Fields Section - Card within a Card */}
+                                    <div className="bg-white border border-gray-200 rounded-md shadow-sm overflow-hidden mb-8">
+                                        <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-md bg-emerald-100 flex items-center justify-center">
-                                                    <CheckCircle
-                                                        size={20}
-                                                        className="text-emerald-600"
-                                                    />
+                                                <div className="w-8 h-8 rounded bg-indigo-100 flex items-center justify-center text-indigo-600">
+                                                    <ClipboardCheck size={18} />
                                                 </div>
-                                                <div>
-                                                    <h2 className="text-xl font-semibold text-gray-900">
-                                                        Audit Questions
-                                                    </h2>
-                                                    <p className="text-sm text-emerald-600 mt-0.5">
-                                                        {auditFields.length}{" "}
-                                                        fields to complete •{" "}
-                                                        {
-                                                            Object.keys(
-                                                                responses,
-                                                            ).filter(
-                                                                (k) =>
-                                                                    responses[
-                                                                        k
-                                                                    ],
-                                                            ).length
-                                                        }{" "}
-                                                        answered
-                                                    </p>
-                                                </div>
+                                                <h2 className="text-lg font-bold text-gray-900 tracking-tight">
+                                                    Templated Audit Fields
+                                                </h2>
                                             </div>
                                         </div>
-                                        <div className="p-5">
-                                            <div className="space-y-3">
-                                                {auditFields.length > 0 ? (
-                                                    auditFields.map(
-                                                        (fieldItem, fIdx) => {
-                                                            const fieldKey =
-                                                                generateFieldKey(
-                                                                    fieldItem,
-                                                                );
 
-                                                            const slugify = (str) =>
-                                                                (str || "")
-                                                                    .toLowerCase()
-                                                                    .replace(/[^a-z0-9]+/g, "")
-                                                                    .trim();
+                                        <div className="p-4 sm:p-6 bg-slate-50/50">
+                                            <div className="space-y-2.5">
+                                                {audit_templates && audit_templates.length > 0 ? (
+                                                    audit_templates.map((fieldItem, fIdx) => {
+                                                        const fieldKey = generateFieldKey(fieldItem);
+                                                        const isFieldVisible = isVisible(fieldItem, fIdx, audit_templates, responses);
+                                                        if (!isFieldVisible) return null;
 
-                                                            const findTargetField = (label, allFields) => {
-                                                                const sLabel = slugify(label);
-                                                                if (!sLabel) return null;
+                                                        const isSelect =
+                                                            fieldItem.type === "select" ||
+                                                            fieldItem.options ||
+                                                            (fieldItem.field_label || "")
+                                                                .toLowerCase()
+                                                                .includes("subscriber type");
 
-                                                                // 1. Check ID first (this is common in template rules)
-                                                                let found = allFields.find(
-                                                                    (f) =>
-                                                                        slugify(f.id?.toString()) === sLabel
-                                                                );
-                                                                if (found) return found;
+                                                        const hasError = errors.audits?.[index]?.responses?.[fieldKey];
+                                                        const currentValue = responses[fieldKey];
 
-                                                                // 2. Exact slug match for labels
-                                                                found = allFields.find(
-                                                                    (f) =>
-                                                                        slugify(f.field_label) === sLabel ||
-                                                                        slugify(f.name) === sLabel,
-                                                                );
-                                                                if (found) return found;
-
-                                                                // 3. Prefix match (handles "pitched" vs "pitch")
-                                                                found = allFields.find((f) => {
-                                                                    const sField = slugify(f.field_label || f.name);
-                                                                    return (
-                                                                        sField.substring(0, 15) ===
-                                                                        sLabel.substring(0, 15)
-                                                                    );
-                                                                });
-                                                                if (found) return found;
-
-                                                                // 4. Substring match
-                                                                found = allFields.find((f) => {
-                                                                    const sField = slugify(f.field_label || f.name);
-                                                                    return (
-                                                                        sField.includes(sLabel) ||
-                                                                        sLabel.includes(sField)
-                                                                    );
-                                                                });
-                                                                return found;
-                                                            };
-
-                                                            const evaluateCondition = (condition, responses, allFields) => {
-                                                                if (!condition) return true;
-
-                                                                const parts = condition.split(/\s+(?:AND|and)\s+/);
-                                                                return parts.every((part) => {
-                                                                    const match = part.match(/(.+?)\s*=\s*(.+)/);
-                                                                    if (!match) return true;
-
-                                                                    const label = match[1].trim();
-                                                                    const expectedValue = match[2].trim();
-
-                                                                    const targetField = findTargetField(label, allFields);
-                                                                    // If we can't find the source field, stay visible for safety
-                                                                    if (!targetField) return true;
-
-                                                                    const targetKey = generateFieldKey(targetField);
-                                                                    const actualValue = responses[targetKey];
-
-                                                                    return (
-                                                                        actualValue?.toString().toLowerCase() ===
-                                                                        expectedValue.toLowerCase()
-                                                                    );
-                                                                });
-                                                            };
-
-                                                            const isVisible = (() => {
-                                                                if (fIdx === 0) return true;
-
-                                                                // 1. Check own condition first
-                                                                const conditionMet = evaluateCondition(
-                                                                    fieldItem.required_if,
-                                                                    responses,
-                                                                    auditFields,
-                                                                );
-                                                                if (!conditionMet) return false;
-
-                                                                // 2. Find the last visible field before this one to check waterfall
-                                                                let lastVisibleIdx = -1;
-                                                                for (let i = fIdx - 1; i >= 0; i--) {
-                                                                    if (
-                                                                        evaluateCondition(
-                                                                            auditFields[i].required_if,
-                                                                            responses,
-                                                                            auditFields,
-                                                                        )
-                                                                    ) {
-                                                                        lastVisibleIdx = i;
-                                                                        break;
-                                                                    }
-                                                                }
-
-                                                                if (lastVisibleIdx === -1) return true;
-
-                                                                const lastField = auditFields[lastVisibleIdx];
-                                                                const lastKey = generateFieldKey(lastField);
-                                                                const lastVal = responses[lastKey];
-
-                                                                return (
-                                                                    lastVal !== undefined &&
-                                                                    lastVal !== null &&
-                                                                    lastVal.toString().trim() !== ""
-                                                                );
-                                                            })();
-
-                                                            if (!isVisible) return null;
-
-                                                            const isSelect =
-                                                                fieldItem.type === "select" ||
-                                                                fieldItem.options ||
-                                                                (fieldItem.field_label || "")
-                                                                    .toLowerCase()
-                                                                    .includes("subscriber type");
-
-                                                            const hasError =
-                                                                errors.audits?.[
-                                                                    index
-                                                                ]?.responses?.[
-                                                                    fieldKey
-                                                                ];
-                                                            const currentValue =
-                                                                responses[
-                                                                    fieldKey
-                                                                ];
-
-                                                            return (
-                                                                <div
-                                                                    key={
-                                                                        fieldKey
-                                                                    }
-                                                                    className="space-y-1.5 pb-4 border-b border-gray-100 last:border-0 last:pb-0"
-                                                                >
-                                                                    <div className="flex items-start justify-between">
-                                                                        <label className="text-sm font-medium text-gray-700">
-                                                                            {fIdx + 1}. {fieldItem.field_label ||
-                                                                                fieldItem.name}
-                                                                            {fieldItem.required && (
-                                                                                <span className="text-red-500 ml-1">
-                                                                                    *
-                                                                                </span>
-                                                                            )}
+                                                        return (
+                                                            <div
+                                                                key={fieldKey}
+                                                                className="bg-white border border-gray-200 rounded-xl shadow-sm p-4 sm:p-5 space-y-3 hover:border-indigo-200 transition-all duration-300"
+                                                            >
+                                                                <div className="flex flex-col gap-2">
+                                                                    <div className="flex items-center justify-between">
+                                                                        <label className="text-[15px] font-bold text-gray-800 tracking-tight flex items-center gap-1.5">
+                                                                            {fieldItem.name || fieldItem.field_label}
+                                                                            <span className="text-red-500 font-bold">*</span>
                                                                         </label>
                                                                         {currentValue && (
-                                                                            <span className="text-xs text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">
+                                                                            <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded border border-emerald-100">
                                                                                 Answered
                                                                             </span>
                                                                         )}
                                                                     </div>
 
                                                                     {fieldItem.help_text && (
-                                                                        <p className="text-xs text-gray-500 mb-3">
-                                                                            {
-                                                                                fieldItem.help_text
-                                                                            }
-                                                                        </p>
-                                                                    )}
-
-                                                                    {isSelect ? (
-                                                                        (() => {
-                                                                            const options =
-                                                                                fieldItem.options
-                                                                                    ?.split(/,(?![^()]*\))/)
-                                                                                    .map(
-                                                                                        (
-                                                                                            o,
-                                                                                        ) =>
-                                                                                            o.trim(),
-                                                                                    ) ||
-                                                                                [];
-                                                                            const isYesNo =
-                                                                                options.length ===
-                                                                                    2 &&
-                                                                                options.some(
-                                                                                    (
-                                                                                        o,
-                                                                                    ) =>
-                                                                                        o.toLowerCase() ===
-                                                                                        "yes",
-                                                                                ) &&
-                                                                                options.some(
-                                                                                    (
-                                                                                        o,
-                                                                                    ) =>
-                                                                                        o.toLowerCase() ===
-                                                                                        "no",
-                                                                                );
-
-                                                                            if (
-                                                                                isYesNo
-                                                                            ) {
-                                                                                return (
-                                                                                    <div className="flex gap-3">
-                                                                                        {options.map(
-                                                                                            (
-                                                                                                opt,
-                                                                                            ) => {
-                                                                                                const isSelected =
-                                                                                                    responses[
-                                                                                                        fieldKey
-                                                                                                    ] ===
-                                                                                                    opt;
-                                                                                                return (
-                                                                                                    <button
-                                                                                                        key={
-                                                                                                            opt
-                                                                                                        }
-                                                                                                        type="button"
-                                                                                                        onClick={() => {
-                                                                                                            setValue(
-                                                                                                                `audits.${index}.responses.${fieldKey}`,
-                                                                                                                opt,
-                                                                                                                {
-                                                                                                                    shouldValidate: true,
-                                                                                                                    shouldDirty: true,
-                                                                                                                },
-                                                                                                            );
-                                                                                                        }}
-                                                                                                        className={`flex-1 h-11 rounded-md border-2 flex items-center justify-center gap-2 transition-all ${
-                                                                                                            isSelected
-                                                                                                                ? opt.toLowerCase() ===
-                                                                                                                  "yes"
-                                                                                                                    ? "border-emerald-500 bg-emerald-50 text-emerald-700"
-                                                                                                                    : "border-red-500 bg-red-50 text-red-700"
-                                                                                                                : "border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50"
-                                                                                                        }`}
-                                                                                                    >
-                                                                                                        {isSelected && (
-                                                                                                            <div
-                                                                                                                className={`w-5 h-5 rounded-full flex items-center justify-center ${
-                                                                                                                    opt.toLowerCase() ===
-                                                                                                                    "yes"
-                                                                                                                        ? "bg-emerald-500"
-                                                                                                                        : "bg-red-500"
-                                                                                                                }`}
-                                                                                                            >
-                                                                                                                <Check
-                                                                                                                    size={
-                                                                                                                        12
-                                                                                                                    }
-                                                                                                                    className="text-white"
-                                                                                                                    strokeWidth={
-                                                                                                                        3
-                                                                                                                    }
-                                                                                                                />
-                                                                                                            </div>
-                                                                                                        )}
-                                                                                                        <span className="text-sm font-medium">
-                                                                                                            {
-                                                                                                                opt
-                                                                                                            }
-                                                                                                        </span>
-                                                                                                    </button>
-                                                                                                );
-                                                                                            },
-                                                                                        )}
-                                                                                    </div>
-                                                                                );
-                                                                            }
-
-                                                                            return (
-                                                                                <div className="space-y-2">
-                                                                                    {options.map(
-                                                                                        (
-                                                                                            opt,
-                                                                                        ) => {
-                                                                                            const isSelected =
-                                                                                                responses[
-                                                                                                    fieldKey
-                                                                                                ] ===
-                                                                                                opt;
-                                                                                            return (
-                                                                                                <button
-                                                                                                    key={
-                                                                                                        opt
-                                                                                                    }
-                                                                                                    type="button"
-                                                                                                    onClick={() => {
-                                                                                                        setValue(
-                                                                                                            `audits.${index}.responses.${fieldKey}`,
-                                                                                                            opt,
-                                                                                                            {
-                                                                                                                shouldValidate: true,
-                                                                                                                shouldDirty: true,
-                                                                                                            },
-                                                                                                        );
-                                                                                                        auditFields
-                                                                                                            .slice(
-                                                                                                                fIdx +
-                                                                                                                    1,
-                                                                                                            )
-                                                                                                            .forEach(
-                                                                                                                (
-                                                                                                                    subField,
-                                                                                                                ) => {
-                                                                                                                    const subKey =
-                                                                                                                        generateFieldKey(
-                                                                                                                            subField,
-                                                                                                                        );
-                                                                                                                    setValue(
-                                                                                                                        `audits.${index}.responses.${subKey}`,
-                                                                                                                        "",
-                                                                                                                        {
-                                                                                                                            shouldValidate: true,
-                                                                                                                            shouldDirty: true,
-                                                                                                                        },
-                                                                                                                    );
-                                                                                                                },
-                                                                                                            );
-                                                                                                    }}
-                                                                                                    className={`w-full px-4 py-2.5 rounded-md border-2 text-left flex items-center gap-3 transition-all ${
-                                                                                                        isSelected
-                                                                                                            ? "border-black bg-gray-50 shadow-sm"
-                                                                                                            : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50"
-                                                                                                    }`}
-                                                                                                >
-                                                                                                    <div
-                                                                                                        className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                                                                                                            isSelected
-                                                                                                                ? "border-indigo-500"
-                                                                                                                : "border-gray-300"
-                                                                                                        }`}
-                                                                                                    >
-                                                                                                        {isSelected && (
-                                                                                                            <div className="w-2.5 h-2.5 rounded-full bg-indigo-500" />
-                                                                                                        )}
-                                                                                                    </div>
-                                                                                                    <span
-                                                                                                        className={`text-sm ${
-                                                                                                            isSelected
-                                                                                                                ? "text-indigo-700 font-medium"
-                                                                                                                : "text-gray-700"
-                                                                                                        }`}
-                                                                                                    >
-                                                                                                        {
-                                                                                                            opt
-                                                                                                        }
-                                                                                                    </span>
-                                                                                                </button>
-                                                                                            );
-                                                                                        },
-                                                                                    )}
-                                                                                </div>
-                                                                            );
-                                                                        })()
-                                                                    ) : (
-                                                                        <input
-                                                                            type="text"
-                                                                            {...register(
-                                                                                `audits.${index}.responses.${fieldKey}`,
-                                                                                {
-                                                                                    required:
-                                                                                        fieldItem.required,
-                                                                                    onChange:
-                                                                                        (
-                                                                                            e,
-                                                                                        ) => {
-                                                                                            if (
-                                                                                                !e
-                                                                                                    .target
-                                                                                                    .value
-                                                                                            ) {
-                                                                                                auditFields
-                                                                                                    .slice(
-                                                                                                        fIdx +
-                                                                                                            1,
-                                                                                                    )
-                                                                                                    .forEach(
-                                                                                                        (
-                                                                                                            subField,
-                                                                                                        ) => {
-                                                                                                            const subKey =
-                                                                                                                generateFieldKey(
-                                                                                                                    subField,
-                                                                                                                );
-                                                                                                            setValue(
-                                                                                                                `audits.${index}.responses.${subKey}`,
-                                                                                                                "",
-                                                                                                                {
-                                                                                                                    shouldValidate: true,
-                                                                                                                    shouldDirty: true,
-                                                                                                                },
-                                                                                                            );
-                                                                                                        },
-                                                                                                    );
-                                                                                            }
-                                                                                        },
-                                                                                },
-                                                                            )}
-                                                                            className={`w-full bg-white border rounded-md px-4 py-3 text-sm focus:outline-none transition-all ${
-                                                                                hasError
-                                                                                    ? "border-red-500 ring-2 ring-red-500/20"
-                                                                                    : currentValue
-                                                                                      ? "border-emerald-500 ring-2 ring-emerald-500/20"
-                                                                                      : "border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
-                                                                            }`}
-                                                                            placeholder={`Enter ${fieldItem.field_label || fieldItem.name}`}
-                                                                        />
-                                                                    )}
-                                                                    {hasError && (
-                                                                        <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
-                                                                            <AlertCircle
-                                                                                size={
-                                                                                    12
-                                                                                }
-                                                                            />
-                                                                            This
-                                                                            field
-                                                                            is
-                                                                            required
-                                                                        </p>
+                                                                        <div className="bg-indigo-50/80 border border-indigo-100 p-3.5 rounded-lg">
+                                                                            <p className="flex items-center gap-2 text-sm text-indigo-900 font-bold mb-1">
+                                                                                <FileText size={14} className="text-indigo-500" />
+                                                                                Description:
+                                                                            </p>
+                                                                            <p className="text-[13px] text-indigo-800/80 leading-relaxed font-medium pl-5">
+                                                                                {fieldItem.help_text}
+                                                                            </p>
+                                                                        </div>
                                                                     )}
                                                                 </div>
-                                                            );
-                                                        },
-                                                    )
+
+                                                                {isSelect ? (
+                                                                    (() => {
+                                                                        const options =
+                                                                            fieldItem.options
+                                                                                ?.split(/,(?![^()]*\))/)
+                                                                                .map((o) => o.trim()) || [];
+
+                                                                        const handleUpdate = (opt) => {
+                                                                            setValue(
+                                                                                `audits.${index}.responses.${fieldKey}`,
+                                                                                opt,
+                                                                                {
+                                                                                    shouldValidate: true,
+                                                                                    shouldDirty: true,
+                                                                                },
+                                                                            );
+
+                                                                            // Waterfall: Reset following fields to ensure fresh state
+                                                                            const followingFields = audit_templates.slice(fIdx + 1);
+                                                                            followingFields.forEach((nextField) => {
+                                                                                const nKey = generateFieldKey(nextField);
+                                                                                setValue(`audits.${index}.responses.${nKey}`, "", { shouldValidate: true });
+                                                                            });
+                                                                        };
+
+                                                                        return (
+                                                                            <div className="space-y-3">
+                                                                                <div className="relative group">
+                                                                                    <select
+                                                                                        value={responses[fieldKey] || ""}
+                                                                                        onChange={(e) => handleUpdate(e.target.value)}
+                                                                                        className={`w-full appearance-none bg-white border rounded-md px-4 py-2 text-[15px] font-medium focus:outline-none focus:ring-4 focus:ring-indigo-500/5 transition-all ${hasError
+                                                                                            ? "border-red-500"
+                                                                                            : responses[fieldKey]
+                                                                                                ? "border-emerald-500"
+                                                                                                : "border-gray-200 focus:border-indigo-600"
+                                                                                            }`}
+                                                                                    >
+                                                                                        <option value="">
+                                                                                            Select {(fieldItem.name || fieldItem.field_label).toLowerCase()}
+                                                                                        </option>
+                                                                                        {options.map((opt) => (
+                                                                                            <option key={opt} value={opt}>
+                                                                                                {opt}
+                                                                                            </option>
+                                                                                        ))}
+                                                                                    </select>
+                                                                                </div>
+
+                                                                                {/* 'Other' Specification Input */}
+                                                                                {slugify(responses[fieldKey]) === "other" && (
+                                                                                    <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+                                                                                        <input
+                                                                                            type="text"
+                                                                                            {...register(`audits.${index}.responses.${fieldKey}_other`, { required: true })}
+                                                                                            placeholder="Please specify other..."
+                                                                                            className="w-full bg-slate-50 border border-indigo-100 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/10 transition-all placeholder:text-gray-400"
+                                                                                        />
+                                                                                    </div>
+                                                                                )}
+                                                                            </div>
+                                                                        );
+                                                                    })()
+                                                                ) : (
+                                                                    <textarea
+                                                                        rows={3}
+                                                                        {...register(
+                                                                            `audits.${index}.responses.${fieldKey}`,
+                                                                            {
+                                                                                required: fieldItem.required,
+                                                                            },
+                                                                        )}
+                                                                        className={`w-full bg-white border rounded-lg px-4 py-3 text-[15px] font-medium focus:outline-none focus:ring-4 focus:ring-indigo-500/5 transition-all resize-none ${hasError
+                                                                            ? "border-red-500"
+                                                                            : currentValue
+                                                                                ? "border-emerald-500"
+                                                                                : "border-gray-200 focus:border-indigo-600"
+                                                                            }`}
+                                                                        placeholder={`Enter analysis/details for ${fieldItem.field_label || fieldItem.name}...`}
+                                                                    />
+                                                                )}
+                                                                {hasError && (
+                                                                    <p className="text-[11px] font-black uppercase tracking-widest text-red-500 mt-2 flex items-center gap-2 px-2">
+                                                                        <AlertCircle size={14} />
+                                                                        Required field
+                                                                    </p>
+                                                                )}
+                                                            </div>
+                                                        );
+                                                    })
                                                 ) : (
-                                                    <div className="text-center py-16">
-                                                        <div className="w-20 h-20 mx-auto mb-6 bg-gray-100 rounded-2xl flex items-center justify-center">
-                                                            <AlertCircle
-                                                                size={32}
-                                                                className="text-gray-400"
-                                                            />
+                                                    <div className="bg-white border border-gray-200 rounded-md p-16 text-center">
+                                                        <div className="w-20 h-20 mx-auto mb-6 bg-gray-50 rounded-2xl flex items-center justify-center">
+                                                            <AlertCircle size={32} className="text-gray-300" />
                                                         </div>
-                                                        <p className="text-gray-600 font-medium text-lg">
-                                                            No audit fields
-                                                            configured
-                                                        </p>
-                                                        <p className="text-sm text-gray-400 mt-2 max-w-md mx-auto">
-                                                            Please contact your
-                                                            administrator to set
-                                                            up audit fields for
-                                                            this agency
-                                                        </p>
+                                                        <p className="text-gray-600 font-semibold text-lg">No audit questions</p>
+                                                        <p className="text-sm text-gray-400 mt-2">Audit template has not been configured yet.</p>
                                                     </div>
                                                 )}
                                             </div>

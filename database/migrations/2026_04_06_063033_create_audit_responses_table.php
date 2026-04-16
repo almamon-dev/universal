@@ -14,9 +14,12 @@ return new class extends Migration
         Schema::create('audit_responses', function (Blueprint $table) {
             $table->id();
             $table->foreignId('audit_id')->constrained('seo_audits')->onDelete('cascade');
+            $table->foreignId('agency_id')->nullable()->constrained('agencies')->onDelete('cascade');
             $table->string('field_key')->index();
             $table->text('value')->nullable();
             $table->timestamps();
+
+            $table->index(['agency_id', 'field_key']);
         });
     }
 

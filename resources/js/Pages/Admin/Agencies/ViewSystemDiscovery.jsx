@@ -1,5 +1,6 @@
 import AdminLayout from "@/Layouts/AdminLayout";
-import { Head, Link } from "@inertiajs/react";
+import { Head, Link, useForm } from "@inertiajs/react";
+import { useState } from "react";
 import {
     ArrowLeft,
     CircleDollarSign,
@@ -12,11 +13,44 @@ import {
     TrendingUp,
     Sparkles,
     Zap,
-    Target,
     Activity,
+    Target,
+    Edit2,
 } from "lucide-react";
+import Modal from "@/Components/Modal";
+import TextInput from "@/Components/TextInput";
+import InputLabel from "@/Components/InputLabel";
+import InputError from "@/Components/InputError";
+import PrimaryButton from "@/Components/PrimaryButton";
+import SecondaryButton from "@/Components/SecondaryButton";
 
 export default function ViewSystemDiscovery({ agency }) {
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+    const { data, setData, post, processing, errors, reset } = useForm({
+        first_paywall_sexting: agency.first_paywall_sexting || 0,
+        avg_completed_sexting_sequence: agency.avg_completed_sexting_sequence || 0,
+        avg_recorded_ppv: agency.avg_recorded_ppv || 0,
+    });
+
+    const submit = (e) => {
+        e.preventDefault();
+        post(route("admin.agencies.update-metrics", agency.id), {
+            onSuccess: () => {
+                setIsEditModalOpen(false);
+            },
+        });
+    };
+
+    const openEditModal = () => {
+        setData({
+            first_paywall_sexting: agency.first_paywall_sexting || 0,
+            avg_completed_sexting_sequence: agency.avg_completed_sexting_sequence || 0,
+            avg_recorded_ppv: agency.avg_recorded_ppv || 0,
+        });
+        setIsEditModalOpen(true);
+    };
+
     const StatsCard = ({ label, value, icon: Icon, gradient, color }) => (
         <div className="relative group">
             {/* Animated background gradient */}
@@ -74,8 +108,8 @@ export default function ViewSystemDiscovery({ agency }) {
         <Link
             href={href}
             className={`relative group block h-full ${isMain
-                    ? "transform hover:-translate-y-1"
-                    : "hover:-translate-y-0.5"
+                ? "transform hover:-translate-y-1"
+                : "hover:-translate-y-0.5"
                 } transition-all duration-300`}
         >
             {/* Main Card */}
@@ -99,8 +133,8 @@ export default function ViewSystemDiscovery({ agency }) {
                     <div className="flex items-start justify-between mb-4">
                         <div
                             className={`w-12 h-12 rounded-lg flex items-center justify-center ${isMain
-                                    ? "bg-white/20 text-white"
-                                    : `bg-gradient-to-br ${gradient} bg-opacity-10 text-gray-900`
+                                ? "bg-white/20 text-white"
+                                : `bg-gradient-to-br ${gradient} bg-opacity-10 text-gray-900`
                                 }`}
                         >
                             <Icon
@@ -111,8 +145,8 @@ export default function ViewSystemDiscovery({ agency }) {
                         {badge && (
                             <span
                                 className={`px-2 py-1 text-xs font-medium rounded-full ${isMain
-                                        ? "bg-white/20 text-white"
-                                        : "bg-gray-100 text-gray-600"
+                                    ? "bg-white/20 text-white"
+                                    : "bg-gray-100 text-gray-600"
                                     }`}
                             >
                                 {badge}
@@ -146,8 +180,8 @@ export default function ViewSystemDiscovery({ agency }) {
                         </span>
                         <div
                             className={`w-7 h-7 rounded-full flex items-center justify-center transition-all group-hover:translate-x-1 ${isMain
-                                    ? "bg-white/20 text-white"
-                                    : "bg-gray-100 text-gray-700 group-hover:bg-gradient-to-br group-hover:from-indigo-600 group-hover:to-purple-600 group-hover:text-white"
+                                ? "bg-white/20 text-white"
+                                : "bg-gray-100 text-gray-700 group-hover:bg-gradient-to-br group-hover:from-indigo-600 group-hover:to-purple-600 group-hover:text-white"
                                 }`}
                         >
                             <ArrowUpRight size={14} />
@@ -190,13 +224,22 @@ export default function ViewSystemDiscovery({ agency }) {
                                 </p>
                             </div>
 
-                            <Link
-                                href={route("admin.agencies.edit", agency.id)}
-                                className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-sm font-medium rounded-lg hover:from-indigo-700 hover:to-purple-700 shadow-lg shadow-indigo-200 transition-all"
-                            >
-                                <Zap size={16} />
-                                Update Settings
-                            </Link>
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={openEditModal}
+                                    className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 shadow-sm transition-all"
+                                >
+                                    <Edit2 size={16} />
+                                    Edit Metrics
+                                </button>
+                                {/* <Link
+                                    href={route("admin.agencies.edit", agency.id)}
+                                    className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-sm font-medium rounded-lg hover:from-indigo-700 hover:to-purple-700 shadow-lg shadow-indigo-200 transition-all"
+                                >
+                                    <Zap size={16} />
+                                    Update Settings
+                                </Link> */}
+                            </div>
                         </div>
                     </div>
 
@@ -218,7 +261,7 @@ export default function ViewSystemDiscovery({ agency }) {
                         />
                         <StatsCard
                             label="Pre-recorded PPV"
-                            value={agency.avg_recorded_ppn}
+                            value={agency.avg_recorded_ppv}
                             icon={MonitorPlay}
                             gradient="from-orange-600 to-red-600"
                             color="text-orange-600"
@@ -331,6 +374,65 @@ export default function ViewSystemDiscovery({ agency }) {
                     </div>
                 </div>
             </div>
+
+            {/* Edit Metrics Modal */}
+            <Modal show={isEditModalOpen} onClose={() => setIsEditModalOpen(false)}>
+                <form onSubmit={submit} className="p-6">
+                    <h2 className="text-lg font-medium text-gray-900 mb-4">
+                        Update Discovery Metrics
+                    </h2>
+
+                    <div className="space-y-4">
+                        <div>
+                            <InputLabel htmlFor="first_paywall_sexting" value="Initial Paywall ($)" />
+                            <TextInput
+                                id="first_paywall_sexting"
+                                type="number"
+                                step="any"
+                                className="mt-1 block w-full"
+                                value={data.first_paywall_sexting}
+                                onChange={(e) => setData("first_paywall_sexting", e.target.value)}
+                            />
+                            <InputError message={errors.first_paywall_sexting} className="mt-2" />
+                        </div>
+
+                        <div>
+                            <InputLabel htmlFor="avg_completed_sexting_sequence" value="Sequence Average ($)" />
+                            <TextInput
+                                id="avg_completed_sexting_sequence"
+                                type="number"
+                                step="any"
+                                className="mt-1 block w-full"
+                                value={data.avg_completed_sexting_sequence}
+                                onChange={(e) => setData("avg_completed_sexting_sequence", e.target.value)}
+                            />
+                            <InputError message={errors.avg_completed_sexting_sequence} className="mt-2" />
+                        </div>
+
+                        <div>
+                            <InputLabel htmlFor="avg_recorded_ppv" value="Pre-recorded PPV ($)" />
+                            <TextInput
+                                id="avg_recorded_ppv"
+                                type="number"
+                                step="any"
+                                className="mt-1 block w-full"
+                                value={data.avg_recorded_ppv}
+                                onChange={(e) => setData("avg_recorded_ppv", e.target.value)}
+                            />
+                            <InputError message={errors.avg_recorded_ppv} className="mt-2" />
+                        </div>
+                    </div>
+
+                    <div className="mt-6 flex justify-end gap-3">
+                        <SecondaryButton onClick={() => setIsEditModalOpen(false)}>
+                            Cancel
+                        </SecondaryButton>
+                        <PrimaryButton disabled={processing}>
+                            Save Changes
+                        </PrimaryButton>
+                    </div>
+                </form>
+            </Modal>
         </AdminLayout>
     );
 }

@@ -23,6 +23,7 @@ import {
     List,
     Monitor,
     Hash,
+    Edit2,
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
@@ -124,6 +125,7 @@ export default function Edit({
     const isAdmin = user?.role === "admin";
     const canEdit = isAdmin;
     const isEditing = !!agency?.id;
+    const [view, setView] = useState(isEditing ? "hub" : "form");
     const [searchTerm, setSearchTerm] = useState("");
     const [dateFrom, setDateFrom] = useState("02/07/2026");
     const [dateTo, setDateTo] = useState("02/07/2026");
@@ -142,7 +144,7 @@ export default function Edit({
         first_paywall_sexting: agency?.first_paywall_sexting || "",
         avg_completed_sexting_sequence:
             agency?.avg_completed_sexting_sequence || "",
-        avg_recorded_ppn: agency?.avg_recorded_ppn || "",
+        avg_recorded_ppv: agency?.avg_recorded_ppv || "",
         status: agency?.status || "active",
         qcs: agency?.qcs || [],
     });
@@ -243,11 +245,9 @@ export default function Edit({
             onProgress: (progress) => console.log("Upload progress:", progress),
             onSuccess: (page) => {
                 console.log("Request successful:", page);
-                toast.success("Agency saved successfully");
             },
             onError: (errors) => {
                 console.error("Request failed with errors:", errors);
-                toast.error("Failed to save agency. Check errors.");
             },
             onFinish: () => console.log("Request finished"),
         };
@@ -318,7 +318,7 @@ export default function Edit({
                 .split(/[-_\s]/)
                 .map(
                     (word) =>
-                        word.charAt(0).to() +
+                        word.charAt(0).toUpperCase() +
                         word.slice(1).toLowerCase(),
                 )
                 .join(" ");
@@ -447,9 +447,9 @@ export default function Edit({
 
     return (
         <Layout>
-            {!isEditing ? (
+            {view === "form" ? (
                 <>
-                    <Head title="Create Agency" />
+                    <Head title={isEditing ? `Edit ${agency.name}` : "Create Agency"} />
                     <div className="max-w-4xl mx-auto px-4 py-8">
                         <div className="mb-8">
                             <Link
@@ -462,12 +462,21 @@ export default function Edit({
                             <div className="flex items-center justify-between">
                                 <div>
                                     <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
-                                        Create New Agency
+                                        {isEditing ? `Edit ${agency.name}` : "Create New Agency"}
                                     </h1>
                                     <p className="text-sm text-zinc-500 mt-1">
-                                        Initialize a new agency profile and configure operational parameters
+                                        {isEditing ? "Update agency profile and operational parameters" : "Initialize a new agency profile and configure operational parameters"}
                                     </p>
                                 </div>
+                                {isEditing && (
+                                    <button
+                                        onClick={() => setView("hub")}
+                                        className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 shadow-sm transition-all"
+                                    >
+                                        <ArrowLeft size={16} />
+                                        Back to Hub
+                                    </button>
+                                )}
                                 {!canEdit && (
                                     <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 text-amber-600 text-[10px] font-black  tracking-widest rounded-lg border border-amber-100">
                                         <Shield size={12} />
@@ -639,11 +648,11 @@ export default function Edit({
                                             </span>
                                             <input
                                                 type="number"
-                                                value={data.avg_recorded_ppn}
+                                                value={data.avg_recorded_ppv}
                                                 disabled={!canEdit}
                                                 onChange={(e) =>
                                                     setData(
-                                                        "avg_recorded_ppn",
+                                                        "avg_recorded_ppv",
                                                         e.target.value,
                                                     )
                                                 }
@@ -792,6 +801,13 @@ export default function Edit({
                             </div>
                         </div>
                         <div className="flex items-center gap-3">
+                            <button
+                                onClick={() => setView("form")}
+                                className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 shadow-sm transition-all"
+                            >
+                                <Edit2 size={16} />
+                                Edit Profile
+                            </button>
                             <Link
                                 href={route("admin.agencies.audits", agency.id)}
                                 className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-900 text-sm font-semibold rounded-md hover:bg-gray-50 transition-all shadow-sm"

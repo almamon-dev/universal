@@ -218,7 +218,8 @@ export default function Dashboard({ auth, stats, agencies }) {
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 text-right">
-                                                <div className="flex items-center justify-end">
+                                                <div className="flex items-center justify-end gap-2">
+
                                                     <Link
                                                         href={route("admin.agencies.edit", agency.id)}
                                                         className="bg-zinc-900 hover:bg-zinc-800 text-white px-5 py-2 rounded-sm text-xs font-bold transition-all shadow-md shadow-zinc-100 flex items-center gap-2"

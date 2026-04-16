@@ -19,7 +19,7 @@ return new class extends Migration
             // Price Configuration
             $table->decimal('first_paywall_sexting', 10, 2)->default(0);
             $table->decimal('avg_completed_sexting_sequence', 10, 2)->default(0);
-            $table->decimal('avg_recorded_ppn', 10, 2)->default(0);
+            $table->decimal('avg_recorded_ppv', 10, 2)->default(0);
 
             $table->string('status')->default('active'); // active, inactive
             $table->integer('total_audits')->default(0);

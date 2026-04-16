@@ -171,7 +171,7 @@ export default function WeeklyReport({ agency, stats }) {
                                     </ReportSection>
 
                                     <ReportSection title="Phase I — Signal Audit" label="Revenue leakage analysis">
-                                        <RevenueLeakage stats={stats} />
+                                        <RevenueLeakage stats={stats} agency={agency} />
                                     </ReportSection>
 
                                     <ReportSection title="Phase II — Revenue Fault Mapping" label="Diagnostic fault matrix">

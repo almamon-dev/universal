@@ -30,6 +30,9 @@ class UserSeeder extends Seeder
             [
                 'timezone' => 'UTC',
                 'status' => 'active',
+                'first_paywall_sexting' => 30.00,
+                'avg_completed_sexting_sequence' => 150.00,
+                'avg_recorded_ppv' => 70.00,
             ]
         );
 

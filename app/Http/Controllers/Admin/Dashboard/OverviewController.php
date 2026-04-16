@@ -47,10 +47,10 @@ class OverviewController extends Controller
             $agency = Auth::user()->agency;
             $filterDateStr = request('date', now()->format('Y-m-d'));
             $filterDate = \Carbon\Carbon::parse($filterDateStr);
-            
+
             $totalAudits = $agency ? $agency->audits()->count() : 0;
             $selectedDateAudits = $agency ? $agency->audits()->whereDate('seo_audits.created_at', $filterDateStr)->count() : 0;
-            
+
             // Graph Data (7 days up to filter date)
             $graphData = [];
             if ($agency) {
@@ -60,7 +60,7 @@ class OverviewController extends Controller
                     $count = $agency->audits()->whereDate('seo_audits.created_at', $dateKey)->count();
                     $graphData[] = [
                         'date' => $d->format('d M'),
-                        'count' => $count
+                        'count' => $count,
                     ];
                 }
             }
@@ -71,8 +71,8 @@ class OverviewController extends Controller
                     'total_audits' => $totalAudits,
                     'today_audits' => $selectedDateAudits,
                     'filter_date' => $filterDateStr,
-                    'graph_data' => $graphData
-                ]
+                    'graph_data' => $graphData,
+                ],
             ]);
         }
 
@@ -81,7 +81,7 @@ class OverviewController extends Controller
         for ($i = 6; $i >= 0; $i--) {
             $graphData[] = [
                 'date' => now()->subDays($i)->format('d M'),
-                'count' => rand(1, 10) // Placeholder activity data
+                'count' => rand(1, 10), // Placeholder activity data
             ];
         }
 
@@ -96,8 +96,8 @@ class OverviewController extends Controller
                         'color' => 'bg-indigo-600',
                     ],
                 ],
-                'graph_data' => $graphData
-            ]
+                'graph_data' => $graphData,
+            ],
         ]);
     }
 }
