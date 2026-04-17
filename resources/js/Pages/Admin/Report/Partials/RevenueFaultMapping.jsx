@@ -1,79 +1,54 @@
 import React, { useState } from "react";
-import { Info, ChevronDown } from "lucide-react";
+import { 
+    Info, 
+    ChevronDown, 
+    Target, 
+    Zap, 
+    TrendingUp, 
+    PlayCircle, 
+    Repeat, 
+    ArrowUpCircle, 
+    DollarSign, 
+    Heart, 
+    ShieldAlert, 
+    Activity 
+} from "lucide-react";
 import { Card, CardContent } from "@/Components/ui/card";
 import { cn } from "@/lib/utils";
 
-const FaultCard = ({ label, value, sublabel, action, theme = "blue", formula }) => {
-    const [isHovered, setIsHovered] = useState(false);
+const FaultCard = ({ label, value, sublabel, action, theme = "blue", icon: Icon }) => {
     const themes = {
-        blue: { label: "text-blue-600", border: "border-blue-200", bg: "bg-blue-50/30" },
-        purple: { label: "text-purple-600", border: "border-purple-200", bg: "bg-purple-50/30" },
-        green: { label: "text-green-600", border: "border-green-200", bg: "bg-green-50/30" },
-        lime: { label: "text-lime-600", border: "border-lime-200", bg: "bg-lime-50/30" },
-        orange: { label: "text-orange-600", border: "border-orange-200", bg: "bg-orange-50/30" },
-        cyan: { label: "text-cyan-600", border: "border-cyan-200", bg: "bg-cyan-50/30" },
-        yellow: { label: "text-yellow-600", border: "border-yellow-200", bg: "bg-yellow-50/30" },
-        indigo: { label: "text-indigo-600", border: "border-indigo-200", bg: "bg-indigo-50/30" },
-        rose: { label: "text-rose-600", border: "border-rose-200", bg: "bg-rose-50/30" },
+        blue: { text: "text-blue-600", border: "border-blue-100", bg: "bg-blue-50/50" },
+        purple: { text: "text-purple-600", border: "border-purple-100", bg: "bg-purple-50/50" },
+        green: { text: "text-green-600", border: "border-green-100", bg: "bg-green-50/50" },
+        lime: { text: "text-lime-600", border: "border-lime-100", bg: "bg-lime-50/50" },
+        orange: { text: "text-orange-600", border: "border-orange-100", bg: "bg-orange-50/50" },
+        cyan: { text: "text-cyan-600", border: "border-cyan-100", bg: "bg-cyan-50/50" },
+        amber: { text: "text-amber-600", border: "border-amber-100", bg: "bg-amber-50/50" },
+        indigo: { text: "text-indigo-600", border: "border-indigo-100", bg: "bg-indigo-50/50" },
+        rose: { text: "text-rose-600", border: "border-rose-100", bg: "bg-rose-50/50" },
     };
 
     const config = themes[theme] || themes.blue;
-    const isDetailed = formula?.definitions?.length > 0;
 
     return (
-        <Card 
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-            className={cn("border shadow-none rounded-xl relative overflow-visible transition-all hover:shadow-md", config.border, config.bg)}
-        >
-            <CardContent className="p-7 space-y-5">
+        <Card className={cn("border shadow-none rounded-md transition-all hover:shadow-sm", config.border, config.bg)}>
+            <CardContent className="p-4 space-y-3">
                 <div className="flex items-center justify-between">
-                    <span className={cn("text-[11px] font-bold uppercase tracking-widest", config.label)}>{label}</span>
-                    {formula && (
-                        <div className="relative">
-                            <Info size={16} className={cn("cursor-help transition-all duration-300", config.label)} />
-                            
-                            {isHovered && (
-                                <div className={cn(
-                                    "pointer-events-none transition-all duration-300 absolute bottom-full right-0 mb-3 z-[100] animate-in fade-in zoom-in-95",
-                                    isDetailed ? "w-80" : "whitespace-nowrap"
-                                )}>
-                                    <div className="bg-[#0F172A] text-white p-4 rounded-xl shadow-2xl border border-white/10 backdrop-blur-sm text-left">
-                                        <div className="space-y-3">
-                                            <p className="text-xs font-medium leading-relaxed tracking-tight">
-                                                <span className="text-slate-400 mr-1">Formula:</span> {formula.math || formula}
-                                            </p>
-                                            
-                                            {isDetailed && (
-                                                <div className="space-y-1 pt-2 border-t border-white/5">
-                                                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Where:</p>
-                                                    {formula.definitions.map((def, i) => (
-                                                        <p key={i} className="text-[10px] leading-relaxed text-slate-300">
-                                                            <span className="text-white font-bold">{def.key}</span> = {def.value}
-                                                        </p>
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div className="absolute top-full right-1.5 -mt-1 border-8 border-transparent border-t-[#0F172A]" />
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    )}
+                    <span className={cn("text-[9px] font-black uppercase tracking-widest", config.text)}>{label}</span>
+                    <div className={cn("p-1.5 rounded-full bg-white border", config.border)}>
+                        <Icon size={12} className={config.text} />
+                    </div>
                 </div>
 
-                <div className="space-y-4">
-                    <h2 className={cn("text-4xl font-black tabular-nums tracking-tighter leading-none", "text-slate-800")}>{value}</h2>
-                    
-                    <div className="space-y-2">
-                        <p className={cn("text-[11px] font-bold opacity-80 leading-none", config.label)}>{sublabel}</p>
-                        {action && (
-                            <p className={cn("text-[11px] font-bold underline underline-offset-4 cursor-pointer hover:opacity-100 transition-opacity", config.label)}>
-                                {action}
-                            </p>
-                        )}
-                    </div>
+                <div className="space-y-1">
+                    <h2 className={cn("text-3xl font-black tabular-nums tracking-tighter leading-none", "text-slate-900")}>{value}</h2>
+                    <p className={cn("text-[9px] font-bold opacity-70 uppercase tracking-tight", "text-slate-500")}>{sublabel}</p>
+                    {action && (
+                        <p className={cn("text-[9px] font-black underline underline-offset-2 cursor-pointer transition-opacity mt-1", config.text)}>
+                            {action}
+                        </p>
+                    )}
                 </div>
             </CardContent>
         </Card>
@@ -109,6 +84,7 @@ export default function RevenueFaultMapping({ stats, isComparisonOpen = false })
             value: calcRate(sellable, total_audits), 
             sublabel: "Sellable / Total Conversations", 
             theme: "blue", 
+            icon: Target,
             formula: `(${sellable} Sellable ÷ ${total_audits} Total) × 100` 
         },
         { 
@@ -116,6 +92,7 @@ export default function RevenueFaultMapping({ stats, isComparisonOpen = false })
             value: calcRate(pitched, sellable), 
             sublabel: "Pitched / Sellable Conversations", 
             theme: "purple", 
+            icon: Zap,
             formula: `(${pitched} Pitched ÷ ${sellable} Sellable) × 100` 
         },
         { 
@@ -123,6 +100,7 @@ export default function RevenueFaultMapping({ stats, isComparisonOpen = false })
             value: calcRate(sexting_sale_yes, sexting_pitched), 
             sublabel: "Sexting Sales / Sexting Pitched", 
             theme: "green", 
+            icon: TrendingUp,
             formula: `(${sexting_sale_yes} Sold ÷ ${sexting_pitched} Pitched) × 100` 
         },
         { 
@@ -130,6 +108,7 @@ export default function RevenueFaultMapping({ stats, isComparisonOpen = false })
             value: calcRate(prerecorded_sale_yes, prerecorded_pitched), 
             sublabel: "PPV Sales / PPV Pitched", 
             theme: "lime", 
+            icon: PlayCircle,
             formula: `(${prerecorded_sale_yes} Sales ÷ ${prerecorded_pitched} Pitched) × 100` 
         },
         { 
@@ -137,6 +116,7 @@ export default function RevenueFaultMapping({ stats, isComparisonOpen = false })
             value: calcRate(sexting_sub_continued, sexting_sale_yes), 
             sublabel: "Continued / Sexting Sales", 
             theme: "orange", 
+            icon: Repeat,
             formula: `(${sexting_sub_continued} Continued ÷ ${sexting_sale_yes} Sold) × 100` 
         },
         { 
@@ -144,13 +124,15 @@ export default function RevenueFaultMapping({ stats, isComparisonOpen = false })
             value: calcRate(upsell_attempted, prerecorded_pitched), 
             sublabel: "Upsell Attempts / First PPV Sales", 
             theme: "cyan", 
+            icon: ArrowUpCircle,
             formula: `(${upsell_attempted} Attempts ÷ ${prerecorded_pitched} First PPV Sales) × 100` 
         },
         { 
             label: "UPSELL CONVERSION", 
             value: calcRate(upsell_purchased, upsell_attempted), 
             sublabel: "Upsell Purchased / Upsell Attempted", 
-            theme: "yellow", 
+            theme: "amber", 
+            icon: DollarSign,
             formula: `(${upsell_purchased} Purchased ÷ ${upsell_attempted} Attempted) × 100` 
         },
         { 
@@ -158,9 +140,16 @@ export default function RevenueFaultMapping({ stats, isComparisonOpen = false })
             value: calcRate(transition_yes, sellable), 
             sublabel: "Casual Conversation: Yes / Total Sellable", 
             theme: "rose", 
+            icon: Heart,
             formula: `(${transition_yes} Yes ÷ ${sellable} Sellable) × 100` 
         },
-        { label: "QC INTERVENTIONS", value: total_interventions.toString(), sublabel: "Total interventions tracked", theme: "indigo" },
+        { 
+            label: "QC INTERVENTIONS", 
+            value: total_interventions.toString(), 
+            sublabel: "Total interventions tracked", 
+            theme: "indigo",
+            icon: ShieldAlert
+        },
     ];
 
     // Placeholder for comparison weeks (can be dynamic if backend provides history)
@@ -188,6 +177,7 @@ export default function RevenueFaultMapping({ stats, isComparisonOpen = false })
                         sublabel={item.sublabel}
                         action={item.action}
                         theme={item.theme}
+                        icon={item.icon}
                         formula={item.formula}
                     />
                 ))}
@@ -275,6 +265,7 @@ export default function RevenueFaultMapping({ stats, isComparisonOpen = false })
                             sublabel={item.sublabel}
                             action={item.action}
                             theme={item.theme}
+                            icon={item.icon}
                             formula={item.formula}
                         />
                     ))}

@@ -7,14 +7,10 @@ import {
     Calendar,
     ChevronDown,
     Download,
-    Filter,
-    Shield,
-    FileText,
     ArrowLeft,
     ChevronUp
 } from "lucide-react";
 import { Card, CardContent } from "@/Components/ui/card";
-import { Button } from "@/Components/ui/button";
 import ReportSection from "./Partials/ReportSection";
 import ExecutiveSnapshot from "./Partials/ExecutiveSnapshot";
 import UnitVolume from "./Partials/UnitVolume";
@@ -36,165 +32,142 @@ export default function WeeklyReport({ agency, stats }) {
             <Head title={`${activeTab === 'weekly' ? 'Weekly Quality Control' : activeTab === 'chatter' ? 'Chatter Audit' : 'Creator Audit'} Report — ${agency.name}`} />
 
             <div className="min-h-screen bg-[#F8FAFC]" style={{ fontFamily: "'Inter', sans-serif" }}>
-                <div className="max-w-7xl mx-auto px-4 py-4 space-y-4">
+                <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
 
                     {/* Top Row: Back link and Save button */}
                     <div className="flex items-center justify-between">
                         <Link
                             href={route("admin.agencies.edit", agency.id)}
-                            className="flex items-center gap-3 text-slate-600 hover:text-slate-950 transition-colors font-bold text-sm"
+                            className="flex items-center gap-2 text-slate-500 hover:text-slate-900 transition-colors font-bold text-xs"
                         >
-                            <ArrowLeft size={20} /> Back to Dashboard
+                            <ArrowLeft size={16} /> Back to Dashboard
                         </Link>
 
-                        <button className="bg-[#2563EB] hover:bg-blue-700 text-white font-bold text-xs px-8 py-3 rounded-lg shadow-lg shadow-blue-100 flex items-center gap-2">
-                            <Download size={14} className="stroke-[3]" /> Save as PDF
+                        <button className="bg-[#2563EB] hover:bg-blue-700 text-white font-bold text-[10px] px-6 py-2.5 rounded-md shadow-lg shadow-blue-100 flex items-center gap-2 uppercase tracking-wider">
+                            <Download size={14} className="stroke-[3]" /> Download PDF
                         </button>
                     </div>
 
                     {/* Filter Card: Date Selectors */}
-                    <Card className="shadow-none border-slate-100 bg-white rounded-md overflow-hidden">
-                        <CardContent className="p-8 flex items-center gap-10">
-                            <div className="flex items-center gap-3 pr-2 border-r border-slate-50">
-                                <Calendar size={24} className="text-slate-400 stroke-[1.5]" />
-                            </div>
-                            <div className="flex items-center gap-10">
-                                <div className="flex items-center gap-4">
-                                    <span className="text-xs font-bold text-slate-500 lowercase first-letter:uppercase">Start Date:</span>
-                                    <div className="relative group">
-                                        <input
-                                            type="date"
-                                            value={startDate}
-                                            onChange={(e) => setStartDate(e.target.value)}
-                                            className="w-52 bg-white border border-slate-200 rounded-md px-5 py-3 text-[11px] font-bold text-slate-700 shadow-sm hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/5 transition-all outline-none"
-                                        />
-                                    </div>
+                    <Card className="shadow-none border-slate-100 bg-white rounded-md">
+                        <CardContent className="p-4 md:p-6 flex flex-col md:flex-row items-start md:items-center gap-6">
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full">
+                                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
+                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Start Date:</span>
+                                    <input
+                                        type="date"
+                                        value={startDate}
+                                        onChange={(e) => setStartDate(e.target.value)}
+                                        className="w-full sm:w-44 bg-white border border-slate-200 rounded px-3 py-2 text-[10px] font-bold text-slate-700 outline-none"
+                                    />
                                 </div>
 
-                                <div className="flex items-center gap-4">
-                                    <span className="text-xs font-bold text-slate-500 lowercase first-letter:uppercase">End Date:</span>
-                                    <div className="relative group">
-                                        <input
-                                            type="date"
-                                            value={endDate}
-                                            onChange={(e) => setEndDate(e.target.value)}
-                                            className="w-52 bg-white border border-slate-200 rounded-md px-5 py-3 text-[11px] font-bold text-slate-700 shadow-sm hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/5 transition-all outline-none"
-                                        />
-                                    </div>
+                                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
+                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">End Date:</span>
+                                    <input
+                                        type="date"
+                                        value={endDate}
+                                        onChange={(e) => setEndDate(e.target.value)}
+                                        className="w-full sm:w-44 bg-white border border-slate-200 rounded px-3 py-2 text-[10px] font-bold text-slate-700 outline-none"
+                                    />
                                 </div>
                             </div>
                         </CardContent>
                     </Card>
 
                     {/* Tabs Card */}
-                    <Card className="bg-white border-slate-100 rounded-md p-1 shadow-sm overflow-hidden animate-in fade-in duration-500 w-fit">
-                        <div className="flex items-center gap-3 p-1">
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-1">
+                        {[
+                            { id: "weekly", label: "Executive Snapshot" },
+                            { id: "chatter", label: "Chatter Performance" },
+                            { id: "creator", label: "Creator Performance" }
+                        ].map((tab) => (
                             <button
-                                onClick={() => setActiveTab("weekly")}
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id)}
                                 className={cn(
-                                    "px-10 py-4 rounded-md text-sm font-bold transition-all duration-300",
-                                    activeTab === "weekly"
-                                        ? "bg-[#2563EB] text-white shadow-[0_4px_12px_rgba(37,99,235,0.25)]"
-                                        : "bg-slate-50 text-slate-600 hover:bg-slate-100/80 hover:text-slate-900"
+                                    "px-6 py-3 rounded text-[10px] font-black uppercase tracking-widest transition-all",
+                                    activeTab === tab.id
+                                        ? "bg-slate-900 text-white shadow-md shadow-slate-200"
+                                        : "bg-white text-slate-400 hover:text-slate-600 border border-slate-100"
                                 )}
                             >
-                                Weekly Quality Control Report
+                                {tab.label}
                             </button>
-                            <button
-                                onClick={() => setActiveTab("chatter")}
-                                className={cn(
-                                    "px-10 py-4 rounded-md text-sm font-bold transition-all duration-300",
-                                    activeTab === "chatter"
-                                        ? "bg-[#2563EB] text-white shadow-[0_4px_12px_rgba(37,99,235,0.25)]"
-                                        : "bg-slate-50 text-slate-600 hover:bg-slate-100/80 hover:text-slate-900"
-                                )}
-                            >
-                                Chatter Audit Report
-                            </button>
-                            <button
-                                onClick={() => setActiveTab("creator")}
-                                className={cn(
-                                    "px-10 py-4 rounded-md text-sm font-bold transition-all duration-300",
-                                    activeTab === "creator"
-                                        ? "bg-[#2563EB] text-white shadow-[0_4px_12px_rgba(37,99,235,0.25)]"
-                                        : "bg-slate-50 text-slate-600 hover:bg-slate-100/80 hover:text-slate-900"
-                                )}
-                            >
-                                Creator Audit Report
-                            </button>
-                        </div>
-                    </Card>
+                        ))}
+                    </div>
 
                     {activeTab === "weekly" && (
-                        <Card className="shadow-none border-slate-100 bg-white rounded-md overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-700">
-                            <div className="px-12 pt-8 pb-6 space-y-8">
+                        <Card className="shadow-none border-slate-100 bg-white rounded-md overflow-hidden animate-in fade-in duration-700">
+                            <div className="p-6 md:p-10 space-y-6">
 
-                                {/* Title Card Content */}
-                                <div className="space-y-10">
-                                    <div className="space-y-1">
-                                        <h1 className="text-lg font-bold text-slate-900 tracking-tight leading-none">Weekly Quality Control Report</h1>
-                                        <p className="text-[10px] font-bold text-slate-400 tracking-wide">Prepared by Invariant Consulting</p>
+                                {/* Header Info */}
+                                <div className="space-y-6">
+                                    <div>
+                                        <h1 className="text-xl font-black text-slate-900 tracking-tight leading-none uppercase">Executive Quality Control</h1>
+                                        <p className="text-[10px] font-bold text-slate-400 tracking-[0.2em] uppercase mt-2">Invariant Diagnostic Protocol</p>
                                     </div>
 
-                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-y-4 gap-x-8 pt-4 border-t border-slate-50 mt-6">
-                                        <div className="space-y-1.5 px-1">
-                                            <p className="text-[10px] text-slate-400 font-bold tracking-tight">Agency</p>
-                                            <p className="text-sm text-slate-900 font-black leading-none">{agency.name}</p>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 py-6 border-y border-slate-50">
+                                        <div className="space-y-1">
+                                            <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Agency Path</p>
+                                            <p className="text-xs text-slate-900 font-black">{agency.name}</p>
                                         </div>
-                                        <div className="space-y-1.5 px-1">
-                                            <p className="text-[10px] text-slate-400 font-bold tracking-tight">Reporting period</p>
-                                            <p className="text-sm text-slate-900 font-black leading-none">{stats?.period?.full_range || 'Feb 10 – Feb 17, 2026'}</p>
+                                        <div className="space-y-1">
+                                            <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Time Horizon</p>
+                                            <p className="text-xs text-slate-900 font-black">{stats?.period?.full_range || 'Feb 10 – Feb 17, 2026'}</p>
                                         </div>
-                                        <div className="space-y-1.5 px-1">
-                                            <p className="text-[10px] text-slate-400 font-bold tracking-tight">Report status</p>
-                                            <p className="text-sm text-slate-900 font-black leading-none">Finalized</p>
+                                        <div className="space-y-1">
+                                            <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Status Matrix</p>
+                                            <p className="text-xs text-slate-900 font-black">Finalized & Verified</p>
                                         </div>
-                                        <div className="space-y-1.5 px-1">
-                                            <p className="text-[10px] text-slate-400 font-bold tracking-tight">Generated</p>
-                                            <p className="text-sm text-slate-900 font-black leading-none">{new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                                        <div className="space-y-1">
+                                            <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Timestamp</p>
+                                            <p className="text-xs text-slate-900 font-black">{new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* Section Wrapper */}
-                                <div className="pt-6 border-t border-slate-50/50 space-y-8">
-
-                                    <ReportSection title="Executive Snapshot" label="Audit volume summary">
+                                {/* Main Sections */}
+                                <div className="space-y-12">
+                                    <ReportSection title="Executive Snapshot" label="AUDIT VOLUME SUMMARY">
                                         <ExecutiveSnapshot stats={stats} />
                                     </ReportSection>
 
-                                    <ReportSection>
-                                        <div className="space-y-8">
+                                    <div className="space-y-12">
+                                        <ReportSection title="Intervention Depth" label="QC ACTIVITY TRACKING">
                                             <QCInterventionActivity stats={stats} />
+                                        </ReportSection>
+                                        <ReportSection title="Inventory Velocity" label="UNIT VOLUME ANALYSIS">
                                             <UnitVolume stats={stats} />
-                                        </div>
-                                    </ReportSection>
+                                        </ReportSection>
+                                    </div>
 
-                                    <ReportSection title="Phase I — Signal Audit" label="Revenue leakage analysis">
+                                    <ReportSection title="Phase I — Signal Audit" label="REVENUE LEAKAGE ANALYSIS">
                                         <RevenueLeakage stats={stats} agency={agency} />
                                     </ReportSection>
 
-                                    <ReportSection title="Phase II — Revenue Fault Mapping" label="Diagnostic fault matrix">
+                                    <ReportSection title="Phase II — Revenue Fault Mapping" label="DIAGNOSTIC FAULT MATRIX">
                                         <RevenueFaultMapping stats={stats} isComparisonOpen={false} />
                                     </ReportSection>
 
                                     <ReportSection
-                                        title="Phase II - Revenue Fault Mapping: Week-by-Week Comparison"
-                                        label="Diagnostic fault comparison"
+                                        title="Phase II — Comparative Mapping"
+                                        label="WEEK-BY-WEEK PERFORMANCE"
                                         action={
                                             <button
                                                 onClick={() => setIsComparisonOpen(!isComparisonOpen)}
-                                                className="bg-[#2563EB] hover:bg-blue-700 text-white font-bold text-xs px-4 py-2 rounded-lg flex items-center gap-2 transition-all shadow-md"
+                                                className="bg-[#2563EB] hover:bg-blue-700 text-white font-black text-[9px] px-4 py-2 rounded flex items-center gap-2 transition-all uppercase tracking-widest"
                                             >
-                                                {isComparisonOpen ? <ChevronUp size={14} strokeWidth={3} /> : <ChevronDown size={14} strokeWidth={3} />}
-                                                {isComparisonOpen ? "Hide Comparison" : "Show Comparison"}
+                                                {isComparisonOpen ? "Hide Metrics" : "Show Comparison"}
+                                                {isComparisonOpen ? <ChevronUp size={12} strokeWidth={3} /> : <ChevronDown size={12} strokeWidth={3} />}
                                             </button>
                                         }
                                     >
                                         {isComparisonOpen && <RevenueFaultMapping stats={stats} isComparisonOpen={true} />}
                                     </ReportSection>
 
-                                    <ReportSection>
+                                    <ReportSection title="Audit Continuity" label="DAILY DENSITY MAPPING">
                                         <DailyAuditCoverage stats={stats} />
                                     </ReportSection>
                                 </div>
@@ -203,13 +176,13 @@ export default function WeeklyReport({ agency, stats }) {
                     )}
 
                     {activeTab === "chatter" && (
-                        <Card className="shadow-none border-slate-100 bg-white rounded-md overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-700">
+                        <Card className="shadow-none border-slate-100 bg-white rounded-md overflow-hidden">
                             <ChatterAuditReport agency={agency} stats={stats} />
                         </Card>
                     )}
 
                     {activeTab === "creator" && (
-                        <Card className="shadow-none border-slate-100 bg-white rounded-md overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-700">
+                        <Card className="shadow-none border-slate-100 bg-white rounded-md overflow-hidden">
                             <CreatorAuditReport agency={agency} stats={stats} />
                         </Card>
                     )}

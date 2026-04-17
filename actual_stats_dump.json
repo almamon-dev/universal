@@ -1,0 +1,43 @@
+{
+    "total_audits": 10,
+    "sellable": 10,
+    "non_sellable": 0,
+    "pitched": 7,
+    "pitch_not_possible": 0,
+    "pitch_possible_not_executed": 0,
+    "pitch_not_possible_audits": [],
+    "pitch_possible_not_executed_audits": [],
+    "sexting_pitched": 6,
+    "sexting_sale_yes": 4,
+    "prerecorded_pitched": 1,
+    "prerecorded_sale_yes": 1,
+    "sexting_sub_continued": 4,
+    "upsell_attempted": 1,
+    "upsell_purchased": 1,
+    "transition_yes": 8,
+    "transition_no": 0,
+    "total_interventions": 10,
+    "help_requested_yes": 5,
+    "help_requested_no": 5,
+    "rule_violations_yes": 2,
+    "rule_violations_no": 8,
+    "negotiation_yes": 7,
+    "negotiation_no": 1,
+    "aftercare_yes": 5,
+    "aftercare_no": 1,
+    "fresh_subs": 7,
+    "old_subs": 3,
+    "sexting_no_sale": 3,
+    "sexting_abandoned": 0,
+    "ppv_no_sale": 0,
+    "upsell_lost": 0,
+    "upsell_failed": 0,
+    "aftercare_missed": 1,
+    "auditor_stats": [
+        {
+            "name": "QC User",
+            "count": 10,
+            "interventions": 10
+        }
+    ]
+}

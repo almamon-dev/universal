@@ -18,8 +18,6 @@ export default function AdminLayout({ children }) {
         }
     }, [flash]);
 
-    const sidebarWidth = "260px";
-
     return (
         <div className="flex h-screen bg-[#F9F9F9] overflow-hidden font-['Inter', 'system-ui', 'sans-serif']">
             <Toaster
@@ -35,17 +33,19 @@ export default function AdminLayout({ children }) {
                     },
                 }}
             />
-            {/* Mobile Overlay */}
+            
+            {/* Mobile Sidebar Overlay */}
             {isMobileOpen && (
                 <div
-                    className="fixed inset-0 bg-black/20 z-[155] lg:hidden"
+                    className="fixed inset-0 bg-black/50 z-[155] lg:hidden backdrop-blur-sm transition-opacity animate-in fade-in"
                     onClick={() => setIsMobileOpen(false)}
                 />
             )}
 
-            {/* Sidebar Container */}
+            {/* Sidebar Component */}
             <aside
-                className={`fixed inset-y-0 left-0 z-[160] bg-[#09090b] transition-all duration-300 ease-in-out border-r border-[#18181b] w-[260px]
+                className={`fixed inset-y-0 left-0 z-[160] bg-[#09090b] transition-all duration-300 ease-in-out border-r border-[#18181b] 
+                    ${isCollapsed ? "w-[80px]" : "w-[260px]"}
                     ${isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}
             >
                 <Sidebar
@@ -54,9 +54,20 @@ export default function AdminLayout({ children }) {
                 />
             </aside>
 
-            <div className="flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out ml-[260px]">
-                <main className="flex-1 overflow-y-auto">
-                    <div className="p-0">{children}</div>
+            {/* Main Content Area */}
+            <div 
+                className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out 
+                    ${isCollapsed ? "lg:ml-[80px]" : "lg:ml-[260px]"}
+                    ml-0`}
+            >
+                {/* Header with Mobile Menu Toggle */}
+                <Header onMenuClick={() => setIsMobileOpen(true)} />
+
+                {/* Page Content */}
+                <main className="flex-1 overflow-y-auto w-full">
+                    <div className="p-4 md:p-6 lg:p-8 max-w-[1600px] mx-auto">
+                        {children}
+                    </div>
                 </main>
             </div>
         </div>

@@ -1,12 +1,20 @@
 <?php
 
 use App\Http\Controllers\Admin\AgencyController;
-use App\Http\Controllers\Admin\Settings\SystemSettingsController;
+use App\Http\Controllers\Admin\Dashboard\OverviewController;
 use App\Http\Controllers\Admin\ReportController;
+use App\Http\Controllers\Admin\Settings\SystemSettingsController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+*/
 
 Route::get('/', function () {
     return Inertia::render('Auth/Login', [
@@ -15,72 +23,97 @@ Route::get('/', function () {
         'phpVersion' => PHP_VERSION,
     ]);
 });
-use App\Http\Controllers\Admin\Dashboard\OverviewController;
 
-Route::get('/dashboard', [OverviewController::class, 'index'])
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard');
-
-Route::get('/admin/dashboard', [OverviewController::class, 'index'])
-    ->middleware(['auth', 'verified'])
-    ->name('admin.dashboard');
-
-Route::get('/qc/dashboard', [OverviewController::class, 'index'])
-    ->middleware(['auth', 'verified'])
-    ->name('qc.dashboard');
-
+/*
+|--------------------------------------------------------------------------
+| Authenticated Dashboard Routes
+|--------------------------------------------------------------------------
+*/
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    // QC Routes
-    Route::prefix('qc')->name('qc.')->group(function () {
-        Route::get('agencies/{agency}/protocols', [AgencyController::class, 'protocols'])->name('agencies.protocols');
-        Route::get('agencies/{agency}/audits/create', [AgencyController::class, 'createAudit'])->name('agencies.audits.create');
-        Route::post('agencies/{agency}/audits', [AgencyController::class, 'storeAudit'])->name('agencies.audits.store');
+    // Universal Dashboard Redirect
+    Route::get('/dashboard', [OverviewController::class, 'index'])->name('dashboard');
+
+    // Admin Specific Dashboard
+    Route::middleware('admin')->get('/admin/dashboard', [OverviewController::class, 'index'])->name('admin.dashboard');
+
+    // QC Specific Dashboard
+    Route::middleware('qc')->get('/qc/dashboard', [OverviewController::class, 'index'])->name('qc.dashboard');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Profile Routes
+|--------------------------------------------------------------------------
+*/
+Route::middleware('auth')->controller(ProfileController::class)->group(function () {
+    Route::get('/profile', 'edit')->name('profile.edit');
+    Route::patch('/profile', 'update')->name('profile.update');
+    Route::delete('/profile', 'destroy')->name('profile.destroy');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Quality Control (QC) Routes
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'verified', 'qc'])->prefix('qc')->name('qc.')->group(function () {
+    Route::controller(AgencyController::class)->group(function () {
+        Route::get('agencies/{agency}/protocols', 'protocols')->name('agencies.protocols');
+        Route::get('agencies/{agency}/audits/create', 'createAudit')->name('agencies.audits.create');
+        Route::post('agencies/{agency}/audits', 'storeAudit')->name('agencies.audits.store');
+    });
+});
+
+/*
+|--------------------------------------------------------------------------
+| Administration Routes
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    // System Settings
+    Route::controller(SystemSettingsController::class)->group(function () {
+        Route::get('/settings/system', 'edit')->name('settings.system');
+        Route::post('/settings/system', 'update')->name('settings.system.update');
     });
 
-    // Admin Settings
-    Route::prefix('admin')->name('admin.')->group(function () {
-        Route::get('/settings/system', [SystemSettingsController::class, 'edit'])->name('settings.system');
-        Route::post('/settings/system', [SystemSettingsController::class, 'update'])->name('settings.system.update');
-        // Users
-        Route::resource('users', \App\Http\Controllers\Admin\UserController::class)->only(['index', 'destroy']);
-        // Agencies
-        Route::resource('agencies', \App\Http\Controllers\Admin\AgencyController::class);
-        Route::get('agencies/{agency}/audits', [\App\Http\Controllers\Admin\AgencyController::class, 'audits'])->name('agencies.audits');
-        Route::post('agencies/{agency}/audit-fields', [\App\Http\Controllers\Admin\AgencyController::class, 'updateAuditFields'])->name('agencies.audit-fields.update');
-        Route::get('agencies/{agency}/registry', [\App\Http\Controllers\Admin\AgencyController::class, 'registry'])->name('agencies.registry');
-        Route::post('agencies/{agency}/chatters', [\App\Http\Controllers\Admin\AgencyController::class, 'storeChatter'])->name('agencies.chatters.store');
-        Route::delete('chatters/{chatter}', [\App\Http\Controllers\Admin\AgencyController::class, 'destroyChatter'])->name('chatters.destroy');
-        Route::post('agencies/{agency}/creators', [\App\Http\Controllers\Admin\AgencyController::class, 'storeCreator'])->name('agencies.creators.store');
-        Route::delete('creators/{creator}', [\App\Http\Controllers\Admin\AgencyController::class, 'destroyCreator'])->name('creators.destroy');
-        Route::get('agencies/{agency}/discovery', [\App\Http\Controllers\Admin\AgencyController::class, 'discovery'])->name('agencies.discovery');
-        Route::get('agencies/{agency}/chatter-discovery', [\App\Http\Controllers\Admin\AgencyController::class, 'chatterDiscovery'])->name('agencies.chatter-discovery');
-        Route::get('agencies/{agency}/qc-discovery', [\App\Http\Controllers\Admin\AgencyController::class, 'qcDiscovery'])->name('agencies.qc-discovery');
-        Route::get('agencies/{agency}/owner-discovery', [\App\Http\Controllers\Admin\AgencyController::class, 'ownerDiscovery'])->name('agencies.owner-discovery');
-        Route::post('agencies/{agency}/discovery/{type}', [\App\Http\Controllers\Admin\AgencyController::class, 'updateDiscovery'])->name('agencies.discovery.update');
+    // User Management
+    Route::resource('users', UserController::class)->only(['index', 'destroy']);
 
-        // Admin Routes
-        Route::get('agencies/{agency}/view-system/discovery', [AgencyController::class, 'viewSystemDiscovery'])->name('agencies.view-system-discovery');
-        Route::post('agencies/{agency}/update-metrics', [AgencyController::class, 'updateMetrics'])->name('agencies.update-metrics');
-        Route::post('agencies/{agency}/protocols', [AgencyController::class, 'updateProtocols'])->name('agencies.protocols.update');
+    // Agency & Audit Management
+    Route::controller(AgencyController::class)->group(function () {
+        Route::resource('agencies', AgencyController::class);
+        Route::get('agencies/{agency}/audits', 'audits')->name('agencies.audits');
+        Route::post('agencies/{agency}/audit-fields', 'updateAuditFields')->name('agencies.audit-fields.update');
+        Route::get('agencies/{agency}/registry', 'registry')->name('agencies.registry');
+        Route::post('agencies/{agency}/chatters', 'storeChatter')->name('agencies.chatters.store');
+        Route::delete('chatters/{chatter}', 'destroyChatter')->name('chatters.destroy');
+        Route::post('agencies/{agency}/creators', 'storeCreator')->name('agencies.creators.store');
+        Route::delete('creators/{creator}', 'destroyCreator')->name('creators.destroy');
+        Route::get('agencies/{agency}/discovery', 'discovery')->name('agencies.discovery');
+        Route::get('agencies/{agency}/chatter-discovery', 'chatterDiscovery')->name('agencies.chatter-discovery');
+        Route::get('agencies/{agency}/qc-discovery', 'qcDiscovery')->name('agencies.qc-discovery');
+        Route::get('agencies/{agency}/owner-discovery', 'ownerDiscovery')->name('agencies.owner-discovery');
+        Route::post('agencies/{agency}/discovery/{type}', 'updateDiscovery')->name('agencies.discovery.update');
+        Route::get('agencies/{agency}/view-system/discovery', 'viewSystemDiscovery')->name('agencies.view-system-discovery');
+        Route::post('agencies/{agency}/update-metrics', 'updateMetrics')->name('agencies.update-metrics');
+        Route::post('agencies/{agency}/protocols', 'updateProtocols')->name('agencies.protocols.update');
 
-        // Maintain Admin's ability to view/edit protocols if needed
-        Route::get('agencies/{agency}/protocols', [AgencyController::class, 'protocols'])->name('agencies.protocols');
-        
+        // Protocol View for Admin
+        Route::get('agencies/{agency}/protocols', 'protocols')->name('agencies.protocols');
+
         // Instant QC Management
-        Route::post('agencies/{agency}/qcs', [AgencyController::class, 'storeQC'])->name('agencies.qcs.store');
-        Route::put('qcs/{user}', [AgencyController::class, 'updateQC'])->name('agencies.qcs.update');
-        Route::delete('qcs/{user}/destroy', [AgencyController::class, 'destroyQC'])->name('agencies.qcs.destroy');
-        // Reports
-        Route::get('report/{agency?}', [ReportController::class, 'index'])->name('report.index');
-        Route::prefix('report')->name('report.')->group(function () {
-            Route::get('/weekly/{agency}', [ReportController::class, 'weeklyReport'])->name('weekly');
-            Route::get('/agency/{agency}', [ReportController::class, 'agencyAudit'])->name('agency');
-            Route::get('/summary', [ReportController::class, 'summary'])->name('summary');
-            Route::get('/revenue', [ReportController::class, 'revenue'])->name('revenue');
-        });
+        Route::post('agencies/{agency}/qcs', 'storeQC')->name('agencies.qcs.store');
+        Route::put('qcs/{user}', 'updateQC')->name('agencies.qcs.update');
+        Route::delete('qcs/{user}/destroy', 'destroyQC')->name('agencies.qcs.destroy');
+    });
+
+    // Reporting Engine
+    Route::controller(ReportController::class)->prefix('report')->name('report.')->group(function () {
+        Route::get('/{agency?}', 'index')->name('index');
+        Route::get('/weekly/{agency}', 'weeklyReport')->name('weekly');
+        Route::get('/agency/{agency}', 'agencyAudit')->name('agency');
+        Route::get('/summary', 'summary')->name('summary');
+        Route::get('/revenue', 'revenue')->name('revenue');
     });
 });
 
