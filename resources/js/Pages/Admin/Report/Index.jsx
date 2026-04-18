@@ -38,7 +38,7 @@ const ReportCard = ({ title, description, href, icon: Icon, color = "text-zinc-6
         <div className={`mt-8 pt-6 border-t flex items-center justify-between ${
             isMain ? "border-white/10" : "border-zinc-50"
         }`}>
-            <span className={`text-[10px] font-bold tracking-[0.2em] uppercase ${
+            <span className={`text-[10px] font-bold tracking-tight ${
                 isMain ? "text-zinc-500" : "text-zinc-400"
             }`}>
                 View Diagnostic
@@ -104,7 +104,7 @@ export default function Index({ agency }) {
                     </Link>
                     
                     <div className="flex flex-col items-center">
-                        <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1 italic">Reporting Suite</p>
+                        <p className="text-[10px] font-bold text-zinc-400 tracking-tight mb-1 italic">Reporting Suite</p>
                         <h1 className="text-xl font-bold text-zinc-900 tracking-tight">{agency.name}</h1>
                     </div>
 

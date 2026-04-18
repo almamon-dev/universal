@@ -20,7 +20,7 @@ const AuditListModal = ({ title, audits, stats, onClose }) => {
     const totalCount = audits.length;
 
     return createPortal(
-        <div className="fixed inset-0 z-[500] flex items-center justify-center p-6 bg-slate-950/60 backdrop-blur-sm animate-in fade-in duration-300 font-['Inter', 'system-ui', 'sans-serif']">
+        <div className="fixed inset-0 z-[500] flex items-center justify-center p-6 bg-slate-950/60 backdrop-blur-sm animate-in fade-in duration-300 font-['Plus_Jakarta_Sans',_sans-serif]">
             <div className="bg-white w-full max-w-4xl max-h-[90vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-300 border border-slate-200">
                 {/* Header */}
                 <div className="px-6 py-4 border-b border-rose-50 flex justify-between items-start bg-rose-50/20">
@@ -28,7 +28,7 @@ const AuditListModal = ({ title, audits, stats, onClose }) => {
                         <h2 className="text-xl font-black text-rose-900 flex items-center gap-2">
                             {title} <span className="text-rose-600">{totalCount}</span><span className="text-emerald-500 font-bold text-base">/{totalSellable}</span>
                         </h2>
-                        <p className="text-[10px] font-bold text-rose-400 uppercase tracking-tight">
+                        <p className="text-[10px] font-bold text-rose-400 tracking-tight">
                             Sellable conversations that did not transition ({totalCount} audits)
                         </p>
                     </div>
@@ -42,11 +42,11 @@ const AuditListModal = ({ title, audits, stats, onClose }) => {
                     {/* Summary Section */}
                     {totalCount > 0 && (
                         <div className="bg-rose-50/40 border border-rose-100 rounded-xl p-5 space-y-4">
-                            <p className="text-[10px] font-black text-rose-900 uppercase tracking-widest">Total per Chatter:</p>
+                            <p className="text-[10px] font-black text-rose-900 tracking-widest">Total per Chatter:</p>
                             <div className="grid grid-cols-1 gap-3 px-1">
                                 {Object.keys(chatterGroups).map((name) => (
                                     <div key={name} className="bg-white border border-rose-100 p-3 rounded-lg flex justify-between items-center shadow-sm">
-                                        <span className="text-[10px] font-black text-rose-900 uppercase tracking-tighter truncate pr-2">{name}</span>
+                                        <span className="text-[10px] font-black text-rose-900 tracking-tighter truncate pr-2">{name}</span>
                                         <span className="text-sm font-black text-rose-700">{chatterGroups[name].length}</span>
                                     </div>
                                 ))}
@@ -58,7 +58,7 @@ const AuditListModal = ({ title, audits, stats, onClose }) => {
                     <div className="space-y-8">
                         {Object.keys(chatterGroups).map((name) => (
                             <div key={name} className="space-y-3">
-                                <h3 className="text-sm font-black text-rose-800 uppercase tracking-wider bg-rose-50/50 inline-block px-3 py-1 rounded-md">{name} ({chatterGroups[name].length})</h3>
+                                <h3 className="text-sm font-black text-rose-800 tracking-wider bg-rose-50/50 inline-block px-3 py-1 rounded-md">{name} ({chatterGroups[name].length})</h3>
                                 <div className="grid grid-cols-1 gap-2">
                                     {chatterGroups[name].map((audit, i) => (
                                         <div key={i} className="bg-[#FFF1F2]/50 border border-rose-100 px-5 py-3 rounded-lg shadow-sm">
@@ -93,7 +93,7 @@ const AuditListModal = ({ title, audits, stats, onClose }) => {
                         {totalCount === 0 && (
                             <div className="py-20 text-center space-y-3">
                                 <ShieldAlert className="mx-auto text-rose-100" size={48} />
-                                <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px]">No audits available for this category</p>
+                                <p className="text-slate-400 font-bold tracking-widest text-[10px]">No audits available for this category</p>
                             </div>
                         )}
                     </div>
@@ -101,11 +101,11 @@ const AuditListModal = ({ title, audits, stats, onClose }) => {
 
                 {/* Footer */}
                 <div className="p-5 border-t border-slate-100 flex justify-between bg-slate-50/30">
-                    <button className="bg-[#2563EB] hover:bg-blue-700 text-white font-bold text-[10px] uppercase tracking-widest px-5 py-2.5 rounded-lg transition-all flex items-center gap-2">
+                    <button className="bg-[#2563EB] hover:bg-blue-700 text-white font-bold text-[10px] px-5 py-2.5 rounded-lg transition-all flex items-center gap-2">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                         Save as PDF
                     </button>
-                    <button onClick={onClose} className="bg-[#E2E8F0] hover:bg-slate-300 text-slate-700 font-bold text-[10px] uppercase tracking-widest px-6 py-2.5 rounded-lg transition-all">
+                    <button onClick={onClose} className="bg-[#E2E8F0] hover:bg-slate-300 text-slate-700 font-bold text-[10px] px-6 py-2.5 rounded-lg transition-all">
                         Close
                     </button>
                 </div>
@@ -148,13 +148,13 @@ const ClassificationCard = ({ label, count, action, theme = "slate", onClick }) 
             <div className={cn("absolute left-0 top-0 bottom-0 w-1", borderColors[theme])} />
             <CardContent className="p-6 pb-8 space-y-5 text-left">
                 <div className="space-y-3">
-                    <p className={cn("text-[11px] font-bold uppercase tracking-tight", statusThemes[theme].split(' ')[2])}>{label}</p>
+                    <p className={cn("text-[11px] font-bold tracking-tight", statusThemes[theme].split(' ')[2])}>{label}</p>
                     <h4 className={cn("text-[2.8rem] font-black tabular-nums leading-none tracking-tighter", countColors[theme])}>{count}</h4>
                 </div>
                 {action && (
                     <p 
                         onClick={onClick}
-                        className="text-[10px] font-bold text-rose-600 underline underline-offset-4 cursor-pointer hover:text-rose-800 transition-colors uppercase tracking-tight"
+                        className="text-[10px] font-bold text-rose-600 underline underline-offset-4 cursor-pointer hover:text-rose-800 transition-colors tracking-tight"
                     >
                         {action}
                     </p>
@@ -166,7 +166,7 @@ const ClassificationCard = ({ label, count, action, theme = "slate", onClick }) 
 
 const SectionRow = ({ title, children }) => (
     <div className="space-y-5">
-        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{title}</p>
+        <p className="text-[10px] font-black text-slate-500 tracking-widest">{title}</p>
         <div className="flex gap-6">
             {children}
         </div>

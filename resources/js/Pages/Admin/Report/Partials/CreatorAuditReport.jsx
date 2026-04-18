@@ -9,82 +9,18 @@ import { createPortal } from "react-dom";
 const CreatorModal = ({ creator, onClose }) => {
     if (!creator) return null;
 
-    const fakeAuditHistory = [
-        {
-            date: "Feb 10, 08:54 AM",
-            chatter: "Eliseo",
-            state: "Non-Sellable",
-            type: "Fresh (first interaction or first interaction of the day)",
-            subUid: "SUB_E8W3Y1",
-            flags: {
-                pitch: "No",
-                firstPpv: "No",
-                upsellAtt: "No",
-                upsellPur: "No",
-                aftercare: "No",
-                requestHelp: "No",
-                qcInter: "No",
-                ruleViol: "No",
-            }
-        },
-        {
-            date: "Feb 10, 12:40 PM",
-            chatter: "Jamie",
-            state: "Sellable",
-            type: "Fresh (first interaction or first interaction of the day)",
-            subUid: "SUB_H6J8P3",
-            flags: {
-                casualSexual: "Yes",
-                negotiation: "No",
-                pitch: "No",
-                firstPpv: "No",
-                upsellAtt: "No",
-                upsellPur: "No",
-                aftercare: "No",
-                requestHelp: "No",
-                qcInter: "No",
-                ruleViol: "No",
-            }
-        },
-        {
-            date: "Feb 10, 01:05 PM",
-            chatter: "CJ",
-            state: "Sellable",
-            type: "Fresh (first interaction or first interaction of the day)",
-            subUid: "SUB_CJ_123",
-            flags: {
-                casualSexual: "No",
-                negotiation: "No",
-                pitch: "Yes",
-                firstPpv: "Yes",
-                upsellAtt: "No",
-                upsellPur: "No",
-                aftercare: "No",
-                requestHelp: "No",
-                qcInter: "No",
-                ruleViol: "No",
-            }
-        }
-    ];
+    const auditHistory = creator.history || [];
 
-    const FlagLabel = ({ label, value, colorType = "default" }) => {
-        const isYes = value === "Yes";
-        const isNo = value === "No";
+    const FlagLabel = ({ label, value }) => {
+        const isYes = value && value.toUpperCase().includes("YES");
+        const isNo = value && value.toUpperCase().includes("NO");
         
-        let valueClass = "bg-slate-50 text-slate-400 border-slate-100";
-        if (isYes) {
-            if (colorType === "blue") valueClass = "bg-blue-50 text-blue-700 border-blue-200";
-            else valueClass = "bg-emerald-50 text-emerald-700 border-emerald-200";
-        } else if (isNo) {
-            valueClass = "bg-rose-50 text-rose-700 border-rose-200";
-        }
-
         return (
-            <div className="flex items-center justify-between gap-4 py-1 border-b border-slate-50/50 last:border-0">
-                <span className="text-[10px] font-bold text-slate-500/80 uppercase tracking-widest leading-none">{label}</span>
+            <div className="flex items-center justify-between py-0.5">
+                <span className="text-[10px] font-medium text-slate-500 whitespace-nowrap">{label}:</span>
                 <span className={cn(
-                    "px-2 py-0.5 border text-[9px] font-black tracking-[0.1em] uppercase rounded shadow-sm transition-all",
-                    valueClass
+                    "text-[10px] font-bold px-2",
+                    isYes ? "text-emerald-600" : "text-slate-400"
                 )}>
                     {value || "No"}
                 </span>
@@ -94,13 +30,13 @@ const CreatorModal = ({ creator, onClose }) => {
 
     return createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300">
-            <div className="bg-white w-full max-w-6xl max-h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-300">
+            <div className="bg-white w-full max-w-6xl max-h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-300 font-sans">
                 {/* Modal Header */}
                 <div className="px-8 py-5 border-b border-rose-50 bg-[#FAF5F7]">
                     <div className="flex justify-between items-start">
                         <div className="space-y-0.5">
-                            <h2 className="text-2xl font-black text-[#9D174D]">{creator.name} - Detailed Performance</h2>
-                            <p className="text-[10px] font-bold text-[#E11D48] uppercase tracking-wider">{creator.count} audits with 5 chatters</p>
+                            <h2 className="text-2xl font-bold text-[#9D174D]">{creator.name} - Detailed Performance</h2>
+                            <p className="text-[10px] font-bold text-[#E11D48] tracking-tight">{creator.count} audits during selected period</p>
                         </div>
                         <button onClick={onClose} className="p-1.5 hover:bg-rose-100 rounded-full transition-colors">
                             <X className="text-[#9D174D]" size={20} />
@@ -110,64 +46,79 @@ const CreatorModal = ({ creator, onClose }) => {
 
                 {/* Modal Content */}
                 <div className="flex-1 overflow-y-auto p-8 space-y-6 scrollbar-thin scrollbar-thumb-slate-200">
-                    <h3 className="text-sm font-black text-slate-800 border-b border-slate-100 pb-3 uppercase tracking-widest">Audit History</h3>
+                    <h3 className="text-sm font-bold text-slate-800 border-b border-slate-100 pb-3 tracking-tight">Audit History</h3>
                     
                     <div className="space-y-5">
-                        {fakeAuditHistory.map((audit, i) => (
-                            <div key={i} className="border border-slate-200 rounded-lg overflow-hidden shadow-sm">
-                                {/* Entry Header Area */}
-                                <div className="grid grid-cols-4 px-5 py-3 bg-slate-50/50 border-b border-slate-100">
-                                    <div className="flex gap-1.5 text-[10px]">
-                                        <span className="text-slate-400 font-medium tracking-tight">Date:</span>
-                                        <span className="text-slate-900 font-extrabold">{audit.date}</span>
-                                    </div>
-                                    <div className="flex gap-1.5 text-[10px]">
-                                        <span className="text-slate-400 font-medium tracking-tight">Chatter:</span>
-                                        <span className="text-slate-900 font-extrabold">{audit.chatter}</span>
-                                    </div>
-                                    <div className="flex gap-1.5 text-[10px]">
-                                        <span className="text-slate-400 font-medium tracking-tight">State:</span>
-                                        <span className={cn("font-black", audit.state === "Sellable" ? "text-emerald-600" : "text-rose-600")}>{audit.state}</span>
-                                    </div>
-                                    <div className="flex gap-1.5 text-[10px] overflow-hidden">
-                                        <span className="text-slate-400 font-medium tracking-tight">Type:</span>
-                                        <span className="text-slate-900 font-extrabold truncate">{audit.type}</span>
-                                    </div>
-                                </div>
-                                
-                                {/* Flag Table Area */}
-                                <div className="p-5 grid grid-cols-4 gap-x-8 gap-y-3 bg-white">
-                                    <div className="space-y-2">
-                                        <FlagLabel label="Chatter" value={audit.chatter} />
-                                        <FlagLabel label="Pitched" value={audit.flags.pitch} />
-                                        <FlagLabel label="Aftercare" value={audit.flags.aftercare} />
-                                        <FlagLabel label="QC" value="" />
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <FlagLabel label="Casual" value={audit.flags.casualSexual} />
-                                        <FlagLabel label="1st PPV" value={audit.flags.firstPpv} colorType="blue" />
-                                        <FlagLabel label="Help Requested" value={audit.flags.requestHelp} />
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <FlagLabel label="Negotiation" value={audit.flags.negotiation} />
-                                        <FlagLabel label="Upsell Att" value={audit.flags.upsellAtt} />
-                                        <FlagLabel label="QC Inter" value={audit.flags.qcInter} />
-                                        <div className="flex gap-1.5 pt-1">
-                                            <span className="text-[10px] font-medium text-slate-400">Sub UID:</span>
-                                            <span className="text-[10px] font-black text-slate-500 tracking-tighter">{audit.subUid}</span>
+                        {auditHistory.length > 0 ? (
+                            auditHistory.map((audit, i) => (
+                                <div key={i} className="border border-slate-100 rounded-xl overflow-hidden shadow-sm bg-white">
+                                    {/* Entry Header Area */}
+                                    <div className="grid grid-cols-4 px-6 py-4 bg-slate-50/30 border-b border-slate-100">
+                                        <div className="flex gap-2 text-[10px]">
+                                            <span className="text-slate-400 font-medium">Date:</span>
+                                            <span className="text-slate-900 font-bold">{audit.date}</span>
+                                        </div>
+                                        <div className="flex gap-2 text-[10px]">
+                                            <span className="text-slate-400 font-medium">Chatter:</span>
+                                            <span className="text-slate-900 font-bold">{audit.chatter}</span>
+                                        </div>
+                                        <div className="flex gap-2 text-[10px]">
+                                            <span className="text-slate-400 font-medium tracking-tight">State:</span>
+                                            <span className={cn("font-bold", audit.state === "Sellable" ? "text-emerald-600" : "text-rose-600")}>{audit.state}</span>
+                                        </div>
+                                        <div className="flex gap-2 text-[10px] overflow-hidden">
+                                            <span className="text-slate-400 font-medium tracking-tight">Type:</span>
+                                            <span className="text-slate-900 font-bold truncate leading-tight">{audit.type}</span>
                                         </div>
                                     </div>
-
-                                    <div className="space-y-2">
-                                        <FlagLabel label="QC" value="" />
-                                        <FlagLabel label="Upsell Purchase" value={audit.flags.upsellPur} />
-                                        <FlagLabel label="Violation" value={audit.flags.ruleViol} />
+                                    
+                                    {/* Flag Grid Area */}
+                                    <div className="p-6 grid grid-cols-4 gap-x-12 gap-y-1">
+                                        {/* Col 1 */}
+                                        <div className="space-y-1">
+                                            <div className="flex justify-between py-0.5 border-b border-slate-50">
+                                                <span className="text-[10px] font-medium text-slate-500">Chatter:</span>
+                                                <span className="text-[10px] font-bold text-slate-900">{audit.chatter}</span>
+                                            </div>
+                                            <FlagLabel label="Pitched" value={audit.flags.pitch} />
+                                            <FlagLabel label="Aftercare" value={audit.flags.aftercare} />
+                                            <div className="flex justify-between py-0.5 leading-none">
+                                                <span className="text-[10px] font-medium text-slate-500">QC:</span>
+                                                <span className="text-[10px] font-bold text-slate-900">-</span>
+                                            </div>
+                                        </div>
+    
+                                        {/* Col 2 */}
+                                        <div className="space-y-1">
+                                            <FlagLabel label="Casual-Sexual" value={audit.flags.casualSexual} />
+                                            <FlagLabel label="First PPV" value={audit.flags.firstPpv} />
+                                            <FlagLabel label="Requested Help" value={audit.flags.requestHelp} />
+                                        </div>
+    
+                                        {/* Col 3 */}
+                                        <div className="space-y-1">
+                                            <FlagLabel label="Negotiation" value={audit.flags.negotiation} />
+                                            <FlagLabel label="Upsell Attempt" value={audit.flags.upsellAtt} />
+                                            <FlagLabel label="QC Intervention" value={audit.flags.qcInter} />
+                                            <div className="flex justify-between py-0.5 mt-1 border-t border-slate-50 pt-1">
+                                                <span className="text-[10px] font-medium text-slate-500">Subscriber UID:</span>
+                                                <span className="text-[10px] font-bold text-slate-500 tracking-tight">{audit.subUid}</span>
+                                            </div>
+                                        </div>
+    
+                                        {/* Col 4 */}
+                                        <div className="space-y-1">
+                                            <FlagLabel label="Upsell Purchase" value={audit.flags.upsellPur} />
+                                            <FlagLabel label="Rule Violation" value={audit.flags.ruleViol} />
+                                        </div>
                                     </div>
                                 </div>
+                            ))
+                        ) : (
+                            <div className="py-20 text-center border-2 border-dashed border-slate-100 rounded-xl">
+                                <p className="text-sm font-bold text-slate-400">No audit history recorded for this creator during this period.</p>
                             </div>
-                        ))}
+                        )}
                     </div>
                 </div>
 
@@ -175,7 +126,7 @@ const CreatorModal = ({ creator, onClose }) => {
                 <div className="bg-slate-50/30 p-4 border-t border-slate-100 flex justify-end px-8">
                     <button 
                         onClick={onClose}
-                        className="bg-[#E11D48] hover:bg-rose-700 text-white font-black text-[10px] uppercase tracking-widest px-8 py-2.5 rounded-lg transition-all shadow-md"
+                        className="bg-[#E11D48] hover:bg-rose-700 text-white font-bold text-[10px] tracking-tight px-8 py-2.5 rounded-lg transition-all shadow-md"
                     >
                         Close
                     </button>
@@ -208,22 +159,22 @@ export default function CreatorAuditReport({ agency, stats }) {
                 <div className="grid grid-cols-2 md:grid-cols-2 gap-y-10 gap-x-20 pt-8 border-t border-slate-100 mt-6 font-bold">
                     <div className="grid grid-cols-2 gap-x-12">
                         <div className="space-y-1">
-                            <p className="text-[9px] text-slate-400 tracking-widest leading-none">Agency</p>
+                            <p className="text-[9px] text-slate-400 leading-none">Agency</p>
                             <p className="text-sm text-slate-900 leading-none">{agency.name}</p>
                         </div>
                         <div className="space-y-1">
-                            <p className="text-[9px] text-slate-400 tracking-widest leading-none">Reporting period</p>
+                            <p className="text-[9px] text-slate-400 leading-none">Reporting period</p>
                             <p className="text-sm text-slate-900 leading-none">{stats?.period?.full_range || "Feb 10, 2026 – Feb 17, 2026"}</p>
                         </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-x-12">
                         <div className="space-y-1">
-                            <p className="text-[9px] text-slate-400 tracking-widest leading-none">Report status</p>
+                            <p className="text-[9px] text-slate-400 leading-none">Report status</p>
                             <p className="text-sm text-slate-900 leading-none">Final</p>
                         </div>
                         <div className="space-y-1">
-                            <p className="text-[9px] text-slate-400 tracking-widest leading-none">Generated</p>
+                            <p className="text-[9px] text-slate-400 leading-none">Generated</p>
                             <p className="text-sm text-slate-900 leading-none">{new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
                         </div>
                     </div>
@@ -275,11 +226,11 @@ export default function CreatorAuditReport({ agency, stats }) {
                                     {/* Card Header */}
                                     <div className="flex justify-between items-start">
                                         <div className="space-y-1">
-                                            <p className="text-[10px] font-black text-[#E11D48] tracking-widest leading-none uppercase">#{creator.rank} CREATOR</p>
-                                            <h3 className="text-2xl font-black text-[#1F2937] leading-none pt-2">{creator.name}</h3>
+                                            <p className="text-[10px] font-bold text-[#E11D48] leading-none">#{creator.rank} Creator</p>
+                                            <h3 className="text-2xl font-bold text-[#1F2937] leading-none pt-2">{creator.name}</h3>
                                         </div>
                                         <div className="text-right space-y-1">
-                                            <p className="text-[10px] font-black text-[#E11D48] tracking-widest leading-none uppercase">AUDITS</p>
+                                            <p className="text-[10px] font-bold text-[#E11D48] leading-none">Audits</p>
                                             <p className="text-[2.5rem] font-black text-[#E11D48] leading-none pt-1">{creator.count}</p>
                                         </div>
                                     </div>

@@ -116,9 +116,8 @@ class AgencyController extends Controller
             'fields' => 'present|array',
         ]);
 
-        $fieldIds = [];
-        foreach ($validated['fields'] as $fieldData) {
-            // Find or Create the master field definition
+        $syncData = [];
+        foreach ($validated['fields'] as $index => $fieldData) {
             $field = AuditField::updateOrCreate(
                 ['field_key' => $fieldData['id'] ?? (string) \Illuminate\Support\Str::slug($fieldData['name'])],
                 [
@@ -126,7 +125,7 @@ class AgencyController extends Controller
                     'field_label' => $fieldData['field_label'] ?? $fieldData['name'],
                     'type' => $fieldData['type'] ?? 'select',
                     'options' => $fieldData['options'] ?? null,
-                    'is_required' => (bool) ($fieldData['required'] ?? false),
+                    'is_required' => (bool) ($fieldData['required'] ?? $fieldData['is_required'] ?? false),
                     'is_locked' => (bool) ($fieldData['is_locked'] ?? false),
                     'is_conditional' => (bool) ($fieldData['is_conditional'] ?? false),
                     'required_if' => $fieldData['required_if'] ?? null,
@@ -134,11 +133,10 @@ class AgencyController extends Controller
                 ]
             );
 
-            $fieldIds[] = $field->id;
+            $syncData[$field->id] = ['sort_order' => $index];
         }
 
-        // Sync pivot table professionally
-        $agency->auditFields()->sync($fieldIds);
+        $agency->auditFields()->sync($syncData);
 
         return back()->with('success', 'Audit fields updated successfully.');
     }

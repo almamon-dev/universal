@@ -105,7 +105,7 @@ export default function RevenueLeakage({ stats, agency }) {
             </CardContent>
 
             <CardFooter className="bg-rose-100/60 p-8 flex items-center justify-between border-t-2 border-rose-200/50">
-                <span className="text-[14px] font-black text-rose-900 tracking-tight">Total revenue lost</span>
+                <span className="text-[14px] font-bold text-rose-900 tracking-tight">Total revenue lost</span>
                 <span className="text-5xl font-black text-rose-800 tracking-tighter tabular-nums">{formatCurrency(total_loss)}</span>
             </CardFooter>
         </Card>

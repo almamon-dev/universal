@@ -9,14 +9,14 @@ class Agency extends Model
     protected $guarded = [];
 
     protected $casts = [
-        // Obsolete JSON fields removed for Professional Relational tables
+
     ];
 
     public function auditFields()
     {
         return $this->belongsToMany(AuditField::class, 'agency_audit_field')
-                    ->withPivot('sort_order')
-                    ->orderBy('sort_order');
+            ->withPivot('sort_order')
+            ->orderBy('sort_order');
     }
 
     public function protocols()

@@ -603,6 +603,7 @@ export default function CreateAudit({ agency, chatters = [], creators = [], audi
                                                                 .toLowerCase()
                                                                 .includes("subscriber type");
 
+                                                        const isRequiredField = fieldItem.is_required || fieldItem.required;
                                                         const hasError = errors.audits?.[index]?.responses?.[fieldKey];
                                                         const currentValue = responses[fieldKey];
 
@@ -615,7 +616,7 @@ export default function CreateAudit({ agency, chatters = [], creators = [], audi
                                                                     <div className="flex items-center justify-between">
                                                                         <label className="text-[15px] font-bold text-gray-800 tracking-tight flex items-center gap-1.5">
                                                                             {fieldItem.name || fieldItem.field_label}
-                                                                            <span className="text-red-500 font-bold">*</span>
+                                                                            {isRequiredField && <span className="text-red-500 font-bold">*</span>}
                                                                         </label>
                                                                         {currentValue && (
                                                                             <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded border border-emerald-100">
@@ -706,7 +707,7 @@ export default function CreateAudit({ agency, chatters = [], creators = [], audi
                                                                         {...register(
                                                                             `audits.${index}.responses.${fieldKey}`,
                                                                             {
-                                                                                required: fieldItem.required,
+                                                                                required: isRequiredField,
                                                                             },
                                                                         )}
                                                                         className={`w-full bg-white border rounded-lg px-4 py-3 text-[15px] font-medium focus:outline-none focus:ring-4 focus:ring-indigo-500/5 transition-all resize-none ${hasError

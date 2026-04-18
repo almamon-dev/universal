@@ -21,7 +21,7 @@ export default {
         },
         extend: {
             fontFamily: {
-                sans: ["Inter", ...defaultTheme.fontFamily.sans],
+                sans: ["Plus Jakarta Sans", "Inter", ...defaultTheme.fontFamily.sans],
             },
             colors: {
                 border: "var(--border)",

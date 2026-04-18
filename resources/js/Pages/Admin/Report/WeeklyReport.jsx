@@ -31,7 +31,7 @@ export default function WeeklyReport({ agency, stats }) {
         <AdminLayout>
             <Head title={`${activeTab === 'weekly' ? 'Weekly Quality Control' : activeTab === 'chatter' ? 'Chatter Audit' : 'Creator Audit'} Report — ${agency.name}`} />
 
-            <div className="min-h-screen bg-[#F8FAFC]" style={{ fontFamily: "'Inter', sans-serif" }}>
+            <div className="min-h-screen bg-[#F8FAFC]" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
                 <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
 
                     {/* Top Row: Back link and Save button */}
@@ -43,7 +43,7 @@ export default function WeeklyReport({ agency, stats }) {
                             <ArrowLeft size={16} /> Back to Dashboard
                         </Link>
 
-                        <button className="bg-[#2563EB] hover:bg-blue-700 text-white font-bold text-[10px] px-6 py-2.5 rounded-md shadow-lg shadow-blue-100 flex items-center gap-2 uppercase tracking-wider">
+                        <button className="bg-[#2563EB] hover:bg-blue-700 text-white font-bold text-[10px] px-6 py-2.5 rounded-md shadow-lg shadow-blue-100 flex items-center gap-2 tracking-tight">
                             <Download size={14} className="stroke-[3]" /> Download PDF
                         </button>
                     </div>
@@ -53,7 +53,7 @@ export default function WeeklyReport({ agency, stats }) {
                         <CardContent className="p-4 md:p-6 flex flex-col md:flex-row items-start md:items-center gap-6">
                             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full">
                                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
-                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Start Date:</span>
+                                    <span className="text-[10px] font-bold text-slate-400 tracking-tight">Start Date:</span>
                                     <input
                                         type="date"
                                         value={startDate}
@@ -63,7 +63,7 @@ export default function WeeklyReport({ agency, stats }) {
                                 </div>
 
                                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
-                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">End Date:</span>
+                                    <span className="text-[10px] font-bold text-slate-400 tracking-tight">End Date:</span>
                                     <input
                                         type="date"
                                         value={endDate}
@@ -86,7 +86,7 @@ export default function WeeklyReport({ agency, stats }) {
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
                                 className={cn(
-                                    "px-6 py-3 rounded text-[10px] font-black uppercase tracking-widest transition-all",
+                                    "px-6 py-3 rounded text-[10px] font-bold tracking-tight transition-all",
                                     activeTab === tab.id
                                         ? "bg-slate-900 text-white shadow-md shadow-slate-200"
                                         : "bg-white text-slate-400 hover:text-slate-600 border border-slate-100"
@@ -104,26 +104,26 @@ export default function WeeklyReport({ agency, stats }) {
                                 {/* Header Info */}
                                 <div className="space-y-6">
                                     <div>
-                                        <h1 className="text-xl font-black text-slate-900 tracking-tight leading-none uppercase">Executive Quality Control</h1>
-                                        <p className="text-[10px] font-bold text-slate-400 tracking-[0.2em] uppercase mt-2">Invariant Diagnostic Protocol</p>
+                                        <h1 className="text-xl font-bold text-slate-900 tracking-tight leading-none">Executive Quality Control</h1>
+                                        <p className="text-[10px] font-medium text-slate-400 tracking-tight mt-2">Invariant Diagnostic Protocol</p>
                                     </div>
 
                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 py-6 border-y border-slate-50">
                                         <div className="space-y-1">
-                                            <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Agency Path</p>
-                                            <p className="text-xs text-slate-900 font-black">{agency.name}</p>
+                                            <p className="text-[9px] text-slate-400 font-bold tracking-tight">Agency Path</p>
+                                            <p className="text-xs text-slate-900 font-bold">{agency.name}</p>
                                         </div>
                                         <div className="space-y-1">
-                                            <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Time Horizon</p>
-                                            <p className="text-xs text-slate-900 font-black">{stats?.period?.full_range || 'Feb 10 – Feb 17, 2026'}</p>
+                                            <p className="text-[9px] text-slate-400 font-bold tracking-tight">Time Horizon</p>
+                                            <p className="text-xs text-slate-900 font-bold">{stats?.period?.full_range || 'Feb 10 – Feb 17, 2026'}</p>
                                         </div>
                                         <div className="space-y-1">
-                                            <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Status Matrix</p>
-                                            <p className="text-xs text-slate-900 font-black">Finalized & Verified</p>
+                                            <p className="text-[9px] text-slate-400 font-bold tracking-tight">Status Matrix</p>
+                                            <p className="text-xs text-slate-900 font-bold">Finalized & Verified</p>
                                         </div>
                                         <div className="space-y-1">
-                                            <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Timestamp</p>
-                                            <p className="text-xs text-slate-900 font-black">{new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                                            <p className="text-[9px] text-slate-400 font-bold tracking-tight">Timestamp</p>
+                                            <p className="text-xs text-slate-900 font-bold">{new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -157,7 +157,7 @@ export default function WeeklyReport({ agency, stats }) {
                                         action={
                                             <button
                                                 onClick={() => setIsComparisonOpen(!isComparisonOpen)}
-                                                className="bg-[#2563EB] hover:bg-blue-700 text-white font-black text-[9px] px-4 py-2 rounded flex items-center gap-2 transition-all uppercase tracking-widest"
+                                                className="bg-[#2563EB] hover:bg-blue-700 text-white font-bold text-[9px] px-4 py-2 rounded flex items-center gap-2 transition-all tracking-tight"
                                             >
                                                 {isComparisonOpen ? "Hide Metrics" : "Show Comparison"}
                                                 {isComparisonOpen ? <ChevronUp size={12} strokeWidth={3} /> : <ChevronDown size={12} strokeWidth={3} />}

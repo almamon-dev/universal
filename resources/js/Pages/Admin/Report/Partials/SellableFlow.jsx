@@ -43,7 +43,7 @@ const TreeNode = ({ label, value, color = "slate", indent = 0, subtext = false, 
                     )}>
                         {label}
                         {isClickable && (
-                            <span className="ml-2 text-[10px] font-bold text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-tighter">
+                            <span className="ml-2 text-[10px] font-bold text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity tracking-tighter">
                                 Click for details
                             </span>
                         )}
@@ -157,7 +157,7 @@ const SellableDrillDownModal = ({ type, onClose, stats }) => {
     const reasonData = Object.entries(reasonMap).map(([name, count]) => ({ name, count }));
 
     return createPortal(
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-slate-950/60 backdrop-blur-sm animate-in fade-in duration-300 font-['Inter', 'system-ui', 'sans-serif']">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-slate-950/60 backdrop-blur-sm animate-in fade-in duration-300 font-['Plus_Jakarta_Sans',_sans-serif]">
             <div className="bg-white w-full max-w-6xl max-h-[95vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-300 border border-slate-200">
                 {/* Header */}
                 <div className="px-8 py-5 border-b border-rose-50 bg-white">
@@ -186,7 +186,7 @@ const SellableDrillDownModal = ({ type, onClose, stats }) => {
                             className="bg-[#F1F7FF] border border-[#E1EFFF] rounded-xl px-5 py-3 flex justify-between items-center cursor-pointer hover:bg-[#E8F2FF] transition-colors"
                             onClick={() => setIsChatterOpen(!isChatterOpen)}
                         >
-                            <h3 className="text-sm font-black text-[#2563EB] uppercase tracking-tight">{config.chatterGroupLabel}</h3>
+                            <h3 className="text-sm font-bold text-[#2563EB] tracking-tight">{config.chatterGroupLabel}</h3>
                             <ChevronUp className={cn("text-[#2563EB] transition-transform duration-200", !isChatterOpen && "rotate-180")} size={18} />
                         </div>
                         {isChatterOpen && (
@@ -194,7 +194,7 @@ const SellableDrillDownModal = ({ type, onClose, stats }) => {
                                 <button
                                     onClick={() => setSelectedChatter("All")}
                                     className={cn(
-                                        "px-5 py-2.5 rounded-lg text-[11px] font-black uppercase tracking-widest transition-all",
+                                        "px-5 py-2.5 rounded-lg text-[11px] font-bold tracking-tight transition-all",
                                         selectedChatter === "All" ? "bg-[#2563EB] text-white shadow-md" : "bg-white border border-slate-200 text-slate-500 hover:border-[#2563EB]/30"
                                     )}
                                 >
@@ -209,7 +209,7 @@ const SellableDrillDownModal = ({ type, onClose, stats }) => {
                                             selectedChatter === c.name ? "bg-[#2563EB] text-white" : "bg-white border border-slate-200 text-slate-500 hover:border-[#2563EB]/30"
                                         )}
                                     >
-                                        <span className={cn("text-[11px] font-bold uppercase", selectedChatter === c.name ? "text-white" : "text-slate-500")}>{c.name}</span>
+                                        <span className={cn("text-[11px] font-bold", selectedChatter === c.name ? "text-white" : "text-slate-500")}>{c.name}</span>
                                         <span className={cn("text-[15px] font-black", selectedChatter === c.name ? "text-white" : "text-rose-600")}>{c.count}</span>
                                     </button>
                                 ))}
@@ -223,7 +223,7 @@ const SellableDrillDownModal = ({ type, onClose, stats }) => {
                             className="bg-[#FFF8F1] border border-[#FFEDE1] rounded-xl px-5 py-3 flex justify-between items-center cursor-pointer hover:bg-[#FFF2E8] transition-colors"
                             onClick={() => setIsReasonOpen(!isReasonOpen)}
                         >
-                            <h3 className="text-sm font-black text-[#9A3412] uppercase tracking-tight">{config.reasonGroupLabel}</h3>
+                            <h3 className="text-sm font-bold text-[#9A3412] tracking-tight">{config.reasonGroupLabel}</h3>
                             <ChevronUp className={cn("text-[#9A3412] transition-transform duration-200", !isReasonOpen && "rotate-180")} size={18} />
                         </div>
                         {isReasonOpen && (
@@ -240,7 +240,7 @@ const SellableDrillDownModal = ({ type, onClose, stats }) => {
 
                     {/* Records List */}
                     <div className="space-y-4 pt-4 border-t border-slate-100">
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">
+                        <p className="text-[10px] font-bold text-slate-400 tracking-tight px-1">
                             Audits for: <span className="text-[#2563EB]">{selectedChatter}</span> ({filteredAudits.length} records)
                         </p>
                         {filteredAudits.map((audit, i) => (
@@ -260,7 +260,7 @@ const SellableDrillDownModal = ({ type, onClose, stats }) => {
                                     </div>
                                     <div className="flex gap-2">
                                         <span className="font-bold text-slate-400 min-w-[100px]">Subscriber UID:</span>
-                                        <span className="text-slate-700 font-bold uppercase tracking-tight">{audit.subUid}</span>
+                                        <span className="text-slate-700 font-bold tracking-tight">{audit.subUid}</span>
                                     </div>
                                     <div className="flex gap-2">
                                         <span className="font-bold text-slate-400 min-w-[100px]">QC:</span>
@@ -287,7 +287,7 @@ const SellableDrillDownModal = ({ type, onClose, stats }) => {
 
                         {filteredAudits.length === 0 && (
                             <div className="py-24 text-center">
-                                <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">No records found for this category</p>
+                                <p className="text-slate-400 font-bold tracking-tight text-xs">No records found for this category</p>
                             </div>
                         )}
                     </div>
@@ -295,7 +295,7 @@ const SellableDrillDownModal = ({ type, onClose, stats }) => {
 
                 {/* Footer */}
                 <div className="p-6 border-t border-slate-100 flex justify-end bg-slate-50/50">
-                    <button onClick={onClose} className="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-[11px] uppercase tracking-widest px-10 py-3 rounded-xl transition-all shadow-sm">
+                    <button onClick={onClose} className="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-[11px] tracking-tight px-10 py-3 rounded-xl transition-all shadow-sm">
                         Close
                     </button>
                 </div>

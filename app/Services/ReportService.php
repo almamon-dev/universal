@@ -10,9 +10,14 @@ class ReportService
 {
     protected $leakageService;
 
-    public function __construct(RevenueLeakageService $leakageService)
+    protected $chatterService;
+    protected $creatorService;
+
+    public function __construct(RevenueLeakageService $leakageService, ChatterReportService $chatterService, CreatorReportService $creatorService)
     {
         $this->leakageService = $leakageService;
+        $this->chatterService = $chatterService;
+        $this->creatorService = $creatorService;
     }
 
     public function getWeeklyStats(Agency $agency)
@@ -142,6 +147,11 @@ class ReportService
         );
 
         $stats = [
+            'period' => [
+                'full_range' => $audits->count() > 0 
+                    ? $audits->min('created_at')->format('M d, Y') . ' – ' . $audits->max('created_at')->format('M d, Y')
+                    : 'No data available',
+            ],
             'total_audits' => $audits->count(),
             'sellable' => $sellableAudits->count(),
             'non_sellable' => $audits->count() - $sellableAudits->count(),
@@ -354,6 +364,11 @@ class ReportService
                     'interventions' => $userAudits->filter(fn ($a) => str_contains(strtoupper($findValue($a, 'intervene')), 'YES'))->count(),
                 ];
             }),
+
+            'chatter_performance' => $this->chatterService->getPerformanceStats($agency, $audits, $findValue),
+            'chatter_stats' => $this->chatterService->getDetailedStats($agency, $audits, $findValue),
+            'chatter_list' => $agency->chatters->pluck('name'),
+            'creator_performance' => $this->creatorService->getPerformanceStats($agency, $audits, $findValue),
         ];
 
         return $stats;

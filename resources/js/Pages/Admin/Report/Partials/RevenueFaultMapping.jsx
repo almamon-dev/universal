@@ -35,7 +35,7 @@ const FaultCard = ({ label, value, sublabel, action, theme = "blue", icon: Icon 
         <Card className={cn("border shadow-none rounded-md transition-all hover:shadow-sm", config.border, config.bg)}>
             <CardContent className="p-4 space-y-3">
                 <div className="flex items-center justify-between">
-                    <span className={cn("text-[9px] font-black uppercase tracking-widest", config.text)}>{label}</span>
+                    <span className={cn("text-[9px] font-bold tracking-tight", config.text)}>{label}</span>
                     <div className={cn("p-1.5 rounded-full bg-white border", config.border)}>
                         <Icon size={12} className={config.text} />
                     </div>
@@ -43,7 +43,7 @@ const FaultCard = ({ label, value, sublabel, action, theme = "blue", icon: Icon 
 
                 <div className="space-y-1">
                     <h2 className={cn("text-3xl font-black tabular-nums tracking-tighter leading-none", "text-slate-900")}>{value}</h2>
-                    <p className={cn("text-[9px] font-bold opacity-70 uppercase tracking-tight", "text-slate-500")}>{sublabel}</p>
+                    <p className={cn("text-[9px] font-medium opacity-70 tracking-tight", "text-slate-500")}>{sublabel}</p>
                     {action && (
                         <p className={cn("text-[9px] font-black underline underline-offset-2 cursor-pointer transition-opacity mt-1", config.text)}>
                             {action}
@@ -163,7 +163,7 @@ export default function RevenueFaultMapping({ stats, isComparisonOpen = false })
                     <p className="text-[11px] font-medium text-slate-400">{statsLabel}</p>
                 </div>
                 {isBaseline && (
-                    <span className="px-3 py-1 bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-blue-100 shadow-sm">
+                    <span className="px-3 py-1 bg-blue-50 text-blue-600 text-[10px] font-bold tracking-tight rounded-full border border-blue-100 shadow-sm">
                         Baseline Week
                     </span>
                 )}
