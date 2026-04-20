@@ -2,8 +2,8 @@ import React from "react";
 
 export default function ReportSection({ title, children, label, action }) {
     return (
-        <div className="space-y-6 border-b border-slate-200/60 ">
-            <div className="flex items-center justify-between  pb-4 transition-all duration-500">
+        <div className="space-y-6 border-b border-slate-100 pb-12 transition-all duration-500">
+            <div className="flex items-center justify-between transition-all duration-500">
                 <div className="flex items-center gap-4">
                     <div className="space-y-1">
                         <h2 className="text-md font-bold text-slate-700 tracking-tight leading-none">{title}</h2>

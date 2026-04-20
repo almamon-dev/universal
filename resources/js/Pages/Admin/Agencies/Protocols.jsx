@@ -99,15 +99,7 @@ export default function Protocols({ agency }) {
 
                                 {/* Form Actions */}
                                 <div className="flex items-center justify-between pt-6 border-t border-gray-100">
-                                    <Link
-                                        href={route(
-                                            "admin.agencies.edit",
-                                            agency.id,
-                                        )}
-                                        className="px-6 py-2.5 text-sm text-gray-500 hover:text-gray-900 font-bold transition-all"
-                                    >
-                                        Discard Changes
-                                    </Link>
+
                                     <button
                                         type="submit"
                                         disabled={processing}
@@ -124,39 +116,7 @@ export default function Protocols({ agency }) {
                     </div>
                 </div>
 
-                {/* Reference Tips */}
-                <div className="mt-8 p-8 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-md border border-indigo-100 transition-all duration-300">
-                    <div className="flex gap-6 items-center">
-                        <div className="w-12 h-12 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-2xl flex items-center justify-center text-white shadow-2xl shadow-indigo-900/20 shrink-0">
-                            <Info size={24} />
-                        </div>
-                        <div className="flex-1">
-                            <h3 className="text-sm font-bold mb-4  tracking-widest text-indigo-900">
-                                Protocol Best Practices
-                            </h3>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                {[
-                                    "Clarity over complexity",
-                                    "Strict adherence to rules",
-                                    "Reference real examples",
-                                    "Regular audit checks",
-                                    "Contact leads for updates",
-                                    "Quality above all else",
-                                ].map((item, i) => (
-                                    <div
-                                        key={i}
-                                        className="flex items-center gap-3 group"
-                                    >
-                                        <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 transition-transform group-hover:scale-150"></div>
-                                        <span className="text-sm font-medium text-indigo-700">
-                                            {item}
-                                        </span>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                </div>
+
             </div>
         </AdminLayout>
     );

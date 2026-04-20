@@ -39,7 +39,7 @@ class OverviewController extends Controller
                     'inactive_agencies' => $inactiveAgencies,
                     'total_users' => $totalUsers,
                 ],
-                'agencies' => \App\Models\Agency::latest()->get(),
+                'agencies' => \App\Models\Agency::withCount(['chatters', 'audits'])->latest()->get(),
             ]);
         }
 

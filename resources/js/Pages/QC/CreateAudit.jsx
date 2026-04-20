@@ -248,12 +248,20 @@ export default function CreateAudit({ agency, chatters = [], creators = [], audi
         year: "numeric",
     });
 
-    const getCompletionPercentage = (responses) => {
-        if (!auditFields.length) return 0;
-        const answered = Object.keys(responses).filter(
-            (k) => responses[k] && responses[k].toString().trim() !== "",
-        ).length;
-        return Math.round((answered / auditFields.length) * 100);
+    const getCompletionPercentage = (responses, allFields) => {
+        if (!allFields.length) return 0;
+        
+        // Identify which fields SHOULD be answered (visible fields)
+        const currentVisibleFields = allFields.filter((f, idx) => isVisible(f, idx, allFields, responses));
+        if (currentVisibleFields.length === 0) return 0;
+
+        const answeredCount = currentVisibleFields.filter(field => {
+            const key = generateFieldKey(field);
+            const val = responses[key];
+            return val !== undefined && val !== null && val.toString().trim() !== "";
+        }).length;
+
+        return Math.round((answeredCount / currentVisibleFields.length) * 100);
     };
 
     return (
@@ -305,6 +313,7 @@ export default function CreateAudit({ agency, chatters = [], creators = [], audi
                                 const hasErrors = errors.audits?.[index];
                                 const completion = getCompletionPercentage(
                                     currentAuditValue?.responses || {},
+                                    auditFields
                                 );
 
                                 return (
@@ -388,7 +397,7 @@ export default function CreateAudit({ agency, chatters = [], creators = [], audi
                             const activeAuditValues = auditsData[index] || {};
                             const responses = activeAuditValues.responses || {};
                             const completion =
-                                getCompletionPercentage(responses);
+                                getCompletionPercentage(responses, auditFields);
                             const hasErrors = errors.audits?.[index];
 
                             return (

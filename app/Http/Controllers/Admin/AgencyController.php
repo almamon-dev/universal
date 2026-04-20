@@ -118,20 +118,36 @@ class AgencyController extends Controller
 
         $syncData = [];
         foreach ($validated['fields'] as $index => $fieldData) {
-            $field = AuditField::updateOrCreate(
-                ['field_key' => $fieldData['id'] ?? (string) \Illuminate\Support\Str::slug($fieldData['name'])],
-                [
-                    'name' => $fieldData['name'],
-                    'field_label' => $fieldData['field_label'] ?? $fieldData['name'],
-                    'type' => $fieldData['type'] ?? 'select',
-                    'options' => $fieldData['options'] ?? null,
-                    'is_required' => (bool) ($fieldData['required'] ?? $fieldData['is_required'] ?? false),
-                    'is_locked' => (bool) ($fieldData['is_locked'] ?? false),
-                    'is_conditional' => (bool) ($fieldData['is_conditional'] ?? false),
-                    'required_if' => $fieldData['required_if'] ?? null,
-                    'help_text' => $fieldData['help_text'] ?? null,
-                ]
-            );
+            $dbId = (isset($fieldData['id']) && is_numeric($fieldData['id'])) ? $fieldData['id'] : null;
+            $fieldKey = $fieldData['field_key'] ?? (is_string($fieldData['id'] ?? null) ? $fieldData['id'] : \Illuminate\Support\Str::slug($fieldData['name']));
+
+            $field = null;
+            if ($dbId) {
+                $field = AuditField::find($dbId);
+            }
+
+            if (! $field) {
+                $field = AuditField::where('field_key', $fieldKey)->first();
+            }
+
+            $data = [
+                'name' => $fieldData['name'],
+                'field_label' => $fieldData['field_label'] ?? $fieldData['name'],
+                'type' => $fieldData['type'] ?? 'select',
+                'options' => $fieldData['options'] ?? null,
+                'is_required' => (bool) ($fieldData['required'] ?? $fieldData['is_required'] ?? false),
+                'is_locked' => (bool) ($fieldData['is_locked'] ?? false),
+                'is_conditional' => (bool) ($fieldData['is_conditional'] ?? false),
+                'required_if' => $fieldData['required_if'] ?? null,
+                'help_text' => $fieldData['help_text'] ?? null,
+            ];
+
+            if ($field) {
+                $field->update($data);
+            } else {
+                $data['field_key'] = $fieldKey;
+                $field = AuditField::create($data);
+            }
 
             $syncData[$field->id] = ['sort_order' => $index];
         }

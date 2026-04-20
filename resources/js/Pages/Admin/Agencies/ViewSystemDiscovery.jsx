@@ -376,62 +376,76 @@ export default function ViewSystemDiscovery({ agency }) {
             </div>
 
             {/* Edit Metrics Modal */}
-            <Modal show={isEditModalOpen} onClose={() => setIsEditModalOpen(false)}>
-                <form onSubmit={submit} className="p-6">
-                    <h2 className="text-lg font-medium text-gray-900 mb-4">
-                        Update Discovery Metrics
-                    </h2>
-
-                    <div className="space-y-4">
-                        <div>
-                            <InputLabel htmlFor="first_paywall_sexting" value="Initial Paywall ($)" />
-                            <TextInput
-                                id="first_paywall_sexting"
-                                type="number"
-                                step="any"
-                                className="mt-1 block w-full"
-                                value={data.first_paywall_sexting}
-                                onChange={(e) => setData("first_paywall_sexting", e.target.value)}
-                            />
-                            <InputError message={errors.first_paywall_sexting} className="mt-2" />
-                        </div>
-
-                        <div>
-                            <InputLabel htmlFor="avg_completed_sexting_sequence" value="Sequence Average ($)" />
-                            <TextInput
-                                id="avg_completed_sexting_sequence"
-                                type="number"
-                                step="any"
-                                className="mt-1 block w-full"
-                                value={data.avg_completed_sexting_sequence}
-                                onChange={(e) => setData("avg_completed_sexting_sequence", e.target.value)}
-                            />
-                            <InputError message={errors.avg_completed_sexting_sequence} className="mt-2" />
-                        </div>
-
-                        <div>
-                            <InputLabel htmlFor="avg_recorded_ppv" value="Pre-recorded PPV ($)" />
-                            <TextInput
-                                id="avg_recorded_ppv"
-                                type="number"
-                                step="any"
-                                className="mt-1 block w-full"
-                                value={data.avg_recorded_ppv}
-                                onChange={(e) => setData("avg_recorded_ppv", e.target.value)}
-                            />
-                            <InputError message={errors.avg_recorded_ppv} className="mt-2" />
-                        </div>
+            <Modal show={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} maxWidth="2xl">
+                <div className="bg-white overflow-hidden font-sans">
+                    {/* Header */}
+                    <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                        <h2 className="text-lg font-bold text-slate-900">Update Metrics</h2>
+                        <button onClick={() => setIsEditModalOpen(false)} className="p-2 hover:bg-slate-50 rounded-md transition-colors">
+                            <X size={18} className="text-slate-400" />
+                        </button>
                     </div>
 
-                    <div className="mt-6 flex justify-end gap-3">
-                        <SecondaryButton onClick={() => setIsEditModalOpen(false)}>
-                            Cancel
-                        </SecondaryButton>
-                        <PrimaryButton disabled={processing}>
-                            Save Changes
-                        </PrimaryButton>
-                    </div>
-                </form>
+                    <form onSubmit={submit} className="p-6 space-y-6">
+                        <div className="space-y-4">
+                            <div className="space-y-1.5">
+                                <InputLabel htmlFor="first_paywall_sexting" value="Initial Paywall ($)" className="text-[11px] font-bold text-slate-400 uppercase tracking-wider" />
+                                <TextInput
+                                    id="first_paywall_sexting"
+                                    type="number"
+                                    step="any"
+                                    className="mt-1 block w-full bg-slate-50 border-slate-200 shadow-none"
+                                    value={data.first_paywall_sexting}
+                                    onChange={(e) => setData("first_paywall_sexting", e.target.value)}
+                                />
+                                <InputError message={errors.first_paywall_sexting} className="mt-2" />
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <InputLabel htmlFor="avg_completed_sexting_sequence" value="Sequence Average ($)" className="text-[11px] font-bold text-slate-400 uppercase tracking-wider" />
+                                <TextInput
+                                    id="avg_completed_sexting_sequence"
+                                    type="number"
+                                    step="any"
+                                    className="mt-1 block w-full bg-slate-50 border-slate-200 shadow-none"
+                                    value={data.avg_completed_sexting_sequence}
+                                    onChange={(e) => setData("avg_completed_sexting_sequence", e.target.value)}
+                                />
+                                <InputError message={errors.avg_completed_sexting_sequence} className="mt-2" />
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <InputLabel htmlFor="avg_recorded_ppv" value="Pre-recorded PPV ($)" className="text-[11px] font-bold text-slate-400 uppercase tracking-wider" />
+                                <TextInput
+                                    id="avg_recorded_ppv"
+                                    type="number"
+                                    step="any"
+                                    className="mt-1 block w-full bg-slate-50 border-slate-200 shadow-none"
+                                    value={data.avg_recorded_ppv}
+                                    onChange={(e) => setData("avg_recorded_ppv", e.target.value)}
+                                />
+                                <InputError message={errors.avg_recorded_ppv} className="mt-2" />
+                            </div>
+                        </div>
+
+                        <div className="flex justify-end pt-4 border-t border-slate-50 gap-3">
+                            <button 
+                                type="button"
+                                onClick={() => setIsEditModalOpen(false)}
+                                className="px-4 py-2 text-xs font-bold text-slate-500 hover:text-slate-700 transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button 
+                                type="submit" 
+                                disabled={processing}
+                                className="bg-slate-900 text-white px-6 py-2 rounded-md text-xs font-bold hover:bg-slate-800 transition-all disabled:opacity-50 active:scale-[0.98]"
+                            >
+                                Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </Modal>
         </AdminLayout>
     );

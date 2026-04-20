@@ -77,8 +77,8 @@ const Header = ({ onMenuClick }) => {
                             <p className="text-xs font-bold text-gray-900">
                                 {auth?.user?.name}
                             </p>
-                            <p className="text-[10px] text-gray-400 font-semibold italic">
-                                Admin account
+                            <p className="text-[10px] text-gray-400 font-semibold">
+                                Admin
                             </p>
                         </div>
                         <ChevronDown
@@ -99,29 +99,14 @@ const Header = ({ onMenuClick }) => {
                                 </p>
                             </div>
 
-                            <Link
-                                href={route("profile.edit")}
-                                className="flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-gray-600 hover:bg-gray-50 hover:text-black transition-all"
-                            >
-                                <User size={14} />
-                                Profile settings
-                            </Link>
-                            <Link
-                                href="#"
-                                className="flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-gray-600 hover:bg-gray-50 hover:text-black transition-all"
-                            >
-                                <Settings size={14} />
-                                System preferences
-                            </Link>
 
-                            <div className="h-px bg-gray-50 my-1"></div>
 
                             <button
                                 onClick={handleLogout}
                                 className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-red-500 hover:bg-red-50 transition-all"
                             >
                                 <LogOut size={14} />
-                                End session
+                                Log Out
                             </button>
                         </div>
                     )}

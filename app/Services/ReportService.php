@@ -110,7 +110,7 @@ class ReportService
         // Multi-field check for "No Pitch" reasons (checking both reason categories and status)
         $pitchNotPossible = $sellableAudits->filter(function($a) use ($findValue) {
             $val = strtoupper($findValue($a, 'reason'));
-            return str_contains($val, 'POSSIBLE') && str_contains($val, 'NOT');
+            return str_contains($val, 'PITCH NOT POSSIBLE') || (str_contains($val, 'NOT') && str_contains($val, 'POSSIBLE') && !str_contains($val, 'EXECUTED'));
         });
 
         // Final Pitched list: Look for positive responses

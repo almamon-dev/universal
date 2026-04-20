@@ -1,51 +1,85 @@
 import React, { useState } from "react";
-import { 
-    Info, 
-    ChevronDown, 
-    Target, 
-    Zap, 
-    TrendingUp, 
-    PlayCircle, 
-    Repeat, 
-    ArrowUpCircle, 
-    DollarSign, 
-    Heart, 
-    ShieldAlert, 
-    Activity 
+import {
+    Info,
+    ChevronDown,
+    Target,
+    Zap,
+    TrendingUp,
+    PlayCircle,
+    Repeat,
+    ArrowUpCircle,
+    DollarSign,
+    Heart,
+    Activity,
+    X,
+    ShieldAlert
 } from "lucide-react";
 import { Card, CardContent } from "@/Components/ui/card";
+import Modal from "@/Components/Modal";
 import { cn } from "@/lib/utils";
+import AuditDrillDownModal from "./AuditDrillDownModal";
 
-const FaultCard = ({ label, value, sublabel, action, theme = "blue", icon: Icon }) => {
+const FaultCard = ({ label, value, sublabel, action, theme = "blue", icon: Icon, formula, onClick }) => {
     const themes = {
-        blue: { text: "text-blue-600", border: "border-blue-100", bg: "bg-blue-50/50" },
-        purple: { text: "text-purple-600", border: "border-purple-100", bg: "bg-purple-50/50" },
-        green: { text: "text-green-600", border: "border-green-100", bg: "bg-green-50/50" },
-        lime: { text: "text-lime-600", border: "border-lime-100", bg: "bg-lime-50/50" },
-        orange: { text: "text-orange-600", border: "border-orange-100", bg: "bg-orange-50/50" },
-        cyan: { text: "text-cyan-600", border: "border-cyan-100", bg: "bg-cyan-50/50" },
-        amber: { text: "text-amber-600", border: "border-amber-100", bg: "bg-amber-50/50" },
-        indigo: { text: "text-indigo-600", border: "border-indigo-100", bg: "bg-indigo-50/50" },
-        rose: { text: "text-rose-600", border: "border-rose-100", bg: "bg-rose-50/50" },
+        blue: { text: "text-blue-700", border: "border-blue-200", bg: "bg-gradient-to-br from-blue-50 to-blue-100/40", iconBg: "bg-blue-100" },
+        purple: { text: "text-purple-700", border: "border-purple-200", bg: "bg-gradient-to-br from-purple-50 to-purple-100/40", iconBg: "bg-purple-100" },
+        green: { text: "text-green-700", border: "border-green-200", bg: "bg-gradient-to-br from-green-50 to-green-100/40", iconBg: "bg-green-100" },
+        lime: { text: "text-lime-700", border: "border-lime-200", bg: "bg-gradient-to-br from-lime-50 to-lime-100/40", iconBg: "bg-lime-100" },
+        orange: { text: "text-orange-700", border: "border-orange-200", bg: "bg-gradient-to-br from-orange-50 to-orange-100/40", iconBg: "bg-orange-100" },
+        cyan: { text: "text-cyan-700", border: "border-cyan-200", bg: "bg-gradient-to-br from-cyan-50 to-cyan-100/40", iconBg: "bg-cyan-100" },
+        amber: { text: "text-amber-700", border: "border-amber-200", bg: "bg-gradient-to-br from-amber-50 to-amber-100/40", iconBg: "bg-amber-100" },
+        indigo: { text: "text-indigo-700", border: "border-indigo-200", bg: "bg-gradient-to-br from-indigo-50 to-indigo-100/40", iconBg: "bg-indigo-100" },
+        rose: { text: "text-rose-700", border: "border-rose-200", bg: "bg-gradient-to-br from-rose-50 to-rose-100/40", iconBg: "bg-rose-100" },
     };
 
     const config = themes[theme] || themes.blue;
 
     return (
-        <Card className={cn("border shadow-none rounded-md transition-all hover:shadow-sm", config.border, config.bg)}>
-            <CardContent className="p-4 space-y-3">
+        <Card className={cn("group relative border shadow-none rounded-xl transition-all hover:shadow-md", config.border, config.bg)}>
+            <CardContent className="p-6 space-y-4">
                 <div className="flex items-center justify-between">
-                    <span className={cn("text-[9px] font-bold tracking-tight", config.text)}>{label}</span>
-                    <div className={cn("p-1.5 rounded-full bg-white border", config.border)}>
-                        <Icon size={12} className={config.text} />
+                    <span className={cn("text-[11px] font-bold tracking-tight", config.text)}>{label}</span>
+                    <div className="flex items-center gap-2">
+                        {formula && (
+                            <div className="cursor-help relative group/tooltip">
+                                <Info size={16} className={cn("transition-colors", config.text)} />
+                                <div className="absolute bottom-[calc(100%+8px)] left-1/2 -translate-x-1/2 w-72 p-4 bg-white border shadow-2xl opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all duration-200 z-[100] rounded-xl border-slate-100 pointer-events-none mb-2">
+                                    <div className="space-y-3 font-sans">
+                                        <div className="space-y-1">
+                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Formula</p>
+                                            <p className="text-[12px] font-bold text-slate-800 leading-tight">{formula.main}</p>
+                                        </div>
+                                        {formula.where && (
+                                            <div className="pt-2 border-t border-slate-50 space-y-1.5">
+                                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Where</p>
+                                                <div className="space-y-1">
+                                                    {formula.where.map((item, i) => (
+                                                        <p key={i} className="text-[10px] font-medium text-slate-500 leading-tight">
+                                                            • {item}
+                                                        </p>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white border-r border-b border-slate-100 rotate-45"></div>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
 
                 <div className="space-y-1">
-                    <h2 className={cn("text-3xl font-black tabular-nums tracking-tighter leading-none", "text-slate-900")}>{value}</h2>
-                    <p className={cn("text-[9px] font-medium opacity-70 tracking-tight", "text-slate-500")}>{sublabel}</p>
+                    <h2 className={cn("text-5xl font-bold tabular-nums tracking-tighter leading-none text-slate-800")}>{value}</h2>
+                    <p className={cn("text-[11px] font-semibold opacity-60 tracking-tight text-slate-500")}>{sublabel}</p>
                     {action && (
-                        <p className={cn("text-[9px] font-black underline underline-offset-2 cursor-pointer transition-opacity mt-1", config.text)}>
+                        <p 
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onClick && onClick();
+                            }}
+                            className={cn("text-[11px] font-bold underline underline-offset-4 cursor-pointer transition-all mt-4 hover:opacity-70", config.text)}
+                        >
                             {action}
                         </p>
                     )}
@@ -58,20 +92,38 @@ const FaultCard = ({ label, value, sublabel, action, theme = "blue", icon: Icon 
 export default function RevenueFaultMapping({ stats, isComparisonOpen = false }) {
     const [comparisonMode, setComparisonMode] = useState("sequential");
     const [baselineWeek, setBaselineWeek] = useState("week1");
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [activeModal, setActiveModal] = useState(null); // 'pitch' or 'sexting'
+    const [selectedReason, setSelectedReason] = useState("Possible but Not Executed");
 
-    // Dynamic Calculations based on your Math Logic
-    const total_audits = stats?.total_audits || 0;
-    const sellable = stats?.sellable || 0;
-    const pitched = stats?.pitched || 0;
-    const sexting_pitched = stats?.sexting_pitched || 0;
-    const sexting_sale_yes = stats?.sexting_sale_yes || 0;
-    const prerecorded_pitched = stats?.prerecorded_pitched || 0;
-    const prerecorded_sale_yes = stats?.prerecorded_sale_yes || 0;
-    const sexting_sub_continued = stats?.sexting_sub_continued || 0;
-    const upsell_attempted = stats?.upsell_attempted || 0;
-    const upsell_purchased = stats?.upsell_purchased || 0;
-    const transition_yes = stats?.transition_yes || 0;
-    const total_interventions = stats?.total_interventions || 0;
+    const openModal = (type, initialReason = "Possible but Not Executed") => {
+        setActiveModal(type);
+        if (type === 'pitch') {
+            setSelectedReason(initialReason);
+        }
+        setIsModalOpen(true);
+    };
+
+    const {
+        sellable = 0,
+        total_audits = 0,
+        pitched = 0,
+        pitch_not_possible_audits = [],
+        pitch_possible_not_executed_audits = [],
+        all_not_pitched_audits = [],
+        sexting_pitched = 0,
+        sexting_sale_no = 0,
+        sexting_sale_no_audits = [],
+        total_sales = 0,
+        sexting_sale_yes = 0,
+        prerecorded_sale_yes = 0,
+        prerecorded_pitched = 0,
+        sexting_sub_continued = 0,
+        upsell_attempted = 0,
+        upsell_purchased = 0,
+        aftercare_yes = 0,
+        transition_yes = 0,
+    } = stats || {};
 
     const calcRate = (part, total) => {
         if (!total || total === 0) return "0.0%";
@@ -79,198 +131,163 @@ export default function RevenueFaultMapping({ stats, isComparisonOpen = false })
     };
 
     const currentStats = [
-        { 
-            label: "CONVERSION RATE", 
-            value: calcRate(sellable, total_audits), 
-            sublabel: "Sellable / Total Conversations", 
-            theme: "blue", 
+        {
+            label: "Conversion Rate",
+            value: calcRate(sellable, total_audits),
+            sublabel: "Sellable / Total Conversations",
+            theme: "blue",
             icon: Target,
-            formula: `(${sellable} Sellable ÷ ${total_audits} Total) × 100` 
+            formula: {
+                main: `(${sellable} Sellable ÷ ${total_audits} Total) × 100`,
+                where: ["Sellable = Conversations with clear sales intent", "Total = Every conversation audited"]
+            }
         },
-        { 
-            label: "PITCH RATE", 
-            value: calcRate(pitched, sellable), 
-            sublabel: "Pitched / Sellable Conversations", 
-            theme: "purple", 
+        {
+            label: "Pitch Rate",
+            value: calcRate(pitched, sellable),
+            sublabel: "Pitched / Sellable Conversations",
+            action: `Click to view ${all_not_pitched_audits.length} not pitched`,
+            theme: "purple",
             icon: Zap,
-            formula: `(${pitched} Pitched ÷ ${sellable} Sellable) × 100` 
+            onClick: () => openModal('pitch'),
+            formula: {
+                main: `(${pitched} Ptd. ÷ ${sellable} Slb.) × 100`,
+                where: ["Pitched = Conversations where a product was offered", "Sellable = Total conversations with sales intent"]
+            }
         },
-        { 
-            label: "SEXTING SALES", 
-            value: calcRate(sexting_sale_yes, sexting_pitched), 
-            sublabel: "Sexting Sales / Sexting Pitched", 
-            theme: "green", 
+        {
+            label: "Sexting Sales Rate",
+            value: calcRate(sexting_sale_yes, sexting_pitched),
+            sublabel: "Sexting Sales / Sexting Pitched",
+            action: `Click to view failed sales`,
+            theme: "green",
             icon: TrendingUp,
-            formula: `(${sexting_sale_yes} Sold ÷ ${sexting_pitched} Pitched) × 100` 
+            onClick: () => openModal('sexting'),
+            formula: {
+                main: `(${sexting_sale_yes} Sales ÷ ${sexting_pitched} Pitched) × 100`,
+                where: ["Sales = Content Type: Sexting AND Sale: Yes", "Pitched = Content Type Pitched: Sexting"]
+            }
         },
-        { 
-            label: "PRE-RECORDED SALES", 
-            value: calcRate(prerecorded_sale_yes, prerecorded_pitched), 
-            sublabel: "PPV Sales / PPV Pitched", 
-            theme: "lime", 
+        {
+            label: "Pre-recorded Sales Rate",
+            value: calcRate(prerecorded_sale_yes, prerecorded_pitched),
+            sublabel: "PPV Sales / PPV Pitched",
+            action: `Click to view failed sales`,
+            theme: "lime",
             icon: PlayCircle,
-            formula: `(${prerecorded_sale_yes} Sales ÷ ${prerecorded_pitched} Pitched) × 100` 
+            formula: {
+                main: `(${prerecorded_sale_yes} Sales ÷ ${prerecorded_pitched} Pitched) × 100`,
+                where: ["Sales = Successful PPV transaction", "Pitched = PPV was offered/pitched"]
+            }
         },
-        { 
-            label: "SEXTING CONTINUATION", 
-            value: calcRate(sexting_sub_continued, sexting_sale_yes), 
-            sublabel: "Continued / Sexting Sales", 
-            theme: "orange", 
+        {
+            label: "Sexting Continuation Rate",
+            value: calcRate(sexting_sub_continued, sexting_sale_yes),
+            sublabel: "Continued / Sexting Sales",
+            action: `Click to view not continued`,
+            theme: "orange",
             icon: Repeat,
-            formula: `(${sexting_sub_continued} Continued ÷ ${sexting_sale_yes} Sold) × 100` 
+            formula: {
+                main: `(${sexting_sub_continued} Continued ÷ ${sexting_sale_yes} Sold) × 100`,
+                where: ["Continued = User stayed after initial sale", "Sold = Initial sexting sale made"]
+            }
         },
-        { 
-            label: "UPSELL ATTEMPT", 
-            value: calcRate(upsell_attempted, prerecorded_pitched), 
-            sublabel: "Upsell Attempts / First PPV Sales", 
-            theme: "cyan", 
+        {
+            label: "Upsell Attempt Rate",
+            value: calcRate(upsell_attempted, prerecorded_pitched),
+            sublabel: "Upsell Attempts / First PPV Sales",
+            action: `Click to view not attempted`,
+            theme: "cyan",
             icon: ArrowUpCircle,
-            formula: `(${upsell_attempted} Attempts ÷ ${prerecorded_pitched} First PPV Sales) × 100` 
+            formula: {
+                main: `(${upsell_attempted} Attempts ÷ ${prerecorded_pitched} First PPV) × 100`,
+                where: ["Attempts = Second offer made after first PPV", "First PPV = Initial PPV sales count"]
+            }
         },
-        { 
-            label: "UPSELL CONVERSION", 
-            value: calcRate(upsell_purchased, upsell_attempted), 
-            sublabel: "Upsell Purchased / Upsell Attempted", 
-            theme: "amber", 
+        {
+            label: "Upsell Conversion Rate",
+            value: calcRate(upsell_purchased, upsell_attempted),
+            sublabel: "Upsell Purchased / Upsell Attempted",
+            action: `Click to view failed attempts`,
+            theme: "amber",
             icon: DollarSign,
-            formula: `(${upsell_purchased} Purchased ÷ ${upsell_attempted} Attempted) × 100` 
+            formula: {
+                main: `(${upsell_purchased} Purchased ÷ ${upsell_attempted} Attempted) × 100`,
+                where: ["Purchased = Successful upsell transaction", "Attempted = Total upsell offers made"]
+            }
         },
-        { 
-            label: "CASUAL TO SEXUAL", 
-            value: calcRate(transition_yes, sellable), 
-            sublabel: "Casual Conversation: Yes / Total Sellable", 
-            theme: "rose", 
-            icon: Heart,
-            formula: `(${transition_yes} Yes ÷ ${sellable} Sellable) × 100` 
-        },
-        { 
-            label: "QC INTERVENTIONS", 
-            value: total_interventions.toString(), 
-            sublabel: "Total interventions tracked", 
+        {
+            label: "Aftercare Provided Rate",
+            value: calcRate(aftercare_yes, total_sales),
+            sublabel: "Aftercare / Total Sales",
+            action: `Click to view without aftercare`,
             theme: "indigo",
-            icon: ShieldAlert
+            icon: Activity,
+            formula: {
+                main: `(${aftercare_yes} Yes ÷ ${total_sales} Sales) × 100`,
+                where: ["Aftercare = Post-sale engagement provided", "Total Sales = Sum of all successful transactions"]
+            }
+        },
+        {
+            label: "Casual Before Sexual Rate",
+            value: calcRate(transition_yes, sellable),
+            sublabel: "Casual Conversation: Yes / Total Sellable",
+            theme: "rose",
+            icon: Heart,
+            formula: {
+                main: `(${transition_yes} Casual Conversation: Yes ÷ ${sellable} Total Sellable) × 100`,
+                where: ["Yes = Conversations with casual transition", "Total Sellable = All conversations with intent"]
+            }
         },
     ];
 
-    // Placeholder for comparison weeks (can be dynamic if backend provides history)
-    const week2Data = currentStats.map(s => ({ ...s, value: "0.0%" }));
+    const isSexting = activeModal === 'sexting';
+    const auditsToShow = isSexting 
+        ? (stats?.sexting_sale_no_audits || []) 
+        : (selectedReason === "Possible but Not Executed" ? (stats?.pitch_possible_not_executed_audits || []) : (stats?.pitch_not_possible_audits || []));
 
-    const renderWeekCards = (weekLabel, dateRange, statsLabel, data, isBaseline = false) => (
-        <div className="space-y-6">
-            <div className="bg-white border-b border-slate-100/50 p-6 flex items-center justify-between">
-                <div className="space-y-1">
-                    <h3 className="text-base font-bold text-slate-900">{weekLabel}: {dateRange}</h3>
-                    <p className="text-[11px] font-medium text-slate-400">{statsLabel}</p>
-                </div>
-                {isBaseline && (
-                    <span className="px-3 py-1 bg-blue-50 text-blue-600 text-[10px] font-bold tracking-tight rounded-full border border-blue-100 shadow-sm">
-                        Baseline Week
-                    </span>
-                )}
-            </div>
-            <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-                {data.map((item, idx) => (
-                    <FaultCard
-                        key={idx}
-                        label={item.label}
-                        value={item.value}
-                        sublabel={item.sublabel}
-                        action={item.action}
-                        theme={item.theme}
-                        icon={item.icon}
-                        formula={item.formula}
-                    />
-                ))}
-            </div>
-        </div>
-    );
+    const modalNumerator = isSexting 
+        ? (stats?.sexting_sale_no || 0) 
+        : (selectedReason === "Possible but Not Executed" ? (stats?.pitch_possible_not_executed_audits?.length || 0) : (stats?.pitch_not_possible_audits?.length || 0));
+    
+    const modalDenominator = isSexting ? (stats?.sellable || 0) : (stats?.sellable || 0);
+    const title = isSexting ? "Sexting Sale: No - Details" : "Not Pitched - Details";
+    const subtitle = isSexting
+        ? "Summary of audits where sexting was pitched but no sale occurred."
+        : "Review of sellable conversations that lacked a product pitch.";
 
     return (
-        <div className="space-y-10">
-            {isComparisonOpen ? (
-                <div className="space-y-8 animate-in fade-in duration-500">
-                    {/* Comparison Header/Controls */}
-                    <Card className="shadow-none border-slate-100/80 bg-slate-50/30">
-                        <CardContent className="p-5 flex flex-wrap items-center gap-x-12 gap-y-6">
-                            <div className="flex items-center gap-6">
-                                <span className="text-xs font-bold text-slate-500 first-letter:uppercase">Comparison Mode:</span>
-                                <div className="flex bg-white p-1 rounded-lg border border-slate-200">
-                                    <button 
-                                        onClick={() => setComparisonMode("sequential")}
-                                        className={cn(
-                                            "px-6 py-2.5 rounded-md text-[11px] font-bold transition-all",
-                                            comparisonMode === "sequential" ? "bg-[#2563EB] text-white shadow-md" : "text-slate-600 hover:text-slate-950"
-                                        )}
-                                    >
-                                        Sequential (Week vs Previous)
-                                    </button>
-                                    <button 
-                                        onClick={() => setComparisonMode("baseline")}
-                                        className={cn(
-                                            "px-6 py-2.5 rounded-md text-[11px] font-bold transition-all",
-                                            comparisonMode === "baseline" ? "bg-[#2563EB] text-white shadow-md" : "text-slate-600 hover:text-slate-950"
-                                        )}
-                                    >
-                                        Baseline (All vs Selected Week)
-                                    </button>
-                                </div>
-                            </div>
-
-                            {comparisonMode === "baseline" && (
-                                <div className="flex items-center gap-6 border-l border-slate-200 pl-12 h-10 animate-in fade-in slide-in-from-left-4 duration-300">
-                                    <span className="text-xs font-bold text-slate-500 first-letter:uppercase">Baseline Week:</span>
-                                    <select 
-                                        value={baselineWeek}
-                                        onChange={(e) => setBaselineWeek(e.target.value)}
-                                        className="bg-white border border-slate-200 rounded-lg px-4 py-2 text-[11px] font-bold text-slate-700 focus:outline-none focus:ring-4 focus:ring-blue-500/5 transition-all"
-                                    >
-                                        <option value="week1">Week 1: 2/7/2026 - 2/13/2026</option>
-                                        <option value="week2">Week 2: 2/14/2026 - 2/20/2026</option>
-                                    </select>
-                                </div>
-                            )}
-                        </CardContent>
-                    </Card>
-
-                    {/* Comparison Lists */}
-                    <div className="space-y-12">
-                        <Card className="shadow-none border-slate-100 bg-white rounded-xl overflow-hidden">
-                            {renderWeekCards(
-                                "Week 1",
-                                "2/7/2026 - 2/13/2026",
-                                `${total_audits} total audits • ${sellable} sellable conversations`,
-                                currentStats,
-                                baselineWeek === "week1"
-                            )}
-                        </Card>
-
-                        <Card className="shadow-none border-slate-100 bg-white rounded-xl overflow-hidden opacity-90">
-                            {renderWeekCards(
-                                "Week 2",
-                                "2/14/2026 - 2/20/2026",
-                                "73 total audits • 50 sellable conversations",
-                                week2Data,
-                                baselineWeek === "week2"
-                            )}
-                        </Card>
-                    </div>
-                </div>
-            ) : (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-in fade-in duration-500">
-                    {currentStats.map((item, idx) => (
-                        <FaultCard
-                            key={idx}
-                            label={item.label}
-                            value={item.value}
-                            sublabel={item.sublabel}
-                            action={item.action}
-                            theme={item.theme}
-                            icon={item.icon}
-                            formula={item.formula}
-                        />
-                    ))}
-                </div>
-            )}
+        <div className="space-y-12">
+            <AuditDrillDownModal 
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                title={title}
+                subtitle={subtitle}
+                audits={auditsToShow}
+                numerator={modalNumerator}
+                denominator={modalDenominator}
+                tabs={!isSexting ? [
+                    { 
+                        label: "Possible but Not Executed", 
+                        count: stats?.pitch_possible_not_executed_audits?.length || 0, 
+                        value: "Possible but Not Executed", 
+                        active: selectedReason === "Possible but Not Executed" 
+                    },
+                    { 
+                        label: "Not Possible", 
+                        count: stats?.pitch_not_possible_audits?.length || 0, 
+                        value: "Not Possible", 
+                        active: selectedReason === "Not Possible" 
+                    }
+                ] : []}
+                onTabChange={(val) => setSelectedReason(val)}
+            />
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {currentStats.map((stat, i) => (
+                    <FaultCard key={i} {...stat} />
+                ))}
+            </div>
         </div>
     );
 }

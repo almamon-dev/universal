@@ -203,13 +203,13 @@ export default function Dashboard({ auth, stats, agencies }) {
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-4">
-                                                    <div className="flex items-center gap-1 text-gray-500">
+                                                    <div className="flex items-center gap-1 text-gray-500" title="Total Chatters">
                                                         <Users size={14} />
                                                         <span className="text-sm font-semibold text-gray-700">
                                                             {agency.chatters_count || 0}
                                                         </span>
                                                     </div>
-                                                    <div className="flex items-center gap-1 text-gray-500">
+                                                    <div className="flex items-center gap-1 text-gray-500" title="Total Audits">
                                                         <Activity size={14} />
                                                         <span className="text-sm font-semibold text-gray-700">
                                                             {agency.audits_count || 0}

@@ -5,10 +5,10 @@ import { createPortal } from "react-dom";
 import { X, Calendar, User, ShieldAlert } from "lucide-react";
 
 // Modal Component for Drill-downs (Matches Screenshot Design)
+// Simplified Modal for Unit Volume
 const AuditListModal = ({ title, audits, stats, onClose }) => {
     if (!audits) return null;
 
-    // Grouping audits by chatter
     const chatterGroups = audits.reduce((acc, obj) => {
         const key = obj.chatter;
         if (!acc[key]) acc[key] = [];
@@ -16,72 +16,66 @@ const AuditListModal = ({ title, audits, stats, onClose }) => {
         return acc;
     }, {});
 
-    const totalSellable = stats?.sellable || 100; // Mock denominator if missing
+    const totalSellable = stats?.sellable || 100;
     const totalCount = audits.length;
 
     return createPortal(
-        <div className="fixed inset-0 z-[500] flex items-center justify-center p-6 bg-slate-950/60 backdrop-blur-sm animate-in fade-in duration-300 font-['Plus_Jakarta_Sans',_sans-serif]">
-            <div className="bg-white w-full max-w-4xl max-h-[90vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-300 border border-slate-200">
-                {/* Header */}
-                <div className="px-6 py-4 border-b border-rose-50 flex justify-between items-start bg-rose-50/20">
-                    <div className="space-y-0.5">
-                        <h2 className="text-xl font-black text-rose-900 flex items-center gap-2">
-                            {title} <span className="text-rose-600">{totalCount}</span><span className="text-emerald-500 font-bold text-base">/{totalSellable}</span>
+        <div className="fixed inset-0 z-[500] flex items-center justify-center p-6 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300 font-sans">
+            <div className="bg-white w-full max-w-4xl max-h-[90vh] rounded-xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-300 border border-slate-100">
+                {/* Clean Header */}
+                <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-white">
+                    <div>
+                        <h2 className="text-lg font-bold text-slate-900">
+                            {title} ({totalCount})
                         </h2>
-                        <p className="text-[10px] font-bold text-rose-400 tracking-tight">
-                            Sellable conversations that did not transition ({totalCount} audits)
+                        <p className="text-[11px] text-slate-500">
+                            Drill-down audit list out of {totalSellable} sellable conversations
                         </p>
                     </div>
-                    <button onClick={onClose} className="p-1.5 hover:bg-rose-100 rounded-full transition-colors">
-                        <X className="text-rose-900" size={20} />
+                    <button onClick={onClose} className="p-2 hover:bg-slate-50 rounded-md transition-colors">
+                        <X className="text-slate-400" size={18} />
                     </button>
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 overflow-y-auto p-6 space-y-6">
-                    {/* Summary Section */}
-                    {totalCount > 0 && (
-                        <div className="bg-rose-50/40 border border-rose-100 rounded-xl p-5 space-y-4">
-                            <p className="text-[10px] font-black text-rose-900 tracking-widest">Total per Chatter:</p>
-                            <div className="grid grid-cols-1 gap-3 px-1">
-                                {Object.keys(chatterGroups).map((name) => (
-                                    <div key={name} className="bg-white border border-rose-100 p-3 rounded-lg flex justify-between items-center shadow-sm">
-                                        <span className="text-[10px] font-black text-rose-900 tracking-tighter truncate pr-2">{name}</span>
-                                        <span className="text-sm font-black text-rose-700">{chatterGroups[name].length}</span>
-                                    </div>
-                                ))}
-                            </div>
+                <div className="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar">
+                    {/* Chatter Breakdowns: Simple Badges */}
+                    <div className="space-y-3">
+                        <h3 className="text-[11px] font-bold text-slate-400">Breakdown by Chatter</h3>
+                        <div className="flex flex-wrap gap-2">
+                            {Object.keys(chatterGroups).map((name) => (
+                                <div key={name} className="flex items-center gap-2 px-3 py-1.5 border border-slate-100 rounded-md bg-slate-50/50">
+                                    <span className="text-xs font-bold text-slate-700">{name}</span>
+                                    <span className="text-xs font-bold text-rose-500">{chatterGroups[name].length}</span>
+                                </div>
+                            ))}
                         </div>
-                    )}
+                    </div>
 
-                    {/* Detailed List Grouped by Chatter */}
-                    <div className="space-y-8">
+                    {/* Audit List: Simple Rows */}
+                    <div className="space-y-6">
                         {Object.keys(chatterGroups).map((name) => (
                             <div key={name} className="space-y-3">
-                                <h3 className="text-sm font-black text-rose-800 tracking-wider bg-rose-50/50 inline-block px-3 py-1 rounded-md">{name} ({chatterGroups[name].length})</h3>
-                                <div className="grid grid-cols-1 gap-2">
+                                <div className="divide-y divide-slate-50 border border-slate-100 rounded-lg overflow-hidden">
                                     {chatterGroups[name].map((audit, i) => (
-                                        <div key={i} className="bg-[#FFF1F2]/50 border border-rose-100 px-5 py-3 rounded-lg shadow-sm">
-                                            <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-[11px]">
-                                                <div className="flex gap-1.5">
-                                                    <span className="font-bold text-slate-500">Date:</span>
-                                                    <span className="text-slate-700 font-bold">{audit.date}</span>
+                                        <div key={i} className="p-4 hover:bg-slate-50/50 transition-colors bg-white">
+                                            <div className="grid grid-cols-3 gap-6 items-start text-xs">
+                                                <div className="space-y-1">
+                                                    <p className="text-[10px] uppercase font-bold text-slate-400">Date/QC</p>
+                                                    <p className="font-bold text-slate-900">{audit.date}</p>
+                                                    <p className="text-[11px] text-slate-500">QC: {audit.qc}</p>
                                                 </div>
-                                                <div className="flex gap-1.5">
-                                                    <span className="font-bold text-slate-500">Chatter:</span>
-                                                    <span className="text-slate-700 font-bold">{audit.chatter}</span>
+                                                <div className="space-y-1">
+                                                    <p className="text-[10px] uppercase font-bold text-slate-400">Creator/Chatter</p>
+                                                    <p className="font-bold text-slate-900">{audit.creator}</p>
+                                                    <p className="text-[11px] text-slate-500">Ch: {audit.chatter}</p>
                                                 </div>
-                                                <div className="flex gap-1.5">
-                                                    <span className="font-bold text-slate-500">Creator:</span>
-                                                    <span className="text-slate-700 font-bold">{audit.creator}</span>
-                                                </div>
-                                                <div className="flex gap-1.5">
-                                                    <span className="font-bold text-slate-500">Subscriber UID:</span>
-                                                    <span className="text-slate-700 font-bold truncate">{audit.subUid}</span>
-                                                </div>
-                                                <div className="flex gap-1.5">
-                                                    <span className="font-bold text-slate-500">QC:</span>
-                                                    <span className="text-slate-700 font-bold">{audit.qc}</span>
+                                                <div className="space-y-1">
+                                                    <p className="text-[10px] uppercase font-bold text-slate-400">Subscriber</p>
+                                                    <p className="font-medium text-slate-700 truncate">{audit.subUid}</p>
+                                                    <span className="text-[10px] bg-slate-100 px-2 py-0.5 rounded font-bold text-slate-600 inline-block mt-1">
+                                                        Authenticated
+                                                    </span>
                                                 </div>
                                             </div>
                                         </div>
@@ -92,20 +86,16 @@ const AuditListModal = ({ title, audits, stats, onClose }) => {
 
                         {totalCount === 0 && (
                             <div className="py-20 text-center space-y-3">
-                                <ShieldAlert className="mx-auto text-rose-100" size={48} />
-                                <p className="text-slate-400 font-bold tracking-widest text-[10px]">No audits available for this category</p>
+                                <ShieldAlert className="mx-auto text-slate-200" size={48} />
+                                <p className="text-slate-400 font-bold text-xs">No audits found</p>
                             </div>
                         )}
                     </div>
                 </div>
 
                 {/* Footer */}
-                <div className="p-5 border-t border-slate-100 flex justify-between bg-slate-50/30">
-                    <button className="bg-[#2563EB] hover:bg-blue-700 text-white font-bold text-[10px] px-5 py-2.5 rounded-lg transition-all flex items-center gap-2">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                        Save as PDF
-                    </button>
-                    <button onClick={onClose} className="bg-[#E2E8F0] hover:bg-slate-300 text-slate-700 font-bold text-[10px] px-6 py-2.5 rounded-lg transition-all">
+                <div className="px-6 py-4 border-t border-slate-100 flex justify-end bg-slate-50/30">
+                    <button onClick={onClose} className="px-6 py-2 bg-slate-900 text-white text-xs font-bold rounded-md hover:bg-slate-800 transition-colors">
                         Close
                     </button>
                 </div>
@@ -144,17 +134,17 @@ const ClassificationCard = ({ label, count, action, theme = "slate", onClick }) 
     };
 
     return (
-        <Card className={cn("flex-1 shadow-sm border rounded-xl relative transition-all hover:shadow-md group overflow-hidden", statusThemes[theme])}>
+        <Card className={cn("flex-1 shadow-none border rounded-lg relative transition-all hover:shadow-md group overflow-hidden bg-white", statusThemes[theme].split(' ')[1])}>
             <div className={cn("absolute left-0 top-0 bottom-0 w-1", borderColors[theme])} />
-            <CardContent className="p-6 pb-8 space-y-5 text-left">
-                <div className="space-y-3">
-                    <p className={cn("text-[11px] font-bold tracking-tight", statusThemes[theme].split(' ')[2])}>{label}</p>
-                    <h4 className={cn("text-[2.8rem] font-black tabular-nums leading-none tracking-tighter", countColors[theme])}>{count}</h4>
+            <CardContent className="p-5 space-y-5 text-left">
+                <div className="space-y-1">
+                    <p className={cn("text-[11px] font-bold tracking-tight text-slate-500")}>{label}</p>
+                    <h4 className={cn("text-4xl font-bold tabular-nums leading-none tracking-tighter text-slate-800")}>{count}</h4>
                 </div>
                 {action && (
-                    <p 
+                    <p
                         onClick={onClick}
-                        className="text-[10px] font-bold text-rose-600 underline underline-offset-4 cursor-pointer hover:text-rose-800 transition-colors tracking-tight"
+                        className="text-[10px] font-bold text-slate-400 underline underline-offset-4 cursor-pointer hover:text-slate-900 transition-colors tracking-tight"
                     >
                         {action}
                     </p>
@@ -165,9 +155,9 @@ const ClassificationCard = ({ label, count, action, theme = "slate", onClick }) 
 };
 
 const SectionRow = ({ title, children }) => (
-    <div className="space-y-5">
-        <p className="text-[10px] font-black text-slate-500 tracking-widest">{title}</p>
-        <div className="flex gap-6">
+    <div className="space-y-4">
+        <p className="text-[11px] font-bold text-slate-400 tracking-tight">{title}</p>
+        <div className="flex gap-4">
             {children}
         </div>
     </div>
@@ -175,15 +165,15 @@ const SectionRow = ({ title, children }) => (
 
 export default function UnitVolume({ stats }) {
     const [modalData, setModalData] = useState(null);
-    
+
     return (
         <div className="space-y-8">
             {modalData && (
-                <AuditListModal 
-                    title={modalData.title} 
-                    audits={modalData.audits || []} 
+                <AuditListModal
+                    title={modalData.title}
+                    audits={modalData.audits || []}
                     stats={stats}
-                    onClose={() => setModalData(null)} 
+                    onClose={() => setModalData(null)}
                 />
             )}
 
@@ -194,10 +184,10 @@ export default function UnitVolume({ stats }) {
 
             <SectionRow title="Casual to sexual transition (sellable conversations)">
                 <ClassificationCard label="Yes" count={stats?.transition_yes || 0} theme="emerald" />
-                <ClassificationCard 
-                    label="No (click for details)" 
-                    count={stats?.transition_no || 0} 
-                    theme="rose" 
+                <ClassificationCard
+                    label="No (click for details)"
+                    count={stats?.transition_no || 0}
+                    theme="rose"
                     action="Click to view details"
                     onClick={() => setModalData({
                         title: "Failed Casual to Sexual Transitions",
@@ -222,15 +212,15 @@ export default function UnitVolume({ stats }) {
             </SectionRow>
 
             <SectionRow title="Rule violations (sellable conversations)">
-                <ClassificationCard 
-                    label="Yes" 
-                    count={stats?.rule_violations_yes || 0} 
-                    theme="rose" 
+                <ClassificationCard
+                    label="Yes"
+                    count={stats?.rule_violations_yes || 0}
+                    theme="rose"
                     action="Click to view details"
                     onClick={() => setModalData({
                         title: "Audit Rule Violations",
                         audits: stats?.rule_violations_yes_audits
-                    })} 
+                    })}
                 />
                 <ClassificationCard label="No" count={stats?.rule_violations_no || 0} theme="emerald" />
             </SectionRow>

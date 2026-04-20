@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { Card, CardHeader, CardContent } from "@/Components/ui/card";
 import { cn } from "@/lib/utils";
-import { createPortal } from "react-dom";
-import { X, ChevronUp } from "lucide-react";
+import { ChevronUp } from "lucide-react";
+import AuditDrillDownModal from "./AuditDrillDownModal";
 
 const TreeNode = ({ label, value, color = "slate", indent = 0, subtext = false, onClick }) => {
     const colors = {
@@ -57,257 +57,9 @@ const TreeNode = ({ label, value, color = "slate", indent = 0, subtext = false, 
     );
 };
 
-const SellableDrillDownModal = ({ type, onClose, stats }) => {
-    const [selectedChatter, setSelectedChatter] = useState("All");
-    const [isChatterOpen, setIsChatterOpen] = useState(true);
-    const [isReasonOpen, setIsReasonOpen] = useState(true);
-
-    if (!type) return null;
-
-    // Config for different types of drill-downs
-    const typeConfig = {
-        notPossible: {
-            title: "Pitch Not Possible",
-            subtext: "Sellable conversations where the pitch was not possible",
-            auditsKey: "pitch_not_possible_audits",
-            chatterGroupLabel: "Not Possible by Chatter",
-            reasonGroupLabel: "Not Possible by Reason"
-        },
-        possibleNotExecuted: {
-            title: "Pitch Possible Not Executed",
-            subtext: "Sellable conversations where the pitch was possible but not executed",
-            auditsKey: "pitch_possible_not_executed_audits",
-            chatterGroupLabel: "Not Executed by Chatter",
-            reasonGroupLabel: "Not Executed by Reason"
-        },
-        sextingSaleNo: {
-            title: "Sexting Sale: No",
-            subtext: "Sexting pitched but no sale made",
-            auditsKey: "sexting_sale_no_audits",
-            chatterGroupLabel: "Failed Sales by Chatter",
-            reasonGroupLabel: "Failed Sales by Reason"
-        },
-        sextingSubAbandoned: {
-            title: "Sexting Continued: No",
-            subtext: "Sexting purchased but subscriber did not continue",
-            auditsKey: "sexting_sub_abandoned_audits",
-            chatterGroupLabel: "Failed Continuation by Chatter",
-            reasonGroupLabel: "Failed Continuation by Reason",
-            customReasonQuery: "Why did the sub not continue?"
-        },
-        prerecordedSaleNo: {
-            title: "Pre-recorded Sale: No",
-            subtext: "Pre-recorded pitched but no sale made",
-            auditsKey: "prerecorded_sale_no_audits",
-            chatterGroupLabel: "Failed Sales by Chatter",
-            reasonGroupLabel: "Failed Sales by Reason"
-        },
-        upsellNo: {
-            title: "Upsell Not Purchased",
-            subtext: "Upsell attempted but not purchased",
-            auditsKey: "upsell_no_audits",
-            chatterGroupLabel: "Failed Upsells by Chatter",
-            reasonGroupLabel: "Reasons for Not Purchasing",
-            customReasonQuery: "Why did the sub not continue?"
-        },
-        sextingPitched: {
-            title: "Sexting Pitches",
-            subtext: "Total audits identified as Sexting content",
-            auditsKey: "sexting_pitched_audits",
-            chatterGroupLabel: "Pitches by Chatter",
-            reasonGroupLabel: "Content Breakdown"
-        },
-        prerecordedPitched: {
-            title: "Pre-recorded Pitches",
-            subtext: "Total audits identified as Pre-recorded/PPV content",
-            auditsKey: "prerecorded_pitched_audits",
-            chatterGroupLabel: "Pitches by Chatter",
-            reasonGroupLabel: "Content Breakdown"
-        }
-    };
-
-    const config = typeConfig[type] || typeConfig.notPossible;
-    const baseAudits = stats?.[config.auditsKey] || [];
-    const sellableCount = stats?.sellable || 0;
-    const parentCount = type === 'sextingSaleNo' ? (stats?.sexting_pitched || 0) :
-        type === 'sextingSubAbandoned' ? (stats?.sexting_sale_yes || 0) :
-            type === 'prerecordedSaleNo' ? (stats?.prerecorded_pitched || 0) :
-                type === 'upsellNo' ? (stats?.upsell_attempted || 0) :
-                    type === 'sextingPitched' ? sellableCount :
-                        type === 'prerecordedPitched' ? sellableCount :
-                            sellableCount;
-
-    // Filter audits based on selection
-    const filteredAudits = selectedChatter === "All"
-        ? baseAudits
-        : baseAudits.filter(a => a.chatter === selectedChatter);
-
-    // Dynamic Summaries
-    const chatterMap = baseAudits.reduce((acc, curr) => {
-        acc[curr.chatter] = (acc[curr.chatter] || 0) + 1;
-        return acc;
-    }, {});
-    const chatterData = Object.entries(chatterMap).map(([name, count]) => ({ name, count }));
-
-    const reasonMap = baseAudits.reduce((acc, curr) => {
-        const reason = curr.reason || 'Not Specified';
-        acc[reason] = (acc[reason] || 0) + 1;
-        return acc;
-    }, {});
-    const reasonData = Object.entries(reasonMap).map(([name, count]) => ({ name, count }));
-
-    return createPortal(
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-slate-950/60 backdrop-blur-sm animate-in fade-in duration-300 font-['Plus_Jakarta_Sans',_sans-serif]">
-            <div className="bg-white w-full max-w-6xl max-h-[95vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-300 border border-slate-200">
-                {/* Header */}
-                <div className="px-8 py-5 border-b border-rose-50 bg-white">
-                    <div className="flex justify-between items-start">
-                        <div className="space-y-1">
-                            <h2 className="text-[22px] font-black tracking-tight text-rose-900 flex items-center gap-2">
-                                {config.title} - Details
-                                <span className="text-rose-600 ml-1">{baseAudits.length}</span>
-                                <span className="text-emerald-500 font-bold text-lg">/{parentCount}</span>
-                            </h2>
-                            <p className="text-xs font-bold text-rose-500 lowercase first-letter:uppercase">
-                                {config.subtext} ({baseAudits.length} audits)
-                            </p>
-                        </div>
-                        <button onClick={onClose} className="p-2 hover:bg-slate-50 rounded-full transition-colors group">
-                            <X className="text-slate-400 group-hover:text-slate-600" size={24} />
-                        </button>
-                    </div>
-                </div>
-
-                {/* Content */}
-                <div className="flex-1 overflow-y-auto p-8 space-y-8 custom-scrollbar">
-                    {/* Interventions Summary (Chatter) */}
-                    <div className="space-y-3">
-                        <div
-                            className="bg-[#F1F7FF] border border-[#E1EFFF] rounded-xl px-5 py-3 flex justify-between items-center cursor-pointer hover:bg-[#E8F2FF] transition-colors"
-                            onClick={() => setIsChatterOpen(!isChatterOpen)}
-                        >
-                            <h3 className="text-sm font-bold text-[#2563EB] tracking-tight">{config.chatterGroupLabel}</h3>
-                            <ChevronUp className={cn("text-[#2563EB] transition-transform duration-200", !isChatterOpen && "rotate-180")} size={18} />
-                        </div>
-                        {isChatterOpen && (
-                            <div className="flex flex-wrap gap-2.5 px-1 animate-in slide-in-from-top-2">
-                                <button
-                                    onClick={() => setSelectedChatter("All")}
-                                    className={cn(
-                                        "px-5 py-2.5 rounded-lg text-[11px] font-bold tracking-tight transition-all",
-                                        selectedChatter === "All" ? "bg-[#2563EB] text-white shadow-md" : "bg-white border border-slate-200 text-slate-500 hover:border-[#2563EB]/30"
-                                    )}
-                                >
-                                    All Chatters
-                                </button>
-                                {chatterData.map((c, i) => (
-                                    <button
-                                        key={i}
-                                        onClick={() => setSelectedChatter(c.name)}
-                                        className={cn(
-                                            "px-5 py-2 rounded-lg flex items-center gap-4 transition-all shadow-sm",
-                                            selectedChatter === c.name ? "bg-[#2563EB] text-white" : "bg-white border border-slate-200 text-slate-500 hover:border-[#2563EB]/30"
-                                        )}
-                                    >
-                                        <span className={cn("text-[11px] font-bold", selectedChatter === c.name ? "text-white" : "text-slate-500")}>{c.name}</span>
-                                        <span className={cn("text-[15px] font-black", selectedChatter === c.name ? "text-white" : "text-rose-600")}>{c.count}</span>
-                                    </button>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Reasons Summary */}
-                    <div className="space-y-3">
-                        <div
-                            className="bg-[#FFF8F1] border border-[#FFEDE1] rounded-xl px-5 py-3 flex justify-between items-center cursor-pointer hover:bg-[#FFF2E8] transition-colors"
-                            onClick={() => setIsReasonOpen(!isReasonOpen)}
-                        >
-                            <h3 className="text-sm font-bold text-[#9A3412] tracking-tight">{config.reasonGroupLabel}</h3>
-                            <ChevronUp className={cn("text-[#9A3412] transition-transform duration-200", !isReasonOpen && "rotate-180")} size={18} />
-                        </div>
-                        {isReasonOpen && (
-                            <div className="flex flex-wrap gap-2.5 px-1 animate-in slide-in-from-top-2">
-                                {reasonData.map((r, i) => (
-                                    <div key={i} className="bg-white border border-[#FFEDE1] px-5 py-3 rounded-xl flex items-center justify-between gap-8 min-w-[200px] shadow-sm">
-                                        <span className="text-[11px] font-bold text-slate-600 capitalize">{r.name}</span>
-                                        <span className="text-lg font-black text-rose-600">{r.count}</span>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Records List */}
-                    <div className="space-y-4 pt-4 border-t border-slate-100">
-                        <p className="text-[10px] font-bold text-slate-400 tracking-tight px-1">
-                            Audits for: <span className="text-[#2563EB]">{selectedChatter}</span> ({filteredAudits.length} records)
-                        </p>
-                        {filteredAudits.map((audit, i) => (
-                            <div key={i} className="bg-[#FFF1F2]/40 border border-rose-100 px-6 py-5 rounded-2xl shadow-sm hover:border-rose-200 transition-all">
-                                <div className="grid grid-cols-2 gap-x-12 gap-y-4 text-[13px]">
-                                    <div className="flex gap-2">
-                                        <span className="font-bold text-slate-400 min-w-[100px]">Date:</span>
-                                        <span className="text-slate-700 font-bold">{audit.date}</span>
-                                    </div>
-                                    <div className="flex gap-2">
-                                        <span className="font-bold text-slate-400 min-w-[100px]">Chatter:</span>
-                                        <span className="text-slate-700 font-bold">{audit.chatter}</span>
-                                    </div>
-                                    <div className="flex gap-2">
-                                        <span className="font-bold text-slate-400 min-w-[100px]">Creator:</span>
-                                        <span className="text-slate-700 font-bold underline decoration-slate-200 underline-offset-4">{audit.creator}</span>
-                                    </div>
-                                    <div className="flex gap-2">
-                                        <span className="font-bold text-slate-400 min-w-[100px]">Subscriber UID:</span>
-                                        <span className="text-slate-700 font-bold tracking-tight">{audit.subUid}</span>
-                                    </div>
-                                    <div className="flex gap-2">
-                                        <span className="font-bold text-slate-400 min-w-[100px]">QC:</span>
-                                        <span className="text-slate-700 font-bold">{audit.qc}</span>
-                                    </div>
-                                    <div className="flex gap-2">
-                                        <span className="font-bold text-slate-400 min-w-[120px]">Subscriber Type:</span>
-                                        <span className="text-slate-600 font-medium">{audit.subType}</span>
-                                    </div>
-                                    <div className="col-span-2 flex items-start gap-2 pt-1 border-t border-rose-50 mt-1">
-                                        <span className="font-bold text-slate-400 min-w-[100px] mt-1">{config.customReasonQuery || "Reason"}:</span>
-                                        <div className="flex flex-wrap gap-2 items-center">
-                                            <span className="bg-white border border-rose-100 px-3 py-1 rounded-md text-rose-700 font-bold text-[11px] shadow-sm">
-                                                {audit.reason}
-                                            </span>
-                                            {audit.reasonDetail && (
-                                                <span className="text-slate-500 font-medium italic">({audit.reasonDetail})</span>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-
-                        {filteredAudits.length === 0 && (
-                            <div className="py-24 text-center">
-                                <p className="text-slate-400 font-bold tracking-tight text-xs">No records found for this category</p>
-                            </div>
-                        )}
-                    </div>
-                </div>
-
-                {/* Footer */}
-                <div className="p-6 border-t border-slate-100 flex justify-end bg-slate-50/50">
-                    <button onClick={onClose} className="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-[11px] tracking-tight px-10 py-3 rounded-xl transition-all shadow-sm">
-                        Close
-                    </button>
-                </div>
-            </div>
-        </div>,
-        document.body
-    );
-};
-
-
 export default function SellableFlow({ stats }) {
     const [activeModal, setActiveModal] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     // Dynamic data mapping from stats prop
     const sellable_count = stats?.sellable || 0;
@@ -331,12 +83,75 @@ export default function SellableFlow({ stats }) {
     const upsell_attempted = stats?.upsell_attempted || 0;
     const upsell_purchased = stats?.upsell_purchased || 0;
 
+    // Config mapping for Unified Modal
+    const typeConfig = {
+        notPossible: {
+            title: "Pitch Not Possible",
+            subtext: "Sellable conversations where the pitch was not possible",
+            audits: stats?.pitch_not_possible_audits || [],
+            denominator: sellable_count
+        },
+        possibleNotExecuted: {
+            title: "Pitch Possible Not Executed",
+            subtext: "Sellable conversations where the pitch was possible but not executed",
+            audits: stats?.pitch_possible_not_executed_audits || [],
+            denominator: sellable_count
+        },
+        sextingSaleNo: {
+            title: "Sexting Sale: No",
+            subtext: "Sexting pitched but no sale made",
+            audits: stats?.sexting_sale_no_audits || [],
+            denominator: sexting_pitched
+        },
+        sextingSubAbandoned: {
+            title: "Sexting Continued: No",
+            subtext: "Sexting purchased but subscriber did not continue",
+            audits: stats?.sexting_sub_abandoned_audits || [],
+            denominator: sexting_sale_yes
+        },
+        prerecordedSaleNo: {
+            title: "Pre-recorded Sale: No",
+            subtext: "Pre-recorded pitched but no sale made",
+            audits: stats?.prerecorded_sale_no_audits || [],
+            denominator: prerecorded_pitched
+        },
+        upsellNo: {
+            title: "Upsell Not Purchased",
+            subtext: "Upsell attempted but not purchased",
+            audits: stats?.upsell_no_audits || [],
+            denominator: upsell_attempted
+        },
+        sextingPitched: {
+            title: "Sexting Pitches",
+            subtext: "Total audits identified as Sexting content",
+            audits: stats?.sexting_pitched_audits || [],
+            denominator: sellable_count
+        },
+        prerecordedPitched: {
+            title: "Pre-recorded Pitches",
+            subtext: "Total audits identified as Pre-recorded/PPV content",
+            audits: stats?.prerecorded_pitched_audits || [],
+            denominator: sellable_count
+        }
+    };
+
+    const modalData = activeModal ? typeConfig[activeModal] : null;
+
+    const openModal = (type) => {
+        setActiveModal(type);
+        setIsModalOpen(true);
+    };
+
     return (
         <Card className="border-slate-200 shadow-sm bg-white overflow-hidden">
-            <SellableDrillDownModal
-                type={activeModal}
-                onClose={() => setActiveModal(null)}
-                stats={stats}
+            <AuditDrillDownModal 
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                title={modalData?.title}
+                subtitle={modalData?.subtext}
+                audits={modalData?.audits || []}
+                numerator={modalData?.audits?.length || 0}
+                denominator={modalData?.denominator || 0}
             />
 
             <CardHeader className="p-8 pb-3 flex border-b border-slate-200 pb-10 flex-row items-end justify-between space-y-0">
@@ -356,14 +171,14 @@ export default function SellableFlow({ stats }) {
                             value={pitch_not_possible}
                             color="red"
                             subtext
-                            onClick={() => setActiveModal("notPossible")}
+                            onClick={() => openModal("notPossible")}
                         />
                         <TreeNode
                             label="Pitch possible but not executed"
                             value={pitch_possible_not_executed}
                             color="red"
                             subtext
-                            onClick={() => setActiveModal("possibleNotExecuted")}
+                            onClick={() => openModal("possibleNotExecuted")}
                         />
                     </div>
                 </div>
@@ -377,14 +192,14 @@ export default function SellableFlow({ stats }) {
                             value={sexting_pitched}
                             color="slate"
                             indent={0}
-                            onClick={() => setActiveModal("sextingPitched")}
+                            onClick={() => openModal("sextingPitched")}
                         />
                         <div className="ml-6 space-y-0.5 border-l border-slate-100 pl-4 pb-2">
                             <TreeNode
                                 label="Sale: No"
                                 value={sexting_sale_no}
                                 color="red"
-                                onClick={() => setActiveModal("sextingSaleNo")}
+                                onClick={() => openModal("sextingSaleNo")}
                             />
                             <TreeNode label="Sale: Yes" value={sexting_sale_yes} color="green" />
                             <div className="ml-6 border-l border-slate-100 pl-4">
@@ -393,7 +208,7 @@ export default function SellableFlow({ stats }) {
                                     label="Sub continued: No"
                                     value={stats?.sexting_sub_abandoned || 0}
                                     color="red"
-                                    onClick={() => setActiveModal("sextingSubAbandoned")}
+                                    onClick={() => openModal("sextingSubAbandoned")}
                                 />
                             </div>
                         </div>
@@ -403,14 +218,14 @@ export default function SellableFlow({ stats }) {
                             value={prerecorded_pitched}
                             color="slate"
                             indent={0}
-                            onClick={() => setActiveModal("prerecordedPitched")}
+                            onClick={() => openModal("prerecordedPitched")}
                         />
                         <div className="ml-6 space-y-0.5 border-l border-slate-100 pl-4 pb-2">
                             <TreeNode
                                 label="Sale: No"
                                 value={prerecorded_sale_no}
                                 color="red"
-                                onClick={() => setActiveModal("prerecordedSaleNo")}
+                                onClick={() => openModal("prerecordedSaleNo")}
                             />
                             <TreeNode label="Sale: Yes" value={prerecorded_sale_yes} color="green" />
                             <div className="ml-8 border-l border-slate-100 pl-4">
@@ -421,7 +236,7 @@ export default function SellableFlow({ stats }) {
                                         label="Purchased: No"
                                         value={stats?.upsell_no || 0}
                                         color="red"
-                                        onClick={() => setActiveModal("upsellNo")}
+                                        onClick={() => openModal("upsellNo")}
                                     />
                                 </div>
                             </div>

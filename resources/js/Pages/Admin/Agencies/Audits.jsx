@@ -166,7 +166,7 @@ const TEMPLATES = [
         required: true,
         options: "Yes, No",
         is_conditional: true,
-        required_if: "template-did-chatter-make-sale = Yes",
+        required_if: "template-did-chatter-make-sale = Yes AND template-pitched-content-type = Sexting",
         is_locked: true,
     },
     {
@@ -381,10 +381,10 @@ export default function Audits({ auth, agency, audits, audit_fields }) {
     };
 
     const handleAddSelectedTemplates = () => {
-        const currentFieldIds = data.fields.map((f) => f.id).filter(Boolean);
+        const currentFieldIdentifier = data.fields.map((f) => f.field_key || f.id).filter(Boolean);
         const selectedFields = TEMPLATES.filter((t) =>
             selectedTemplateIds.includes(t.id),
-        ).filter((t) => !currentFieldIds.includes(t.id));
+        ).filter((t) => !currentFieldIdentifier.includes(t.id));
 
         setData("fields", [...data.fields, ...selectedFields]);
         setIsAddingTemplate(false);
@@ -400,9 +400,9 @@ export default function Audits({ auth, agency, audits, audit_fields }) {
     };
 
     const handleSelectAllTemplates = () => {
-        const currentFieldIds = data.fields.map((f) => f.id).filter(Boolean);
+        const currentFieldIdentifier = data.fields.map((f) => f.field_key || f.id).filter(Boolean);
         const addableTemplates = TEMPLATES.filter(
-            (t) => !currentFieldIds.includes(t.id),
+            (t) => !currentFieldIdentifier.includes(t.id),
         );
 
         if (selectedTemplateIds.length === addableTemplates.length) {
@@ -496,7 +496,7 @@ export default function Audits({ auth, agency, audits, audit_fields }) {
                         <div className="space-y-4">
                             {TEMPLATES.map((field, idx) => {
                                 const isAlreadyAdded = data.fields.some(
-                                    (f) => f.id === field.id,
+                                    (f) => f.id === field.id || f.field_key === field.id,
                                 );
                                 return (
                                     <div

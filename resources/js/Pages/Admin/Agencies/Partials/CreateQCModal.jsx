@@ -18,82 +18,59 @@ export default function CreateQCModal({ show, onClose, onAdd }) {
 
     return (
         <Modal show={show} onClose={onClose} maxWidth="lg">
-            <div className="bg-white rounded-2xl border-2 border-[#00a651] overflow-hidden">
-                <div className="p-6 space-y-6">
-                    <div className="flex items-center justify-between">
-                        <h2 className="text-xl font-bold text-gray-900">
-                            Create New QC
-                        </h2>
-                        <button
-                            onClick={onClose}
-                            className="text-gray-400 hover:text-gray-600 transition-colors"
-                        >
-                            <X size={20} />
-                        </button>
-                    </div>
+            <div className="bg-white overflow-hidden font-sans">
+                {/* Clean Header */}
+                <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                    <h2 className="text-lg font-bold text-slate-900">Create New QC</h2>
+                    <button onClick={onClose} className="p-2 hover:bg-slate-50 rounded-md transition-colors">
+                        <X size={18} className="text-slate-400" />
+                    </button>
+                </div>
 
-                    <div className="space-y-5">
-                        <div className="space-y-2">
-                            <label className="text-sm font-semibold text-gray-700">
-                                QC Name:
-                            </label>
+                <div className="p-6 space-y-6">
+                    <div className="space-y-4">
+                        <div className="space-y-1.5">
+                            <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">QC Name</label>
                             <input
                                 type="text"
                                 placeholder="Enter QC name"
                                 value={qcForm.name}
-                                onChange={(e) =>
-                                    setQCForm({
-                                        ...qcForm,
-                                        name: e.target.value,
-                                    })
-                                }
-                                className="w-full bg-[#f8fafc] border border-gray-200 rounded-xl px-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#00a651]/10 focus:border-[#00a651] transition-all"
+                                onChange={(e) => setQCForm({ ...qcForm, name: e.target.value })}
+                                className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-medium"
                             />
                         </div>
 
-                        <div className="space-y-2">
-                            <label className="text-sm font-semibold text-gray-700">
-                                Username:
-                            </label>
+                        <div className="space-y-1.5">
+                            <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Username</label>
                             <input
                                 type="text"
                                 placeholder="Enter username"
                                 value={qcForm.username}
-                                onChange={(e) =>
-                                    setQCForm({
-                                        ...qcForm,
-                                        username: e.target.value,
-                                    })
-                                }
-                                className="w-full bg-[#f8fafc] border border-gray-200 rounded-xl px-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#00a651]/10 focus:border-[#00a651] transition-all"
+                                onChange={(e) => setQCForm({ ...qcForm, username: e.target.value })}
+                                className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-medium"
                             />
                         </div>
 
-                        <div className="space-y-2">
-                            <label className="text-sm font-semibold text-gray-700">
-                                Password:
-                            </label>
+                        <div className="space-y-1.5">
+                            <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Password</label>
                             <input
                                 type="password"
                                 placeholder="Enter password"
                                 value={qcForm.password}
-                                onChange={(e) =>
-                                    setQCForm({
-                                        ...qcForm,
-                                        password: e.target.value,
-                                    })
-                                }
-                                className="w-full bg-[#f8fafc] border border-gray-200 rounded-xl px-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#00a651]/10 focus:border-[#00a651] transition-all"
+                                onChange={(e) => setQCForm({ ...qcForm, password: e.target.value })}
+                                className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-medium"
                             />
                         </div>
                     </div>
 
-                    <button
-                        onClick={handleAdd}
-                        className="w-full bg-[#00a651] text-white py-4 rounded-xl font-bold hover:bg-[#008c44] transition-all shadow-md active:scale-[0.98] mt-2"
-                    >
-                        Save
-                    </button>
+                    <div className="flex justify-end pt-2">
+                        <button
+                            onClick={handleAdd}
+                            className="bg-slate-900 text-white px-6 py-2 rounded-md text-xs font-bold hover:bg-slate-800 transition-all active:scale-[0.98]"
+                        >
+                            Save Details
+                        </button>
+                    </div>
                 </div>
             </div>
         </Modal>
