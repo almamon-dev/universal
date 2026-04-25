@@ -250,7 +250,7 @@ export default function CreateAudit({ agency, chatters = [], creators = [], audi
 
     const getCompletionPercentage = (responses, allFields) => {
         if (!allFields.length) return 0;
-        
+
         // Identify which fields SHOULD be answered (visible fields)
         const currentVisibleFields = allFields.filter((f, idx) => isVisible(f, idx, allFields, responses));
         if (currentVisibleFields.length === 0) return 0;
@@ -752,33 +752,6 @@ export default function CreateAudit({ agency, chatters = [], creators = [], audi
 
                                     {/* Instructions & Submit Section */}
                                     <div className="space-y-6">
-                                        {/* Instructions Box */}
-                                        <div className="bg-zinc-200 border border-zinc-100 rounded-md p-6">
-                                            <div className="flex items-start gap-4">
-                                                <div className="space-y-4">
-                                                    <h3 className="text-lg font-bold text-zinc-900 flex items-center gap-2">
-                                                        Audit Instructions
-                                                    </h3>
-                                                    <ul className="space-y-2">
-                                                        {[
-                                                            "All fields marked with * are required",
-                                                            "Please review information before submitting",
-                                                            "Cancelled audits cannot be recovered",
-                                                            "Submitted audits cannot be edited",
-                                                        ].map((step, i) => (
-                                                            <li
-                                                                key={i}
-                                                                className="flex items-center gap-3 text-sm font-medium text-zinc-600"
-                                                            >
-                                                                <div className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
-                                                                {step}
-                                                            </li>
-                                                        ))}
-                                                    </ul>
-                                                </div>
-                                            </div>
-                                        </div>
-
                                         {/* Error/Success Feedbacks (Small/Clean) */}
                                         {hasErrors && (
                                             <div className="bg-red-50 border border-red-100 rounded-md p-4 flex items-center gap-3 text-red-700">

@@ -57,16 +57,6 @@ export default function Protocols({ agency }) {
                             {agency.name}
                         </p>
                     </div>
-
-                    <a
-                        href="https://quillbot.com"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white text-sm font-bold rounded-md hover:from-emerald-600 hover:to-emerald-700 shadow-xl shadow-emerald-900/10 transition-all active:scale-95"
-                    >
-                        <CheckCircle2 size={16} />
-                        Refine Protocols
-                    </a>
                 </div>
 
                 {/* Main Editor Card */}

@@ -40,11 +40,9 @@ export default function AuditDrillDownModal({
     const filteredAudits = selectedChatter === "All"
         ? audits
         : audits.filter(a => a.chatter === selectedChatter);
-
     return (
         <Modal show={isOpen} onClose={onClose} maxWidth="6xl">
             <div className="bg-[#fcfcfd] flex flex-col max-h-[80vh] w-full overflow-hidden font-sans rounded-xl shadow-2xl">
-
                 {/* 1. HEADER - Minimalist & Clean */}
                 <div className="px-8 py-6 bg-white border-b border-slate-100 shrink-0">
                     <div className="flex justify-between items-center">

@@ -26,18 +26,7 @@ export default function Protocols({ agency }) {
                             {agency.name}
                         </p>
                     </div>
-
-                    <a
-                        href="https://quillbot.com"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white text-[13px] font-bold rounded-sm hover:from-emerald-600 hover:to-emerald-700 shadow-xl shadow-emerald-900/10 transition-all active:scale-95"
-                    >
-                        <CheckCircle2 size={14} />
-                        Refine Protocols
-                    </a>
                 </div>
-
                 {/* Main Content Card - Mirroring Admin Design */}
                 <div className="overflow-hidden bg-white border border-gray-200 rounded-sm shadow-sm transition-all duration-300">
                     <div className="p-6 md:p-8 space-y-6">
