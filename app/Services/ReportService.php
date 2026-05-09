@@ -11,6 +11,7 @@ class ReportService
     protected $leakageService;
 
     protected $chatterService;
+
     protected $creatorService;
 
     public function __construct(RevenueLeakageService $leakageService, ChatterReportService $chatterService, CreatorReportService $creatorService)
@@ -20,17 +21,25 @@ class ReportService
         $this->creatorService = $creatorService;
     }
 
-    public function getWeeklyStats(Agency $agency)
+    public function getWeeklyStats(Agency $agency, $startDate = null, $endDate = null)
     {
-        $audits = SeoAudit::join('users', 'users.id', '=', 'seo_audits.user_id')
-            ->where('users.agency_id', $agency->id)
-            ->select('seo_audits.*')
+        $query = SeoAudit::join('users', 'users.id', '=', 'seo_audits.user_id')
+            ->where('users.agency_id', $agency->id);
+
+        if ($startDate) {
+            $query->whereDate('seo_audits.created_at', '>=', $startDate);
+        }
+        if ($endDate) {
+            $query->whereDate('seo_audits.created_at', '<=', $endDate);
+        }
+
+        $audits = $query->select('seo_audits.*')
             ->with(['responses', 'chatter', 'user'])
             ->get();
 
         // Temporary Debug: Log the count to see if ID 10 is included
-        \Illuminate\Support\Facades\Log::info("Agency {$agency->id} - Total Audits: " . $audits->count());
-        \Illuminate\Support\Facades\Log::info("Audit IDs: " . $audits->pluck('id')->implode(','));
+        \Illuminate\Support\Facades\Log::info("Agency {$agency->id} - Total Audits: ".$audits->count());
+        \Illuminate\Support\Facades\Log::info('Audit IDs: '.$audits->pluck('id')->implode(','));
 
         $findValue = function ($audit, $keyword) {
             $cleanKeyword = str_replace(['-', '_', ' '], '', strtolower($keyword));
@@ -90,7 +99,7 @@ class ReportService
                 if ($cleanKeyword === 'reason' && (str_contains($key, 'reasoncategory') || str_contains($key, 'pitchreasoncategory') || str_contains($key, 'nopitchreason'))) {
                     return 95;
                 }
-                if ($cleanKeyword === 'reasondetail' && (str_contains($key, 'reason') && !str_contains($key, 'category'))) {
+                if ($cleanKeyword === 'reasondetail' && (str_contains($key, 'reason') && ! str_contains($key, 'category'))) {
                     return 90;
                 }
 
@@ -108,9 +117,10 @@ class ReportService
         });
 
         // Multi-field check for "No Pitch" reasons (checking both reason categories and status)
-        $pitchNotPossible = $sellableAudits->filter(function($a) use ($findValue) {
+        $pitchNotPossible = $sellableAudits->filter(function ($a) use ($findValue) {
             $val = strtoupper($findValue($a, 'reason'));
-            return str_contains($val, 'PITCH NOT POSSIBLE') || (str_contains($val, 'NOT') && str_contains($val, 'POSSIBLE') && !str_contains($val, 'EXECUTED'));
+
+            return str_contains($val, 'PITCH NOT POSSIBLE') || (str_contains($val, 'NOT') && str_contains($val, 'POSSIBLE') && ! str_contains($val, 'EXECUTED'));
         });
 
         // Final Pitched list: Look for positive responses
@@ -126,8 +136,7 @@ class ReportService
         });
 
         // Content Type Detection
-        $sextingPitched = $pitchedContent->filter(fn ($a) => 
-            str_contains(strtoupper($findValue($a, 'type')), 'SEXTING') || 
+        $sextingPitched = $pitchedContent->filter(fn ($a) => str_contains(strtoupper($findValue($a, 'type')), 'SEXTING') ||
             $findValue($a, 'sexting') !== ''
         );
         $preRecorded = $pitchedContent->filter(function ($a) use ($findValue) {
@@ -139,17 +148,18 @@ class ReportService
         // Detailed breakdown for drill-downs (strictly scoped to their parent types)
         $sextingSaleNoAudits = $sextingPitched->filter(fn ($a) => str_contains(strtoupper($findValue($a, 'sale')), 'NO'));
         $sextingSubAbandonedAudits = $sextingPitched->filter(fn ($a) => str_contains(strtoupper($findValue($a, 'sexting')), 'NO'));
-        
+
         $prerecordedSaleNoAudits = $preRecorded->filter(fn ($a) => str_contains(strtoupper($findValue($a, 'sale')), 'NO'));
-        $upsellNoAudits = $preRecorded->filter(fn ($a) => 
-            str_contains(strtoupper($findValue($a, 'upsell')), 'YES') && 
+        $upsellNoAudits = $preRecorded->filter(fn ($a) => str_contains(strtoupper($findValue($a, 'upsell')), 'YES') &&
             (str_contains(strtoupper($findValue($a, 'buy')), 'NO') || str_contains(strtoupper($findValue($a, 'purchase')), 'NO'))
         );
 
+        $interventions = $audits->filter(fn ($a) => str_contains(strtoupper($findValue($a, 'intervene')), 'YES'));
+
         $stats = [
             'period' => [
-                'full_range' => $audits->count() > 0 
-                    ? $audits->min('created_at')->format('M d, Y') . ' – ' . $audits->max('created_at')->format('M d, Y')
+                'full_range' => $audits->count() > 0
+                    ? $audits->min('created_at')->format('M d, Y').' – '.$audits->max('created_at')->format('M d, Y')
                     : 'No data available',
             ],
             'total_audits' => $audits->count(),
@@ -159,6 +169,7 @@ class ReportService
 
             'pitch_not_possible' => $pitchNotPossible->count(),
             'pitch_possible_not_executed' => $pitchPossibleNotExecuted->count(),
+            'total_sales' => $audits->filter(fn ($a) => str_contains(strtoupper($findValue($a, 'sale')), 'YES'))->count(),
 
             'sexting_pitched' => $sextingPitched->count(),
             'sexting_sale_yes' => $sextingPitched->filter(fn ($a) => str_contains(strtoupper($findValue($a, 'sale')), 'YES'))->count(),
@@ -171,7 +182,35 @@ class ReportService
             'upsell_purchased' => $preRecorded->filter(fn ($a) => str_contains(strtoupper($findValue($a, 'buy')), 'YES'))->count(),
             'upsell_no' => $upsellNoAudits->count(),
 
-            // Detailed audits for drill-downs
+            // Essential lists for Comparison Mode
+            'total_audits_list' => $audits->values()->map(fn ($a) => [
+                'id' => $a->id,
+                'created_at' => $a->created_at->toIso8601String(),
+                'date' => $a->created_at->format('M d, Y, h:i A'),
+            ]),
+            'pitched_audits' => $pitchedContent->values()->map(fn ($a) => [
+                'id' => $a->id,
+                'created_at' => $a->created_at->toIso8601String(),
+                'date' => $a->created_at->format('M d, Y, h:i A'),
+            ]),
+            'interventions_list' => $interventions->values()->map(fn ($a) => [
+                'id' => $a->id,
+                'created_at' => $a->created_at->toIso8601String(),
+                'date' => $a->created_at->format('M d, Y, h:i A'),
+            ]),
+            'sellable_audits' => $sellableAudits->values()->map(fn ($a) => [
+                'id' => $a->id,
+                'created_at' => $a->created_at->toIso8601String(),
+                'date' => $a->created_at->format('M d, Y, h:i A'),
+                'chatter' => $a->chatter?->name ?? '-',
+                'creator' => $a->creator?->name ?? '-',
+                'subUid' => $a->subscriber_uid,
+                'qc' => $a->user?->name ?? '-',
+                'subType' => $findValue($a, 'subscriberType'),
+                'reason' => 'Sellable',
+                'hasTransition' => str_contains(strtoupper($findValue($a, 'transition')), 'YES'),
+            ]),
+
             'pitch_not_possible_audits' => $pitchNotPossible->values()->map(fn ($a) => [
                 'id' => $a->id,
                 'date' => $a->created_at->format('M d, Y, h:i A'),
@@ -195,6 +234,18 @@ class ReportService
                 'reasonDetail' => $findValue($a, 'reasonDetail') ?: $findValue($a, 'violation'),
             ]),
 
+            'all_not_pitched_audits' => $pitchNotPossible->concat($pitchPossibleNotExecuted)->values()->map(fn ($a) => [
+                'id' => $a->id,
+                'date' => $a->created_at->format('M d, Y, h:i A'),
+                'chatter' => $a->chatter?->name ?? '-',
+                'creator' => $a->creator?->name ?? '-',
+                'subUid' => $a->subscriber_uid,
+                'qc' => $a->user?->name ?? '-',
+                'subType' => $findValue($a, 'subscriberType'),
+                'reason' => $findValue($a, 'reason') ?: 'Not Pitched',
+                'reasonDetail' => $findValue($a, 'reasonDetail') ?: $findValue($a, 'violation'),
+            ]),
+
             'sexting_sale_no_audits' => $sextingSaleNoAudits->values()->map(fn ($a) => [
                 'id' => $a->id,
                 'date' => $a->created_at->format('M d, Y, h:i A'),
@@ -205,6 +256,18 @@ class ReportService
                 'subType' => $findValue($a, 'subscriberType'),
                 'reason' => $findValue($a, 'template-no-sale-reason') ?: $findValue($a, 'reason'),
                 'reasonDetail' => $findValue($a, 'reasonDetail'),
+            ]),
+            'sexting_sale_yes_audits' => $sextingPitched->filter(fn ($a) => str_contains(strtoupper($findValue($a, 'sale')), 'YES'))->values()->map(fn ($a) => [
+                'id' => $a->id,
+                'created_at' => $a->created_at->toIso8601String(),
+                'date' => $a->created_at->format('M d, Y, h:i A'),
+                'chatter' => $a->chatter?->name ?? '-',
+                'creator' => $a->creator?->name ?? '-',
+                'subUid' => $a->subscriber_uid,
+                'qc' => $a->user?->name ?? '-',
+                'subType' => $findValue($a, 'subscriberType'),
+                'reason' => 'Sexting Sale Made',
+                'isContinued' => str_contains(strtoupper($findValue($a, 'sexting')), 'YES'),
             ]),
 
             'sexting_pitched_audits' => $sextingPitched->values()->map(fn ($a) => [
@@ -229,6 +292,41 @@ class ReportService
                 'subType' => $findValue($a, 'subscriberType'),
                 'reason' => 'Pre-recorded Pitch',
                 'reasonDetail' => $findValue($a, 'type'),
+            ]),
+            'prerecorded_sale_yes_audits' => $preRecorded->filter(fn ($a) => str_contains(strtoupper($findValue($a, 'sale')), 'YES'))->values()->map(fn ($a) => [
+                'id' => $a->id,
+                'created_at' => $a->created_at->toIso8601String(),
+                'date' => $a->created_at->format('M d, Y, h:i A'),
+                'chatter' => $a->chatter?->name ?? '-',
+                'creator' => $a->creator?->name ?? '-',
+                'subUid' => $a->subscriber_uid,
+                'qc' => $a->user?->name ?? '-',
+                'subType' => $findValue($a, 'subscriberType'),
+                'reason' => 'PPV Sale Made',
+            ]),
+
+            'upsell_purchased_audits' => $preRecorded->filter(fn ($a) => str_contains(strtoupper($findValue($a, 'buy')), 'YES'))->values()->map(fn ($a) => [
+                'id' => $a->id,
+                'created_at' => $a->created_at->toIso8601String(),
+                'date' => $a->created_at->format('M d, Y, h:i A'),
+                'chatter' => $a->chatter?->name ?? '-',
+                'creator' => $a->creator?->name ?? '-',
+                'subUid' => $a->subscriber_uid,
+                'qc' => $a->user?->name ?? '-',
+                'subType' => $findValue($a, 'subscriberType'),
+                'reason' => 'Upsell Purchased',
+            ]),
+
+            'upsell_attempted_audits' => $preRecorded->filter(fn ($a) => str_contains(strtoupper($findValue($a, 'upsell')), 'YES'))->values()->map(fn ($a) => [
+                'id' => $a->id,
+                'created_at' => $a->created_at->toIso8601String(),
+                'date' => $a->created_at->format('M d, Y, h:i A'),
+                'chatter' => $a->chatter?->name ?? '-',
+                'creator' => $a->creator?->name ?? '-',
+                'subUid' => $a->subscriber_uid,
+                'qc' => $a->user?->name ?? '-',
+                'subType' => $findValue($a, 'subscriberType'),
+                'reason' => 'Upsell Attempted',
             ]),
 
             'sexting_sub_abandoned_audits' => $sextingSubAbandonedAudits->values()->map(fn ($a) => [
@@ -266,6 +364,16 @@ class ReportService
                 'reason' => $findValue($a, 'template-no-upsell-reason') ?: 'Not Specified',
                 'reasonDetail' => $findValue($a, 'reasonDetail'),
             ]),
+            'total_sales_audits' => $audits->filter(fn ($a) => str_contains(strtoupper($findValue($a, 'sale')), 'YES'))->values()->map(fn ($a) => [
+                'id' => $a->id,
+                'date' => $a->created_at->format('M d, Y, h:i A'),
+                'chatter' => $a->chatter?->name ?? '-',
+                'creator' => $a->creator?->name ?? '-',
+                'subUid' => $a->subscriber_uid,
+                'qc' => $a->user?->name ?? '-',
+                'subType' => $findValue($a, 'subscriberType'),
+                'reason' => 'Sale Made',
+            ]),
 
             'transition_yes' => $sellableAudits->filter(fn ($a) => str_contains(strtoupper($findValue($a, 'transition')), 'YES'))->count(),
             'transition_no' => $sellableAudits->filter(fn ($a) => str_contains(strtoupper($findValue($a, 'transition')), 'NO'))->count(),
@@ -279,7 +387,7 @@ class ReportService
                 'subType' => $findValue($a, 'subscriberType'),
                 'reason' => 'Failed transition',
             ]),
-            
+
             'total_interventions' => $audits->filter(fn ($a) => str_contains(strtoupper($findValue($a, 'intervene')), 'YES'))->count(),
 
             // Real-time Dashboard Metrics (Synchronized with UnitVolume.jsx)
@@ -322,9 +430,9 @@ class ReportService
                 'reason' => 'Poor negotiation discipline',
             ]),
 
-            'aftercare_yes' => $sellableAudits->filter(fn ($a) => str_contains(strtoupper($findValue($a, 'aftercare')), 'YES'))->count(),
-            'aftercare_no' => $sellableAudits->filter(fn ($a) => str_contains(strtoupper($findValue($a, 'aftercare')), 'NO'))->count(),
-            'aftercare_no_audits' => $sellableAudits->filter(fn ($a) => str_contains(strtoupper($findValue($a, 'aftercare')), 'NO'))->values()->map(fn ($a) => [
+            'aftercare_yes' => $audits->filter(fn ($a) => str_contains(strtoupper($findValue($a, 'sale')), 'YES') && str_contains(strtoupper($findValue($a, 'aftercare')), 'YES'))->count(),
+            'aftercare_no' => $audits->filter(fn ($a) => str_contains(strtoupper($findValue($a, 'sale')), 'YES') && str_contains(strtoupper($findValue($a, 'aftercare')), 'NO'))->count(),
+            'aftercare_no_audits' => $audits->filter(fn ($a) => str_contains(strtoupper($findValue($a, 'sale')), 'YES') && str_contains(strtoupper($findValue($a, 'aftercare')), 'NO'))->values()->map(fn ($a) => [
                 'id' => $a->id,
                 'date' => $a->created_at->format('M d, Y, h:i A'),
                 'chatter' => $a->chatter?->name ?? '-',
@@ -347,12 +455,14 @@ class ReportService
             })->count(),
 
             // Core Red Card Metrics (Calculated via separate RevenueLeakageService)
-            ...$this->leakageService->calculateAll($audits),
+            ...$this->leakageService->calculateAll($audits, $agency),
+
+            'sexting_sale_no' => $this->leakageService->getSextingNoSaleCount($sextingPitched),
 
             'daily_stats' => $audits->groupBy(fn ($a) => $a->created_at->format('M d'))
                 ->map(fn ($group, $day) => [
                     'name' => $day,
-                    'audits' => $group->count()
+                    'audits' => $group->count(),
                 ])->values(),
 
             'auditor_stats' => User::where('agency_id', $agency->id)->get()->map(function ($u) use ($audits, $findValue) {

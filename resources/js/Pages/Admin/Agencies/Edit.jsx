@@ -120,6 +120,7 @@ export default function Edit({
     audits = [],
     chatters = [],
     auth,
+    filters = {},
 }) {
     const user = auth?.user;
     const isAdmin = user?.role === "admin";
@@ -127,8 +128,18 @@ export default function Edit({
     const isEditing = !!agency?.id;
     const [view, setView] = useState(isEditing ? "hub" : "form");
     const [searchTerm, setSearchTerm] = useState("");
-    const [dateFrom, setDateFrom] = useState("02/07/2026");
-    const [dateTo, setDateTo] = useState("02/07/2026");
+    const [dateFrom, setDateFrom] = useState(filters.date_from || "");
+    const [dateTo, setDateTo] = useState(filters.date_to || "");
+
+    const [expandedAuditId, setExpandedAuditId] = useState(null);
+
+    const handleFilter = () => {
+        router.get(
+            route("admin.agencies.edit", agency.id),
+            { date_from: dateFrom, date_to: dateTo },
+            { preserveState: true, preserveScroll: true },
+        );
+    };
 
     const {
         data,
@@ -157,7 +168,7 @@ export default function Edit({
         password: "",
     });
     const [showAudits, setShowAudits] = useState(false);
-    const [showFields, setShowFields] = useState(false);
+
     const [selectedChatter, setSelectedChatter] = useState("all");
 
     // Sync form data when agency props change (for instant QC saves)
@@ -308,9 +319,7 @@ export default function Edit({
     };
 
     // Minimal Audit Card Component
-    const AuditCard = ({ audit }) => {
-        const [isExpanded, setIsExpanded] = useState(false);
-
+    const AuditCard = ({ audit, isExpanded, onToggle }) => {
         const formatKey = (key) => {
             if (!key) return "";
             let cleanKey = key.replace(/[^a-zA-Z0-9_-]/g, " ").trim();
@@ -325,97 +334,77 @@ export default function Edit({
         };
 
         return (
-            <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+            <div className="bg-white border border-gray-200 rounded-xl overflow-hidden transition-all duration-200">
                 {/* Header */}
                 <div
-                    onClick={() => setIsExpanded(!isExpanded)}
-                    className="px-4 py-3 flex items-center justify-between cursor-pointer hover:bg-gray-50"
+                    onClick={onToggle}
+                    className="p-5 flex flex-wrap items-start justify-between gap-6 cursor-pointer hover:bg-gray-50/50 transition-colors"
                 >
-                    <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-gray-50 rounded-lg flex items-center justify-center text-gray-500">
-                            <Calendar size={16} />
-                        </div>
-                        <div>
-                            <p className="text-sm font-medium text-gray-900">
-                                {new Date(audit.created_at).toLocaleDateString(
-                                    "en-US",
-                                    {
-                                        month: "short",
+                    <div className="flex-1 min-w-[200px]">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">#subscriber UI</p>
+                        <p className="text-sm font-semibold text-indigo-600">{audit.subscriber_uid || "N/A"}</p>
+                    </div>
+                    <div className="flex-1 min-w-[150px]">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm font-semibold text-gray-900">{audit.user?.name || "qc3"}</p>
+                                <p className="text-[11px] font-medium text-gray-400 mt-0.5">
+                                    {new Date(audit.created_at).toLocaleDateString("en-US", {
                                         day: "numeric",
-                                        hour: "2-digit",
-                                        minute: "2-digit",
-                                    },
-                                )}
-                            </p>
-                            <p className="text-xs text-gray-500">
-                                {audit.user?.name || "System"}
-                            </p>
+                                        month: "short",
+                                        year: "numeric"
+                                    })}
+                                </p>
+                            </div>
+                            <ChevronDown
+                                size={18}
+                                className={`text-gray-300 transition-transform duration-300 ${isExpanded ? "rotate-180" : ""}`}
+                            />
                         </div>
                     </div>
-                    <ChevronDown
-                        size={18}
-                        className={`text-gray-400 transition-transform duration-200 ${isExpanded ? "rotate-180" : ""
-                            }`}
-                    />
+                </div>
+
+                {/* Info Boxes */}
+                <div className="px-5 pb-5 grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="flex items-center gap-3 p-3 bg-gray-50 border border-gray-100 rounded-lg">
+                        <div className="w-9 h-9 bg-white rounded-md flex items-center justify-center text-indigo-500 border border-gray-100">
+                            <UserIcon size={16} />
+                        </div>
+                        <div>
+                            <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Chatter Name</p>
+                            <p className="text-sm font-semibold text-gray-900">{audit.chatter?.name || "David Martinez"}</p>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-3 p-3 bg-gray-50 border border-gray-100 rounded-lg">
+                        <div className="w-9 h-9 bg-white rounded-md flex items-center justify-center text-indigo-500 border border-gray-100">
+                            <Monitor size={16} />
+                        </div>
+                        <div>
+                            <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Creator Name</p>
+                            <p className="text-sm font-semibold text-gray-900">{audit.creator?.name || "John Smith"}</p>
+                        </div>
+                    </div>
                 </div>
 
                 <AnimatePresence>
                     {isExpanded && (
                         <motion.div
-                            initial={{ height: 0 }}
-                            animate={{ height: "auto" }}
-                            exit={{ height: 0 }}
-                            transition={{ duration: 0.2 }}
-                            className="border-t border-gray-100"
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.2, ease: "easeInOut" }}
+                            className="border-t border-gray-100 bg-gray-50/30"
                         >
-                            {/* Info Grid */}
-                            <div className="grid grid-cols-3 gap-4 p-4 bg-gray-50">
-                                <div>
-                                    <p className="text-xs text-gray-500 mb-1">
-                                        Chatter
-                                    </p>
-                                    <p className="text-sm font-medium text-gray-900">
-                                        {audit.chatter?.name || "N/A"}
-                                    </p>
-                                </div>
-                                <div>
-                                    <p className="text-xs text-gray-500 mb-1">
-                                        Creator
-                                    </p>
-                                    <p className="text-sm font-medium text-gray-900">
-                                        {audit.creator?.name || "N/A"}
-                                    </p>
-                                </div>
-                                <div>
-                                    <p className="text-xs text-gray-500 mb-1">
-                                        Subscriber UID
-                                    </p>
-                                    <p className="text-sm font-medium text-gray-900">
-                                        {audit.subscriber_uid || "N/A"}
-                                    </p>
-                                </div>
-                            </div>
-
-                            {/* Details */}
-                            <div className="p-4 space-y-3">
+                            <div className="p-5 space-y-2">
                                 {Object.entries(audit.response_data || {}).map(
                                     ([key, value]) => {
-                                        if (
-                                            !key ||
-                                            key.includes('""') ||
-                                            key === "null"
-                                        )
-                                            return null;
+                                        if (!key || key.includes('""') || key === "null") return null;
 
                                         let displayValue = value;
                                         if (typeof value === "boolean") {
                                             displayValue = value ? "Yes" : "No";
-                                        } else if (
-                                            typeof value === "object" &&
-                                            value !== null
-                                        ) {
-                                            displayValue =
-                                                JSON.stringify(value);
+                                        } else if (typeof value === "object" && value !== null) {
+                                            displayValue = JSON.stringify(value);
                                         } else {
                                             displayValue = value || "N/A";
                                         }
@@ -423,12 +412,12 @@ export default function Edit({
                                         return (
                                             <div
                                                 key={key}
-                                                className="flex items-start gap-3 py-2 border-b border-gray-100 last:border-0"
+                                                className="flex items-start gap-4 py-2.5 border-b border-gray-100/50 last:border-0"
                                             >
-                                                <span className="text-xs font-medium text-gray-500 w-32">
+                                                <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 w-36 shrink-0 pt-0.5">
                                                     {formatKey(key)}
                                                 </span>
-                                                <span className="text-sm text-gray-900 flex-1">
+                                                <span className="text-[13px] font-medium text-gray-700 flex-1 leading-relaxed">
                                                     {displayValue}
                                                 </span>
                                             </div>
@@ -769,8 +758,7 @@ export default function Edit({
                         </form>
                     </div>
                 </>
-            ) : (
-                <div className="max-w-7xl mx-auto px-4 py-8">
+            ) : (                <div className="max-w-7xl mx-auto px-4 py-8">
                     <Head title={`${agency.name} - Agency Hub`} />
 
                     {/* Dashboard Header */}
@@ -787,7 +775,7 @@ export default function Edit({
                                 <span className="text-xs font-bold text-gray-900">{agency.name}</span>
                             </div>
                             <div className="flex items-center gap-4">
-                                <h1 className="text-3xl font-black tracking-tighter text-gray-900">
+                                <h1 className="text-3xl font-bold tracking-tight text-gray-900">
                                     {agency.name}
                                 </h1>
                                 <span
@@ -830,268 +818,158 @@ export default function Edit({
                     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
                         {/* Left Column - 3 cols */}
                         <div className="lg:col-span-3 space-y-6">
-                            {/* Stats */}
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div className="bg-white border border-gray-200 rounded-xl p-4">
-                                    <p className="text-sm text-gray-500 mb-1">
-                                        Total Audits
-                                    </p>
-                                    <p className="text-2xl font-semibold text-gray-900">
-                                        {stats?.total_audits || 0}
-                                    </p>
-                                </div>
-                                <div className="bg-white border border-gray-200 rounded-xl p-4">
-                                    <p className="text-sm text-gray-500 mb-1">
-                                        Sellable
-                                    </p>
-                                    <p className="text-2xl font-semibold text-gray-900">
-                                        {stats?.sellable || 0}
-                                    </p>
-                                </div>
-                                <div className="bg-white border border-gray-200 rounded-xl p-4">
-                                    <p className="text-sm text-gray-500 mb-1">
-                                        Non-Sellable
-                                    </p>
-                                    <p className="text-2xl font-semibold text-gray-900">
-                                        {stats?.non_sellable || 0}
-                                    </p>
-                                </div>
-                            </div>
-
-                            {/* Date Filter */}
-                            <div className="bg-white border border-gray-200 rounded-xl p-4">
-                                <h3 className="text-sm font-medium text-gray-700 mb-3">
-                                    Date Range
+                            
+                            {/* Date Filter Card */}
+                            <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                                <h3 className="text-sm font-semibold text-gray-900 mb-4">
+                                    Date Filter
                                 </h3>
-                                <div className="flex items-center gap-3">
+                                <div className="flex items-center gap-4">
                                     <div className="relative flex-1">
                                         <input
                                             type="text"
                                             value={dateFrom}
-                                            onChange={(e) =>
-                                                setDateFrom(e.target.value)
-                                            }
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                                            onChange={(e) => setDateFrom(e.target.value)}
+                                            onBlur={() => handleFilter()}
+                                            className="w-full pl-3 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                            placeholder="From"
                                         />
-                                        <Calendar
-                                            size={16}
-                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
-                                        />
+                                        <Calendar size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
                                     </div>
-                                    <span className="text-sm text-gray-400">
-                                        to
-                                    </span>
+                                    <span className="text-xs font-bold text-gray-400 uppercase">to</span>
                                     <div className="relative flex-1">
                                         <input
                                             type="text"
                                             value={dateTo}
-                                            onChange={(e) =>
-                                                setDateTo(e.target.value)
-                                            }
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                                            onChange={(e) => setDateTo(e.target.value)}
+                                            onBlur={() => handleFilter()}
+                                            className="w-full pl-3 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                            placeholder="To"
                                         />
-                                        <Calendar
-                                            size={16}
-                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
-                                        />
+                                        <Calendar size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Audit Fields Accordion */}
-                            <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-                                <button
-                                    onClick={() => setShowFields(!showFields)}
-                                    className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50"
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <List
-                                            size={18}
-                                            className="text-gray-500"
-                                        />
-                                        <span className="text-sm font-medium text-gray-900">
-                                            Audit Fields
-                                        </span>
+                            {/* Dashboard Stats */}
+                            <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                                <h3 className="text-sm font-semibold text-gray-900 mb-4">
+                                    Dashboard Stats
+                                </h3>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div className="p-4 bg-gray-50/50 border border-gray-200 rounded-lg">
+                                        <p className="text-xs font-medium text-gray-500 mb-1">
+                                            Total Audits
+                                        </p>
+                                        <p className="text-2xl font-bold text-gray-900">
+                                            {stats?.total_audits || 0}
+                                        </p>
                                     </div>
-                                    <ChevronDown
-                                        size={18}
-                                        className={`text-gray-400 transition-transform ${showFields ? "rotate-180" : ""
-                                            }`}
-                                    />
-                                </button>
-
-                                <AnimatePresence>
-                                    {showFields && (
-                                        <motion.div
-                                            initial={{ height: 0 }}
-                                            animate={{ height: "auto" }}
-                                            exit={{ height: 0 }}
-                                            transition={{ duration: 0.2 }}
-                                            className="border-t border-gray-100"
-                                        >
-                                            <div className="p-4">
-                                                {agency.audit_fields?.length >
-                                                    0 ? (
-                                                    <div className="grid grid-cols-2 gap-2">
-                                                        {agency.audit_fields.map(
-                                                            (field, idx) => (
-                                                                <div
-                                                                    key={idx}
-                                                                    className="p-3 bg-gray-50 rounded-lg"
-                                                                >
-                                                                    <p className="text-sm font-medium text-gray-900">
-                                                                        {field.field_label ||
-                                                                            field.name}
-                                                                    </p>
-                                                                    <p className="text-xs text-gray-500 mt-1">
-                                                                        {
-                                                                            field.type
-                                                                        }{" "}
-                                                                        •{" "}
-                                                                        {field.required
-                                                                            ? "Required"
-                                                                            : "Optional"}
-                                                                    </p>
-                                                                </div>
-                                                            ),
-                                                        )}
-                                                    </div>
-                                                ) : (
-                                                    <p className="text-sm text-gray-500 text-center py-6">
-                                                        No audit fields
-                                                        configured
-                                                    </p>
-                                                )}
-                                            </div>
-                                        </motion.div>
-                                    )}
-                                </AnimatePresence>
+                                    <div className="p-4 bg-gray-50/50 border border-gray-200 rounded-lg">
+                                        <p className="text-xs font-medium text-gray-500 mb-1">
+                                            Sellable
+                                        </p>
+                                        <p className="text-2xl font-bold text-gray-900">
+                                            {stats?.sellable || 0}
+                                        </p>
+                                    </div>
+                                    <div className="p-4 bg-gray-50/50 border border-gray-200 rounded-lg">
+                                        <p className="text-xs font-medium text-gray-500 mb-1">
+                                            Non-Sellable
+                                        </p>
+                                        <p className="text-2xl font-bold text-gray-900">
+                                            {stats?.non_sellable || 0}
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
 
                             {/* Search */}
                             <div className="relative">
+                                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                                    <Search size={16} />
+                                </div>
                                 <input
                                     type="text"
-                                    placeholder="Search by Subscriber UID..."
+                                    placeholder="Search by subscriber UID..."
                                     value={searchTerm}
-                                    onChange={(e) =>
-                                        setSearchTerm(e.target.value)
-                                    }
-                                    className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-gray-400"
-                                />
-                                <Search
-                                    size={16}
-                                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-gray-300"
                                 />
                             </div>
 
-                            {/* Audits Accordion */}
+                            {/* Audits Accordion Section */}
                             <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
                                 <button
                                     onClick={() => setShowAudits(!showAudits)}
-                                    className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50"
+                                    className="w-full px-5 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
                                 >
                                     <div className="flex items-center gap-3">
-                                        <Users
-                                            size={18}
-                                            className="text-gray-500"
-                                        />
-                                        <span className="text-sm font-medium text-gray-900">
-                                            Audits (
-                                            {stats?.total_audits ||
-                                                audits.length}
-                                            )
-                                        </span>
+                                        <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 shadow-sm">
+                                            <Users size={20} />
+                                        </div>
+                                        <div className="text-left">
+                                            <h2 className="text-base font-bold text-gray-900">
+                                                Submitted Audits ({stats?.total_audits || audits.length})
+                                            </h2>
+                                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">
+                                                Audit History Log
+                                            </p>
+                                        </div>
                                     </div>
-                                    <ChevronDown
-                                        size={18}
-                                        className={`text-gray-400 transition-transform ${showAudits ? "rotate-180" : ""
-                                            }`}
-                                    />
+                                    <div className="flex items-center gap-4">
+                                        <div className="relative" onClick={(e) => e.stopPropagation()}>
+                                            <select
+                                                value={selectedChatter}
+                                                onChange={(e) => setSelectedChatter(e.target.value)}
+                                                className="pl-3 pr-8 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-semibold text-gray-700 shadow-sm focus:outline-none appearance-none cursor-pointer"
+                                            >
+                                                <option value="all">All Chatters</option>
+                                                {chatters.map((chatter) => (
+                                                    <option key={chatter.id} value={chatter.id}>
+                                                        {chatter.name}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            <ChevronDown size={12} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                                        </div>
+                                        <ChevronDown
+                                            size={20}
+                                            className={`text-gray-300 transition-transform duration-300 ${showAudits ? "rotate-180" : ""}`}
+                                        />
+                                    </div>
                                 </button>
 
                                 <AnimatePresence>
                                     {showAudits && (
                                         <motion.div
-                                            initial={{ height: 0 }}
-                                            animate={{ height: "auto" }}
-                                            exit={{ height: 0 }}
-                                            transition={{ duration: 0.2 }}
+                                            initial={{ height: 0, opacity: 0 }}
+                                            animate={{ height: "auto", opacity: 1 }}
+                                            exit={{ height: 0, opacity: 0 }}
+                                            transition={{ duration: 0.3, ease: "easeInOut" }}
                                             className="border-t border-gray-100"
                                         >
-                                            <div className="p-4 space-y-4">
-                                                {/* Chatter Filter */}
-                                                <select
-                                                    value={selectedChatter}
-                                                    onChange={(e) =>
-                                                        setSelectedChatter(
-                                                            e.target.value,
-                                                        )
-                                                    }
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-                                                >
-                                                    <option value="all">
-                                                        All Chatters
-                                                    </option>
-                                                    {chatters.map((chatter) => (
-                                                        <option
-                                                            key={chatter.id}
-                                                            value={chatter.id}
-                                                        >
-                                                            {chatter.name}
-                                                        </option>
-                                                    ))}
-                                                </select>
-
-                                                {/* Audit List */}
-                                                <div className="space-y-3">
-                                                    {audits.length > 0 ? (
-                                                        audits
-                                                            .filter((a) => {
-                                                                const matchesSearch =
-                                                                    (
-                                                                        a.subscriber_uid ||
-                                                                        ""
-                                                                    )
-                                                                        .toLowerCase()
-                                                                        .includes(
-                                                                            searchTerm.toLowerCase(),
-                                                                        );
-                                                                const matchesChatter =
-                                                                    selectedChatter ===
-                                                                    "all" ||
-                                                                    String(
-                                                                        a.chatter_id,
-                                                                    ) ===
-                                                                    String(
-                                                                        selectedChatter,
-                                                                    );
-                                                                return (
-                                                                    matchesSearch &&
-                                                                    matchesChatter
-                                                                );
-                                                            })
-                                                            .map(
-                                                                (
-                                                                    audit,
-                                                                    idx,
-                                                                ) => (
-                                                                    <AuditCard
-                                                                        key={
-                                                                            idx
-                                                                        }
-                                                                        audit={
-                                                                            audit
-                                                                        }
-                                                                    />
-                                                                ),
-                                                            )
-                                                    ) : (
-                                                        <p className="text-sm text-gray-500 text-center py-8">
-                                                            No audits found
-                                                        </p>
-                                                    )}
-                                                </div>
+                                            <div className="p-5 space-y-4">
+                                                {audits.length > 0 ? (
+                                                    audits
+                                                        .filter((a) => {
+                                                            const matchesSearch = (a.subscriber_uid || "").toLowerCase().includes(searchTerm.toLowerCase());
+                                                            const matchesChatter = selectedChatter === "all" || String(a.chatter_id) === String(selectedChatter);
+                                                            return matchesSearch && matchesChatter;
+                                                        })
+                                                        .map((audit, idx) => (
+                                                            <AuditCard
+                                                                key={audit.id || idx}
+                                                                audit={audit}
+                                                                isExpanded={expandedAuditId === (audit.id || idx)}
+                                                                onToggle={() => setExpandedAuditId(expandedAuditId === (audit.id || idx) ? null : (audit.id || idx))}
+                                                            />
+                                                        ))
+                                                ) : (
+                                                    <div className="text-center py-12 bg-gray-50/50 border border-dashed border-gray-200 rounded-xl">
+                                                        <p className="text-gray-500 font-medium text-sm">No audits found</p>
+                                                    </div>
+                                                )}
                                             </div>
                                         </motion.div>
                                     )}
@@ -1099,27 +977,20 @@ export default function Edit({
                             </div>
                         </div>
 
-                        {/* Right Column - 1 col */}
+                        {/* Right Column - Action Cards */}
                         <div className="space-y-4">
-                            {/* Action Grid Card */}
-                            <div className="bg-white border border-gray-200 rounded-md p-4 space-y-4">
+                            <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm space-y-4">
                                 <div className="grid grid-cols-2 gap-3">
                                     <ActionBox
                                         icon={Search}
                                         label="Discovery"
-                                        href={route(
-                                            "admin.agencies.discovery",
-                                            agency.id,
-                                        )}
+                                        href={route("admin.agencies.discovery", agency.id)}
                                         color="text-blue-600"
                                     />
                                     <ActionBox
                                         icon={Eye}
                                         label="View"
-                                        href={route(
-                                            "admin.agencies.view-system-discovery",
-                                            agency.id,
-                                        )}
+                                        href={route("admin.agencies.view-system-discovery", agency.id)}
                                         color="text-emerald-600"
                                     />
                                     <ActionBox
@@ -1131,38 +1002,26 @@ export default function Edit({
                                     <ActionBox
                                         icon={Settings}
                                         label="Fields"
-                                        href={route(
-                                            "admin.agencies.audits",
-                                            agency.id,
-                                        )}
+                                        href={route("admin.agencies.audits", agency.id)}
                                         color="text-purple-600"
                                     />
                                     <ActionBox
                                         icon={FileText}
                                         label="Report"
-                                        href={route(
-                                            "admin.report.weekly",
-                                            agency.id,
-                                        )}
+                                        href={route("admin.report.weekly", agency.id)}
                                         color="text-pink-600"
                                     />
                                     <ActionBox
                                         icon={BookOpen}
                                         label="Protocols"
-                                        href={route(
-                                            "admin.agencies.protocols",
-                                            agency.id,
-                                        )}
+                                        href={route("admin.agencies.protocols", agency.id)}
                                         color="text-blue-600"
                                     />
                                 </div>
 
                                 <Link
-                                    href={route(
-                                        "admin.agencies.registry",
-                                        agency.id,
-                                    )}
-                                    className="block w-full bg-black text-white text-center px-4 py-3 rounded-md text-sm font-bold hover:bg-zinc-800 transition-all shadow-sm"
+                                    href={route("admin.agencies.registry", agency.id)}
+                                    className="block w-full bg-black text-white text-center px-4 py-3 rounded-md text-sm font-bold hover:bg-zinc-800 transition-all shadow-sm mt-2"
                                 >
                                     Chatter & Creator Manager
                                 </Link>

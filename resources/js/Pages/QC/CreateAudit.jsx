@@ -16,6 +16,7 @@ import {
     CheckCircle,
     AlertCircle,
     ClipboardCheck,
+    Loader2,
 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
@@ -214,6 +215,7 @@ export default function CreateAudit({ agency, chatters = [], creators = [], audi
     const addAudit = () => {
         append({ ...emptyAudit });
         setActiveTabIndex(fields.length);
+        toast.success("New audit tab added");
     };
 
     const removeAuditItem = (e, index) => {
@@ -222,6 +224,7 @@ export default function CreateAudit({ agency, chatters = [], creators = [], audi
             remove(index);
             if (activeTabIndex >= fields.length - 1)
                 setActiveTabIndex(Math.max(0, fields.length - 2));
+            toast.success("Audit tab removed");
         } else {
             toast.error("At least one audit is required.");
         }
@@ -236,7 +239,8 @@ export default function CreateAudit({ agency, chatters = [], creators = [], audi
             },
             onError: (err) => {
                 console.error(err);
-                toast.error("Please fill all required fields.");
+                const firstError = Object.values(err)[0];
+                toast.error(firstError || "Please fill all required fields.");
                 setIsProcessing(false);
             },
         });
@@ -388,11 +392,14 @@ export default function CreateAudit({ agency, chatters = [], creators = [], audi
                     </div>
 
                     <form
-                        onSubmit={handleSubmit(onSubmit)}
+                        onSubmit={handleSubmit(onSubmit, (errors) => {
+                            console.log("Validation Errors:", errors);
+                            toast.error("Validation failed. Please check all audits for required fields.");
+                        })}
                         className="space-y-3"
                     >
                         {fields.map((field, index) => {
-                            if (activeTabIndex !== index) return null;
+                            const isActive = activeTabIndex === index;
 
                             const activeAuditValues = auditsData[index] || {};
                             const responses = activeAuditValues.responses || {};
@@ -401,7 +408,7 @@ export default function CreateAudit({ agency, chatters = [], creators = [], audi
                             const hasErrors = errors.audits?.[index];
 
                             return (
-                                <div key={field.id} className="space-y-3">
+                                <div key={field.id} className={`space-y-3 ${!isActive ? "hidden" : ""}`}>
                                     {/* Progress Bar */}
                                     <div className="bg-white border border-gray-200 rounded-md p-2.5">
                                         <div className="flex items-center justify-between mb-2">
@@ -676,8 +683,10 @@ export default function CreateAudit({ agency, chatters = [], creators = [], audi
                                                                             <div className="space-y-3">
                                                                                 <div className="relative group">
                                                                                     <select
-                                                                                        value={responses[fieldKey] || ""}
-                                                                                        onChange={(e) => handleUpdate(e.target.value)}
+                                                                                        {...register(`audits.${index}.responses.${fieldKey}`, { 
+                                                                                            required: isRequiredField,
+                                                                                            onChange: (e) => handleUpdate(e.target.value)
+                                                                                        })}
                                                                                         className={`w-full appearance-none bg-white border rounded-md px-4 py-2 text-[15px] font-medium focus:outline-none focus:ring-4 focus:ring-indigo-500/5 transition-all ${hasError
                                                                                             ? "border-red-500"
                                                                                             : responses[fieldKey]
@@ -695,7 +704,7 @@ export default function CreateAudit({ agency, chatters = [], creators = [], audi
                                                                                         ))}
                                                                                     </select>
                                                                                 </div>
-
+                                                                                
                                                                                 {/* 'Other' Specification Input */}
                                                                                 {slugify(responses[fieldKey]) === "other" && (
                                                                                     <div className="animate-in fade-in slide-in-from-top-2 duration-300">
@@ -767,11 +776,16 @@ export default function CreateAudit({ agency, chatters = [], creators = [], audi
                                         <button
                                             type="submit"
                                             disabled={isProcessing}
-                                            className="w-full bg-[#18181b] text-white py-4 rounded-md font-bold hover:bg-black transition-all disabled:opacity-50 shadow-lg shadow-black/5 text-lg"
+                                            className="w-full bg-[#18181b] text-white py-4 rounded-md font-bold hover:bg-black transition-all disabled:opacity-50 shadow-lg shadow-black/5 text-lg flex items-center justify-center gap-2"
                                         >
-                                            {isProcessing
-                                                ? "Submitting..."
-                                                : "Submit Audit"}
+                                            {isProcessing ? (
+                                                <>
+                                                    <Loader2 className="animate-spin" size={20} />
+                                                    Submitting...
+                                                </>
+                                            ) : (
+                                                "Submit Audit"
+                                            )}
                                         </button>
                                     </div>
                                 </div>

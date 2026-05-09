@@ -9,6 +9,7 @@ import {
     ArrowUpRight,
     Users,
     Clock,
+    Calendar,
 } from "lucide-react";
 import { useState } from "react";
 import { Switch } from "@/Components/ui/switch";
@@ -17,6 +18,22 @@ import { router } from "@inertiajs/react";
 export default function Dashboard({ auth, stats, agencies }) {
     const user = auth.user;
     const [searchTerm, setSearchTerm] = useState("");
+    const [selectedDate, setSelectedDate] = useState(
+        stats.filter_date || "",
+    );
+
+    const handleDateChange = (e) => {
+        const newDate = e.target.value;
+        setSelectedDate(newDate);
+        router.get(
+            window.location.pathname,
+            { date: newDate },
+            {
+                preserveState: true,
+                preserveScroll: true,
+            },
+        );
+    };
 
     const agencyList = Array.isArray(agencies) ? agencies : [];
     const filteredAgencies = agencyList.filter((agency) =>
@@ -45,6 +62,13 @@ export default function Dashboard({ auth, stats, agencies }) {
             color: "text-gray-500",
             bgColor: "bg-gray-100",
         },
+        {
+            label: selectedDate ? "Total Audits (Filtered)" : "Total Audits (All Time)",
+            value: stats?.total_audits || 0,
+            icon: Activity,
+            color: "text-indigo-600",
+            bgColor: "bg-indigo-50",
+        },
     ];
 
     return (
@@ -63,17 +87,32 @@ export default function Dashboard({ auth, stats, agencies }) {
                                 Agency Management Overview
                             </p>
                         </div>
-                        <Link
-                            href={route("admin.agencies.create")}
-                            className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-lg shadow-indigo-100 transition-all active:scale-95"
-                        >
-                            <Plus size={18} />
-                            Create Agency
-                        </Link>
+                        <div className="flex items-center gap-3">
+                            {/* Date Filter */}
+                            <div className="bg-white border border-gray-200 px-3 py-2 rounded-lg flex items-center gap-2 shadow-sm mr-2 group focus-within:border-indigo-200 transition-all">
+                                <Calendar
+                                    size={16}
+                                    className="text-gray-400 group-focus-within:text-indigo-500"
+                                />
+                                <input
+                                    type="date"
+                                    value={selectedDate}
+                                    onChange={handleDateChange}
+                                    className="border-none p-0 text-[13px] font-bold text-gray-700 focus:ring-0 outline-none w-[115px] bg-transparent"
+                                />
+                            </div>
+                            <Link
+                                href={route("admin.agencies.create")}
+                                className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-lg shadow-indigo-100 transition-all active:scale-95"
+                            >
+                                <Plus size={18} />
+                                Create Agency
+                            </Link>
+                        </div>
                     </div>
 
                     {/* Stats Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                         {statCards.map((stat, index) => (
                             <div
                                 key={index}
@@ -202,18 +241,43 @@ export default function Dashboard({ auth, stats, agencies }) {
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">
-                                                <div className="flex items-center gap-4">
-                                                    <div className="flex items-center gap-1 text-gray-500" title="Total Chatters">
-                                                        <Users size={14} />
-                                                        <span className="text-sm font-semibold text-gray-700">
-                                                            {agency.chatters_count || 0}
-                                                        </span>
+                                                <div className="flex items-center gap-6">
+                                                    {/* Chatters Stat */}
+                                                    <div className="flex items-center gap-2" title="Total Chatters">
+                                                        <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400 border border-gray-100">
+                                                            <Users size={14} />
+                                                        </div>
+                                                        <div className="flex flex-col -space-y-1">
+                                                            <span className="text-sm font-bold text-gray-900">
+                                                                {agency.chatters_count || 0}
+                                                            </span>
+                                                            <span className="text-[10px] font-medium text-gray-400 uppercase tracking-wider">Chatters</span>
+                                                        </div>
                                                     </div>
-                                                    <div className="flex items-center gap-1 text-gray-500" title="Total Audits">
-                                                        <Activity size={14} />
-                                                        <span className="text-sm font-semibold text-gray-700">
-                                                            {agency.audits_count || 0}
-                                                        </span>
+
+                                                    {/* Divider */}
+                                                    <div className="w-px h-8 bg-gray-100"></div>
+
+                                                    {/* Audits Stat */}
+                                                    <div className="flex items-center gap-2" title="Audits Overview">
+                                                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center border ${selectedDate ? 'bg-indigo-50 text-indigo-600 border-indigo-100' : 'bg-gray-50 text-gray-400 border-gray-100'}`}>
+                                                            <Activity size={14} />
+                                                        </div>
+                                                        <div className="flex flex-col -space-y-1">
+                                                            <div className="flex items-center gap-1.5">
+                                                                <span className={`text-sm font-bold ${selectedDate ? 'text-indigo-600' : 'text-gray-900'}`}>
+                                                                    {selectedDate ? (agency.filtered_audits_count || 0) : (agency.audits_count || 0)}
+                                                                </span>
+                                                                {selectedDate && (
+                                                                    <span className="text-[9px] font-black text-indigo-400 bg-indigo-50/50 px-1 rounded-sm border border-indigo-100/50">
+                                                                        FILTERED
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                            <span className="text-[10px] font-medium text-gray-400 uppercase tracking-wider">
+                                                                {selectedDate ? `Total: ${agency.audits_count || 0}` : 'Audits'}
+                                                            </span>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </td>

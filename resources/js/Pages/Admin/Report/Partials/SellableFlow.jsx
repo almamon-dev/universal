@@ -89,48 +89,56 @@ export default function SellableFlow({ stats }) {
             title: "Pitch Not Possible",
             subtext: "Sellable conversations where the pitch was not possible",
             audits: stats?.pitch_not_possible_audits || [],
+            totalAudits: stats?.sellable_audits || [],
             denominator: sellable_count
         },
         possibleNotExecuted: {
             title: "Pitch Possible Not Executed",
             subtext: "Sellable conversations where the pitch was possible but not executed",
             audits: stats?.pitch_possible_not_executed_audits || [],
+            totalAudits: stats?.sellable_audits || [],
             denominator: sellable_count
         },
         sextingSaleNo: {
             title: "Sexting Sale: No",
             subtext: "Sexting pitched but no sale made",
             audits: stats?.sexting_sale_no_audits || [],
+            totalAudits: stats?.sexting_pitched_audits || [],
             denominator: sexting_pitched
         },
         sextingSubAbandoned: {
             title: "Sexting Continued: No",
             subtext: "Sexting purchased but subscriber did not continue",
             audits: stats?.sexting_sub_abandoned_audits || [],
+            totalAudits: stats?.sexting_pitched_audits || [],
             denominator: sexting_sale_yes
         },
         prerecordedSaleNo: {
             title: "Pre-recorded Sale: No",
             subtext: "Pre-recorded pitched but no sale made",
             audits: stats?.prerecorded_sale_no_audits || [],
+            totalAudits: stats?.prerecorded_pitched_audits || [],
             denominator: prerecorded_pitched
         },
         upsellNo: {
             title: "Upsell Not Purchased",
             subtext: "Upsell attempted but not purchased",
             audits: stats?.upsell_no_audits || [],
+            totalAudits: stats?.prerecorded_pitched_audits || [],
             denominator: upsell_attempted
         },
         sextingPitched: {
             title: "Sexting Pitches",
             subtext: "Total audits identified as Sexting content",
             audits: stats?.sexting_pitched_audits || [],
+            totalAudits: stats?.sellable_audits || [],
             denominator: sellable_count
         },
         prerecordedPitched: {
             title: "Pre-recorded Pitches",
             subtext: "Total audits identified as Pre-recorded/PPV content",
             audits: stats?.prerecorded_pitched_audits || [],
+            totalAudits: stats?.sellable_audits || [],
             denominator: sellable_count
         }
     };
@@ -144,12 +152,13 @@ export default function SellableFlow({ stats }) {
 
     return (
         <Card className="border-slate-200 shadow-sm bg-white overflow-hidden">
-            <AuditDrillDownModal 
+            <AuditDrillDownModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 title={modalData?.title}
                 subtitle={modalData?.subtext}
                 audits={modalData?.audits || []}
+                totalAudits={modalData?.totalAudits || []}
                 numerator={modalData?.audits?.length || 0}
                 denominator={modalData?.denominator || 0}
             />

@@ -12,6 +12,7 @@ export default function AuditDrillDownModal({
     title,
     subtitle,
     audits = [],
+    totalAudits = [],
     numerator = 0,
     denominator = 0,
     tabs = [],
@@ -22,9 +23,17 @@ export default function AuditDrillDownModal({
 
     // Data processing with useMemo for efficiency
     const { chatterData, reasonData } = useMemo(() => {
-        const cMap = {};
-        const rMap = {};
+        const cMap = {}; // Failed audits count per chatter
+        const rMap = {}; // Reasons map
+        const tMap = {}; // Total audits map for denominators
 
+        // First, map ALL total audits to get every chatter in the category
+        totalAudits.forEach(curr => {
+            tMap[curr.chatter] = (tMap[curr.chatter] || 0) + 1;
+            if (!cMap[curr.chatter]) cMap[curr.chatter] = 0; // Initialize with 0 failed
+        });
+
+        // Then, overlay the failed audits counts
         audits.forEach(curr => {
             cMap[curr.chatter] = (cMap[curr.chatter] || 0) + 1;
             const r = curr.reason || "Not Specified";
@@ -32,10 +41,14 @@ export default function AuditDrillDownModal({
         });
 
         return {
-            chatterData: Object.entries(cMap).map(([name, count]) => ({ name, count })),
+            chatterData: Object.entries(tMap).map(([name, total]) => ({
+                name,
+                count: cMap[name] || 0,
+                total
+            })).sort((a, b) => b.count - a.count), // Sort by failed count
             reasonData: Object.entries(rMap).map(([name, count]) => ({ name, count }))
         };
-    }, [audits]);
+    }, [audits, totalAudits]);
 
     const filteredAudits = selectedChatter === "All"
         ? audits
@@ -138,9 +151,13 @@ export default function AuditDrillDownModal({
                                         >
                                             {c.name}
                                             <span className={cn(
-                                                "px-1.5 py-0.5 rounded text-[9px]",
+                                                "px-1.5 py-0.5 rounded text-[10px] font-bold flex items-center",
                                                 selectedChatter === c.name ? "bg-rose-50" : "bg-slate-50"
-                                            )}>{c.count}</span>
+                                            )}>
+                                                <span className="text-rose-600">{c.count}</span>
+                                                <span className="text-slate-300 mx-0.5">/</span>
+                                                <span className="text-emerald-500">{c.total}</span>
+                                            </span>
                                         </button>
                                     ))}
                                 </div>
@@ -244,7 +261,7 @@ export default function AuditDrillDownModal({
                         onClick={onClose}
                         className="bg-slate-900 text-white px-6 py-2.5 rounded-lg text-[11px] font-bold hover:bg-slate-800 transition-all active:scale-[0.98]"
                     >
-                        Dismiss Portal
+                        Cancel
                     </button>
                 </div>
             </div>

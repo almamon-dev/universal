@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, usePage } from "@inertiajs/react";
 import {
     LayoutDashboard,
@@ -11,14 +11,37 @@ import {
     BookOpen,
 } from "lucide-react";
 import UserSidebar from "@/Components/Navigation/User/Sidebar";
+import { Toaster, toast } from "react-hot-toast";
 
 export default function UserLayout({ children }) {
-    const { auth } = usePage().props;
+    const { auth, flash } = usePage().props;
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
 
+    useEffect(() => {
+        if (flash?.success) {
+            toast.success(flash.success);
+        }
+        if (flash?.error) {
+            toast.error(flash.error);
+        }
+    }, [flash]);
+
     return (
         <div className="h-screen bg-gray-50 flex overflow-hidden">
+            <Toaster
+                position="top-right"
+                toastOptions={{
+                    duration: 4000,
+                    style: {
+                        background: "#333",
+                        color: "#fff",
+                        borderRadius: "12px",
+                        fontSize: "14px",
+                        fontWeight: "500",
+                    },
+                }}
+            />
             {/* Mobile Sidebar Overlay */}
             {isSidebarOpen && (
                 <div

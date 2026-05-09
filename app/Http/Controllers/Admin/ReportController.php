@@ -23,11 +23,15 @@ class ReportController extends Controller
         ]);
     }
 
-    public function weeklyReport(Agency $agency)
+    public function weeklyReport(\Illuminate\Http\Request $request, Agency $agency)
     {
         $agency->load(['chatters', 'creators', 'qcs']);
 
-        $stats = $this->reportService->getWeeklyStats($agency);
+        $stats = $this->reportService->getWeeklyStats(
+            $agency,
+            $request->query('start_date'),
+            $request->query('end_date')
+        );
 
         return Inertia::render('Admin/Report/WeeklyReport', [
             'agency' => $agency,

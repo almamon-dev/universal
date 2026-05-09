@@ -53,12 +53,12 @@ export default function RevenueLeakage({ stats, agency }) {
     const loss_upsell_failed = upsell_failed_count * m_upsell;
     const loss_aftercare = aftercare_missed_count * m_aftercare;
 
-    const total_loss = 
-        loss_sexting_no_sale + 
-        loss_sexting_abandoned + 
-        loss_ppv_no_sale + 
-        loss_upsell_lost + 
-        loss_upsell_failed + 
+    const total_loss =
+        loss_sexting_no_sale +
+        loss_sexting_abandoned +
+        loss_ppv_no_sale +
+        loss_upsell_lost +
+        loss_upsell_failed +
         loss_aftercare;
 
     const formatCurrency = (num) => `-$${num.toLocaleString()}`;
@@ -66,40 +66,40 @@ export default function RevenueLeakage({ stats, agency }) {
     return (
         <Card className="border-2 border-rose-400 bg-rose-50/70 shadow-sm relative">
             <CardContent className="p-0 space-y-0 relative">
-                <LeakageRow 
-                    label="Sexting - No sale (paywall)" 
-                    detail={`${sexting_no_sale_count} missed`} 
-                    amount={formatCurrency(loss_sexting_no_sale)} 
+                <LeakageRow
+                    label="Sexting - No sale (paywall)"
+                    detail={`${sexting_no_sale_count} missed`}
+                    amount={formatCurrency(loss_sexting_no_sale)}
                     formula={`${sexting_no_sale_count} (missed sales/nego) × $${m_paywall} (first sexting paywall)`}
                 />
-                <LeakageRow 
-                    label="Sexting - Subscriber didn't continue" 
-                    detail={`${sexting_abandoned_count} abandoned`} 
-                    amount={formatCurrency(loss_sexting_abandoned)} 
+                <LeakageRow
+                    label="Sexting - Subscriber didn't continue"
+                    detail={`${sexting_abandoned_count} abandoned`}
+                    amount={formatCurrency(loss_sexting_abandoned)}
                     formula={`${sexting_abandoned_count} (sub didn't continue) × $${m_sequence_50} (50% of avg sexting sequence)`}
                 />
-                <LeakageRow 
-                    label="Pre-recorded PPV - No sale" 
-                    detail={`${ppv_no_sale_count} missed`} 
-                    amount={formatCurrency(loss_ppv_no_sale)} 
+                <LeakageRow
+                    label="Pre-recorded PPV - No sale"
+                    detail={`${ppv_no_sale_count} missed`}
+                    amount={formatCurrency(loss_ppv_no_sale)}
                     formula={`${ppv_no_sale_count} (no sales) × $${m_ppv} (avg pre-recorded PPV)`}
                 />
-                <LeakageRow 
-                    label="Upsell opportunity lost" 
-                    detail={`${upsell_lost_count} not upsold`} 
-                    amount={formatCurrency(loss_upsell_lost)} 
+                <LeakageRow
+                    label="Upsell opportunity lost"
+                    detail={`${upsell_lost_count} not upsold`}
+                    amount={formatCurrency(loss_upsell_lost)}
                     formula={`${upsell_lost_count} (not upsold) × $${m_upsell} (avg upsell value)`}
                 />
-                <LeakageRow 
-                    label="Upsell attempted but failed" 
-                    detail={`${upsell_failed_count} failed`} 
-                    amount={formatCurrency(loss_upsell_failed)} 
+                <LeakageRow
+                    label="Upsell attempted but failed"
+                    detail={`${upsell_failed_count} failed`}
+                    amount={formatCurrency(loss_upsell_failed)}
                     formula={`${upsell_failed_count} (failed) × $${m_upsell} (avg upsell value)`}
                 />
-                <LeakageRow 
-                    label="Aftercare not provided" 
-                    detail={`${aftercare_missed_count} sales at risk`} 
-                    amount={formatCurrency(loss_aftercare)} 
+                <LeakageRow
+                    label="Aftercare not provided"
+                    detail={`${aftercare_missed_count} sales at risk`}
+                    amount={formatCurrency(loss_aftercare)}
                     formula={`${aftercare_missed_count} sales × 20% refund/churn risk. Aftercare helps prevent refunds, chargebacks, and lost repeat customers.`}
                 />
             </CardContent>

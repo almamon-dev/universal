@@ -39,17 +39,20 @@ export default function ExecutiveSnapshot({ stats }) {
             {/* AUDIT VOLUME */}
             <div className="space-y-2">
                 <p className="text-[10px] font-bold text-slate-400 tracking-tight">Audit volume</p>
-                <div className="bg-white border border-slate-100 rounded-md p-6 space-y-6">
-                    <div className="flex items-baseline gap-3">
-                        <span className="text-4xl font-black text-slate-900 tracking-tight leading-none">{total_audits}</span>
-                        <span className="text-[10px] font-bold text-slate-400 tracking-tight">Total Audits</span>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    {/* Total Audits Card */}
+                    <div className="bg-white p-4 rounded-md border border-slate-100 shadow-sm">
+                        <p className="text-[10px] font-bold text-slate-400 tracking-tight mb-1">Total Audits</p>
+                        <span className="text-2xl font-black text-slate-900 tabular-nums leading-none">{total_audits}</span>
                     </div>
 
-                    <div className="flex flex-wrap gap-2">
-                        {auditor_stats.map((auditor, idx) => (
-                            <AuditorCard key={idx} name={auditor.name} count={auditor.count} />
-                        ))}
-                    </div>
+                    {/* Auditor Cards */}
+                    {auditor_stats.map((auditor, idx) => (
+                        <div key={idx} className="bg-white p-4 rounded-md border border-slate-100 shadow-sm transition-all hover:bg-slate-50 group">
+                            <p className="text-[10px] font-bold text-slate-400 tracking-tight mb-1">{auditor.name}</p>
+                            <span className="text-2xl font-black text-slate-900 tabular-nums leading-none">{auditor.count}</span>
+                        </div>
+                    ))}
                 </div>
             </div>
 

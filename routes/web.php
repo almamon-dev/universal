@@ -82,6 +82,7 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
     // Agency & Audit Management
     Route::controller(AgencyController::class)->group(function () {
         Route::resource('agencies', AgencyController::class);
+        Route::patch('agencies/{agency}/status', 'updateStatus')->name('agencies.status');
         Route::get('agencies/{agency}/audits', 'audits')->name('agencies.audits');
         Route::post('agencies/{agency}/audit-fields', 'updateAuditFields')->name('agencies.audit-fields.update');
         Route::get('agencies/{agency}/registry', 'registry')->name('agencies.registry');

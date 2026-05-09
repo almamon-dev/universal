@@ -24,7 +24,7 @@ import {
 export default function QCDashboard({ agency, stats }) {
     const { auth } = usePage().props;
     const user = auth.user;
-    const [selectedDate, setSelectedDate] = useState(stats.filter_date || new Date().toISOString().split('T')[0]);
+    const [selectedDate, setSelectedDate] = useState(stats.filter_date || "");
 
     const handleDateChange = (e) => {
         const newDate = e.target.value;
@@ -107,7 +107,7 @@ export default function QCDashboard({ agency, stats }) {
                                 <Calendar size={16} />
                             </div>
                             <span className="text-gray-900 font-bold text-sm text-nowrap whitespace-nowrap">
-                                {selectedDate === new Date().toISOString().split('T')[0] ? "Today's Audits" : "Filtered Audits"}
+                                {!selectedDate ? "All Time Audits" : (selectedDate === new Date().toISOString().split('T')[0] ? "Today's Audits" : "Filtered Audits")}
                             </span>
                         </div>
                         <h3 className="text-3xl font-bold text-black tabular-nums">

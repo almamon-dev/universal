@@ -1,12 +1,13 @@
 import React from "react";
 import AdminLayout from "@/Layouts/AdminLayout";
-import { Head, Link } from "@inertiajs/react";
+import { Head, Link, router } from "@inertiajs/react";
 import { cn } from "@/lib/utils";
 import {
     ChevronDown,
     Download,
     ArrowLeft,
-    ChevronUp
+    ChevronUp,
+    Loader2
 } from "lucide-react";
 import { Card, CardContent } from "@/Components/ui/card";
 import ReportSection from "./Partials/ReportSection";
@@ -19,11 +20,47 @@ import QCInterventionActivity from "./Partials/QCInterventionActivity";
 import ChatterAuditReport from "./Partials/ChatterAuditReport";
 import CreatorAuditReport from "./Partials/CreatorAuditReport";
 
-export default function WeeklyReport({ agency, stats }) {
+export default function WeeklyReport({ agency, stats, filters = {} }) {
     const [isComparisonOpen, setIsComparisonOpen] = React.useState(false);
     const [activeTab, setActiveTab] = React.useState("weekly");
-    const [startDate, setStartDate] = React.useState("2026-02-10");
-    const [endDate, setEndDate] = React.useState("2026-02-17");
+    const [startDate, setStartDate] = React.useState(filters.start_date || "");
+    const [endDate, setEndDate] = React.useState(filters.end_date || "");
+    const [isLoading, setIsLoading] = React.useState(false);
+
+    React.useEffect(() => {
+        const start = () => setIsLoading(true);
+        const finish = () => setIsLoading(false);
+
+        router.on("start", start);
+        router.on("finish", finish);
+
+        return () => {
+            // Cleanup listeners
+        };
+    }, []);
+
+    React.useEffect(() => {
+        if (startDate !== (filters.start_date || "") || endDate !== (filters.end_date || "")) {
+            handleFilter();
+        }
+    }, [startDate, endDate]);
+
+    const handleFilter = () => {
+        router.get(
+            route("admin.report.weekly", agency.id),
+            {
+                start_date: startDate,
+                end_date: endDate,
+            },
+            {
+                preserveState: true,
+                preserveScroll: true,
+                replace: true,
+                onStart: () => setIsLoading(true),
+                onFinish: () => setIsLoading(false),
+            }
+        );
+    };
 
     return (
         <AdminLayout>
@@ -56,6 +93,7 @@ export default function WeeklyReport({ agency, stats }) {
                                         type="date"
                                         value={startDate}
                                         onChange={(e) => setStartDate(e.target.value)}
+                                        max={new Date().toISOString().split("T")[0]}
                                         className="w-full sm:w-44 bg-white border border-slate-200 rounded px-3 py-2 text-[10px] font-bold text-slate-700 outline-none"
                                     />
                                 </div>
@@ -66,6 +104,7 @@ export default function WeeklyReport({ agency, stats }) {
                                         type="date"
                                         value={endDate}
                                         onChange={(e) => setEndDate(e.target.value)}
+                                        max={new Date().toISOString().split("T")[0]}
                                         className="w-full sm:w-44 bg-white border border-slate-200 rounded px-3 py-2 text-[10px] font-bold text-slate-700 outline-none"
                                     />
                                 </div>
@@ -95,8 +134,21 @@ export default function WeeklyReport({ agency, stats }) {
                         ))}
                     </div>
 
-                    {activeTab === "weekly" && (
-                        <Card className="shadow-none border-slate-100 bg-white rounded-md overflow-hidden animate-in fade-in duration-700">
+                    <div className="relative">
+                        {isLoading && (
+                            <div className="absolute inset-0 bg-white/60 backdrop-blur-[1px] z-[100] flex items-center justify-center rounded-md animate-in fade-in duration-200">
+                                <div className="bg-white p-4 rounded-xl shadow-xl border border-slate-100 flex flex-col items-center gap-3">
+                                    <Loader2 size={24} className="text-blue-600 animate-spin" />
+                                    <p className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">Generating Intelligence...</p>
+                                </div>
+                            </div>
+                        )}
+
+                        {activeTab === "weekly" && (
+                            <Card className={cn(
+                                "shadow-none border-slate-100 bg-white rounded-md overflow-hidden animate-in fade-in duration-700",
+                                isLoading && "opacity-50 grayscale-[0.5]"
+                            )}>
                             <div className="p-6 md:p-10 space-y-6">
 
                                 {/* Header Info */}
@@ -106,22 +158,19 @@ export default function WeeklyReport({ agency, stats }) {
                                         <p className="text-[10px] font-medium text-slate-400 tracking-tight mt-2">Invariant Diagnostic Protocol</p>
                                     </div>
 
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 py-6 border-y border-slate-50">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 py-6 border-y border-slate-50">
                                         <div className="space-y-1">
                                             <p className="text-[9px] text-slate-400 font-bold tracking-tight">Agency Path</p>
                                             <p className="text-xs text-slate-900 font-bold">{agency.name}</p>
                                         </div>
                                         <div className="space-y-1">
                                             <p className="text-[9px] text-slate-400 font-bold tracking-tight">Time Horizon</p>
-                                            <p className="text-xs text-slate-900 font-bold">{stats?.period?.full_range || 'Feb 10 – Feb 17, 2026'}</p>
-                                        </div>
-                                        <div className="space-y-1">
-                                            <p className="text-[9px] text-slate-400 font-bold tracking-tight">Status Matrix</p>
-                                            <p className="text-xs text-slate-900 font-bold">Finalized & Verified</p>
-                                        </div>
-                                        <div className="space-y-1">
-                                            <p className="text-[9px] text-slate-400 font-bold tracking-tight">Timestamp</p>
-                                            <p className="text-xs text-slate-900 font-bold">{new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                                            <p className="text-xs text-slate-900 font-bold">
+                                                {startDate && endDate 
+                                                    ? `${new Date(startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} – ${new Date(endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
+                                                    : stats?.period?.full_range || 'Feb 10 – Feb 17, 2026'
+                                                }
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
@@ -179,11 +228,12 @@ export default function WeeklyReport({ agency, stats }) {
                         </Card>
                     )}
 
-                    {activeTab === "creator" && (
-                        <Card className="shadow-none border-slate-100 bg-white rounded-md overflow-hidden">
-                            <CreatorAuditReport agency={agency} stats={stats} />
-                        </Card>
-                    )}
+                        {activeTab === "creator" && (
+                            <Card className="shadow-none border-slate-100 bg-white rounded-md overflow-hidden">
+                                <CreatorAuditReport agency={agency} stats={stats} />
+                            </Card>
+                        )}
+                    </div>
                 </div>
             </div>
         </AdminLayout>

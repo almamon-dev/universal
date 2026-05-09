@@ -62,13 +62,51 @@ class AgencyController extends Controller
 
     public function edit(Agency $agency)
     {
+        $dateFrom = request('date_from');
+        $dateTo = request('date_to');
+
+        $auditsQuery = $agency->audits()->with(['user', 'chatter', 'creator'])->latest();
+
+        if ($dateFrom && $dateTo) {
+            $from = \Carbon\Carbon::parse($dateFrom)->startOfDay();
+            $to = \Carbon\Carbon::parse($dateTo)->endOfDay();
+            $auditsQuery->whereBetween('created_at', [$from, $to]);
+        }
+
+        $audits = $auditsQuery->get();
+
+        // Calculate Stats
+        $sellableCount = 0;
+        $nonSellableCount = 0;
+        
+        foreach ($audits as $audit) {
+            $isSellable = false;
+            foreach ($audit->responses as $response) {
+                if ($response->field_key === 'template-is-this-sellable' && $response->value === 'YES') {
+                    $isSellable = true;
+                    break;
+                }
+            }
+            if ($isSellable) {
+                $sellableCount++;
+            } else {
+                $nonSellableCount++;
+            }
+        }
+
         return Inertia::render('Admin/Agencies/Edit', [
-            'agency' => $agency->load('qcs'),
+            'agency' => $agency->load(['qcs', 'auditFields']),
             'stats' => [
-                'total_audits' => $agency->audits()->count(),
+                'total_audits' => $audits->count(),
+                'sellable' => $sellableCount,
+                'non_sellable' => $nonSellableCount,
             ],
-            'audits' => $agency->audits()->with(['user', 'chatter', 'creator'])->latest()->get(),
+            'audits' => $audits,
             'chatters' => $agency->chatters()->orderBy('name')->get(),
+            'filters' => [
+                'date_from' => $dateFrom,
+                'date_to' => $dateTo,
+            ],
         ]);
     }
 
@@ -294,6 +332,31 @@ class AgencyController extends Controller
             'audits.*.responses' => 'required|array',
         ]);
 
+        // Strict Validation: Ensure all required fields from the agency's audit template are filled
+        $allFields = $agency->auditFields()->orderBy('sort_order')->get();
+        $requiredFields = $allFields->where('is_required', true);
+
+        foreach ($validated['audits'] as $index => $auditData) {
+            $responses = $auditData['responses'] ?? [];
+            
+            foreach ($requiredFields as $field) {
+                // Check if the field should be visible/required based on conditions
+                if (!$this->isFieldVisible($field, $responses, $allFields)) {
+                    continue;
+                }
+
+                $value = $responses[$field->field_key] ?? null;
+                if (is_null($value) || (is_string($value) && trim($value) === '')) {
+                    $chatter = Chatter::find($auditData['chatter_id']);
+                    $chatterName = $chatter ? $chatter->name : "Audit ".($index + 1);
+
+                    return back()->withErrors([
+                        "audits.$index.responses.{$field->field_key}" => "The '{$field->name}' field is required for {$chatterName}.",
+                    ])->withInput();
+                }
+            }
+        }
+
         foreach ($validated['audits'] as $auditData) {
             $audit = \App\Models\SeoAudit::create([
                 'user_id' => $user->id,
@@ -404,5 +467,90 @@ class AgencyController extends Controller
         $agency->update($validated);
 
         return back()->with('success', 'Agency status updated successfully.');
+    }
+
+    private function isFieldVisible($field, $responses, $allFields)
+    {
+        return $this->evaluateCondition($field->required_if, $responses, $allFields);
+    }
+
+    private function evaluateCondition($condition, $responses, $allFields)
+    {
+        if (!$condition || !is_string($condition) || empty(trim($condition)) || $condition === 'null') {
+            return true;
+        }
+
+        $parts = preg_split('/\s+(?:AND|and)\s+/', $condition);
+        foreach ($parts as $part) {
+            if (preg_match('/(.+?)\s*(!=|==|=)\s*(.+)/', $part, $match)) {
+                $label = trim($match[1]);
+                $operator = trim($match[2]);
+                $expectedValue = trim($match[3]);
+
+                $targetField = $this->findTargetField($label, $allFields);
+                
+                $potentialKeys = array_filter([
+                    $targetField ? ($targetField->field_key ?? $targetField->id) : null,
+                    $targetField ? $targetField->id : null,
+                    $this->slugify($label),
+                    $label
+                ]);
+
+                $actualValue = null;
+                foreach ($potentialKeys as $key) {
+                    if (isset($responses[$key]) && $responses[$key] !== null) {
+                        $actualValue = $responses[$key];
+                        break;
+                    }
+                }
+
+                if ($actualValue === null) {
+                    return false;
+                }
+
+                $sActual = $this->slugify((string)$actualValue);
+                $sExpected = $this->slugify((string)$expectedValue);
+
+                $isMatch = ($sActual === $sExpected);
+                $conditionMet = ($operator === '!=' ? !$isMatch : $isMatch);
+
+                if (!$conditionMet) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    private function findTargetField($label, $allFields)
+    {
+        $sLabel = $this->slugify($label);
+        if (!$sLabel) return null;
+
+        // 1. Exact match on field_key, id, or slugified name/label
+        foreach ($allFields as $f) {
+            if ($this->slugify($f->field_key ?? '') === $sLabel || 
+                $this->slugify($f->name ?? '') === $sLabel || 
+                $this->slugify($f->field_label ?? '') === $sLabel || 
+                (string)$f->id === (string)$label) {
+                return $f;
+            }
+        }
+
+        // 2. Partial match
+        foreach ($allFields as $f) {
+            if (str_contains($this->slugify($f->name ?? ''), $sLabel) || 
+                str_contains($this->slugify($f->field_label ?? ''), $sLabel)) {
+                return $f;
+            }
+        }
+
+        return null;
+    }
+
+    private function slugify($str)
+    {
+        return strtolower(preg_replace('/[^a-z0-9]+/i', '', $str));
     }
 }

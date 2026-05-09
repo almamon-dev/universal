@@ -99,29 +99,96 @@ class RevenueLeakageService
     }
 
     /**
-     * 7. Total Aggregated Stats
+     * 7. Total Aggregated Stats with Formulas
      */
-    public function calculateAll(Collection $audits): array
+    public function calculateAll(Collection $audits, ?\App\Models\Agency $agency = null): array
     {
         // Preparation logic
         $sellable = $audits->filter(fn ($a) => str_contains($this->findValue($a, 'classification'), 'SELLABLE'));
-        
         $pitched = $sellable->filter(fn ($a) => str_contains($this->findValue($a, 'pitched'), 'YES'));
         
         $sextingPitched = $pitched->filter(fn ($a) => str_contains($this->findValue($a, 'type'), 'SEXTING'));
-        
         $preRecorded = $pitched->filter(fn ($a) => 
             str_contains(str_replace('-', '', $this->findValue($a, 'type')), 'PRERECORDED') ||
             str_contains($this->findValue($a, 'type'), 'PPV')
         );
 
+        $totalSalesCount = $audits->filter(fn ($a) => $this->findValue($a, 'sale') === 'YES')->count();
+
+        // Metrics from Agency
+        $firstSextingPaywall = $agency->first_paywall_sexting ?? 0;
+        $avgSextingSequence = $agency->avg_completed_sexting_sequence ?? 0;
+        $avgPpv = $agency->avg_recorded_ppv ?? 0;
+        $avgSaleValue = $avgPpv; // Fallback for aftercare calculation
+
+        // Counts
+        $sextingNoSaleCount = $this->getSextingNoSaleCount($sextingPitched);
+        $sextingAbandonedCount = $this->getSextingAbandonedCount($sextingPitched);
+        $ppvNoSaleCount = $this->getPpvNoSaleCount($preRecorded);
+        $upsellLostCount = $this->getUpsellLostCount($preRecorded);
+        $upsellFailedCount = $this->getUpsellFailedCount($preRecorded);
+        $aftercareMissedCount = $this->getAftercareMissedCount($sellable);
+
+        // Phase I - Revenue Leakage Calculations
+        $leakageSextingNoSale = $sextingNoSaleCount * $firstSextingPaywall;
+        $leakageSextingAbandoned = $sextingAbandonedCount * ($avgSextingSequence * 0.5);
+        $leakagePpvNoSale = $ppvNoSaleCount * $avgPpv;
+        $leakageUpsellLost = $upsellLostCount * $avgPpv;
+        $leakageUpsellFailed = $upsellFailedCount * $avgPpv;
+        $leakageAftercareMissed = $aftercareMissedCount * ($avgSaleValue * 0.20);
+
+        $totalLeakage = $leakageSextingNoSale + $leakageSextingAbandoned + $leakagePpvNoSale + 
+                        $leakageUpsellLost + $leakageUpsellFailed + $leakageAftercareMissed;
+
+        // Phase II - Performance Rates
+        $totalAuditsCount = $audits->count();
+        $sellableCount = $sellable->count();
+        $pitchedCount = $pitched->count();
+        
+        $sextingSold = $sextingPitched->filter(fn ($a) => $this->findValue($a, 'sale') === 'YES')->count();
+        $sextingPitchedCount = $sextingPitched->count();
+        
+        $ppvSold = $preRecorded->filter(fn ($a) => $this->findValue($a, 'sale') === 'YES')->count();
+        $ppvPitchedCount = $preRecorded->count();
+
+        $sextingContinued = $sextingPitched->filter(fn ($a) => $this->findValue($a, 'sale') === 'YES' && $this->findValue($a, 'sexting') === 'YES')->count();
+        
+        $upsellAttempted = $preRecorded->filter(fn ($a) => $this->findValue($a, 'upsell') === 'YES')->count();
+        $upsellPurchased = $preRecorded->filter(fn ($a) => $this->findValue($a, 'buy') === 'YES')->count();
+        
+        $aftercareYes = $audits->filter(fn ($a) => $this->findValue($a, 'sale') === 'YES' && $this->findValue($a, 'aftercare') === 'YES')->count();
+        $totalSales = $totalSalesCount;
+        
+        $casualYes = $sellable->filter(fn ($a) => $this->findValue($a, 'casual') === 'YES')->count();
+
         return [
-            'sexting_no_sale'   => $this->getSextingNoSaleCount($sextingPitched),
-            'sexting_abandoned' => $this->getSextingAbandonedCount($sextingPitched),
-            'ppv_no_sale'       => $this->getPpvNoSaleCount($preRecorded),
-            'upsell_lost'       => $this->getUpsellLostCount($preRecorded),
-            'upsell_failed'     => $this->getUpsellFailedCount($preRecorded),
-            'aftercare_missed'  => $this->getAftercareMissedCount($sellable),
+            // Counts
+            'sexting_no_sale_count'   => $sextingNoSaleCount,
+            'sexting_abandoned_count' => $sextingAbandonedCount,
+            'ppv_no_sale_count'       => $ppvNoSaleCount,
+            'upsell_lost_count'       => $upsellLostCount,
+            'upsell_failed_count'     => $upsellFailedCount,
+            'aftercare_missed_count'  => $aftercareMissedCount,
+
+            // Leakage Amounts (Phase I)
+            'leakage_sexting_no_sale'   => $leakageSextingNoSale,
+            'leakage_sexting_abandoned' => $leakageSextingAbandoned,
+            'leakage_ppv_no_sale'       => $leakagePpvNoSale,
+            'leakage_upsell_lost'       => $leakageUpsellLost,
+            'leakage_upsell_failed'     => $leakageUpsellFailed,
+            'leakage_aftercare_missed'  => $leakageAftercareMissed,
+            'total_revenue_lost'        => $totalLeakage,
+
+            // Rates (Phase II)
+            'conversion_rate'          => $totalAuditsCount > 0 ? ($sellableCount / $totalAuditsCount) * 100 : 0,
+            'pitch_rate'               => $sellableCount > 0 ? ($pitchedCount / $sellableCount) * 100 : 0,
+            'sexting_sales_rate'       => $sextingPitchedCount > 0 ? ($sextingSold / $sextingPitchedCount) * 100 : 0,
+            'ppv_sales_rate'           => $ppvPitchedCount > 0 ? ($ppvSold / $ppvPitchedCount) * 100 : 0,
+            'sexting_continuation_rate'=> $sextingSold > 0 ? ($sextingContinued / $sextingSold) * 100 : 0,
+            'upsell_attempt_rate'      => $ppvSold > 0 ? ($upsellAttempted / $ppvSold) * 100 : 0,
+            'upsell_conversion_rate'   => $upsellAttempted > 0 ? ($upsellPurchased / $upsellAttempted) * 100 : 0,
+            'aftercare_provided_rate'  => $totalSales > 0 ? ($aftercareYes / $totalSales) * 100 : 0,
+            'casual_before_sexual_rate'=> $sellableCount > 0 ? ($casualYes / $sellableCount) * 100 : 0,
         ];
     }
 }
